@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/laragon/www/gaslighting log --oneline -20)",
+      "Bash(npx shadcn@latest init -d -y)",
+      "Bash(npx shadcn@latest add card input label button dialog sheet tabs toast dropdown-menu separator select badge scroll-area sonner -y)",
+      "Bash(npx shadcn@latest add card input label button dialog sheet tabs dropdown-menu separator select badge scroll-area sonner -y)",
+      "mcp__plugin_supabase_supabase__apply_migration",
+      "mcp__plugin_supabase_supabase__generate_typescript_types",
+      "mcp__plugin_supabase_supabase__get_advisors",
+      "mcp__plugin_supabase_supabase__execute_sql",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)"
+    ]
+  }
+}
