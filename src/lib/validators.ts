@@ -1,13 +1,6 @@
 import { z } from "zod"
+import { todayYmd } from "@/lib/dates"
 import { isIdrIntegerString, parseIdrInteger } from "@/lib/money"
-
-function todayYmd(): string {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, "0")
-  const d = String(now.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
 
 export const loginSchema = z.object({
   email: z.string().email("Email tidak valid"),
@@ -104,3 +97,23 @@ export const billSchema = z.object({
 })
 
 export type BillInput = z.infer<typeof billSchema>
+
+export const adminCategorySchema = z.object({
+  name: z.string().min(1, "Nama kategori wajib diisi"),
+  type: z.enum(["income", "expense"]),
+  icon: z.string().min(1, "Ikon wajib diisi"),
+  color: z.string().min(1, "Warna wajib diisi"),
+  sort_order: z.number().int().min(0),
+})
+
+export type AdminCategoryInput = z.infer<typeof adminCategorySchema>
+
+export const adminAccountPresetSchema = z.object({
+  name: z.string().min(1, "Nama preset wajib diisi"),
+  type: z.enum(["bank", "ewallet", "cash", "savings", "investment", "other"]),
+  icon: z.string().min(1, "Ikon wajib diisi"),
+  color: z.string().min(1, "Warna wajib diisi"),
+  sort_order: z.number().int().min(0),
+})
+
+export type AdminAccountPresetInput = z.infer<typeof adminAccountPresetSchema>
