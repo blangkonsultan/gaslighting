@@ -9,9 +9,9 @@ import { useAuthStore } from "@/stores/auth-store"
 import { formatCurrency } from "@/lib/formatters"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
+import { FormField } from "@/components/shared/FormField"
 import { Wallet, Building2, Smartphone, PiggyBank, TrendingUp, CircleDot } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { AccountType } from "@/lib/constants"
@@ -131,8 +131,7 @@ export function OnboardingForm() {
               </div>
             )}
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Nama Rekening</Label>
+            <FormField label="Nama Rekening" htmlFor="name" error={errors.name}>
               <Input
                 id="name"
                 placeholder="Contoh: BCA, GoPay, Dompet"
@@ -146,13 +145,9 @@ export function OnboardingForm() {
                   <option key={name} value={name} />
                 ))}
               </datalist>
-              {errors.name && (
-                <p className="text-xs text-destructive">{errors.name.message}</p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="flex flex-col gap-2">
-              <Label>Tipe Rekening</Label>
+            <FormField label="Tipe Rekening" error={errors.type}>
               <div className="grid grid-cols-3 gap-2">
                 {accountTypeOptions.map(({ value, label, icon: Icon }) => (
                   <button
@@ -171,13 +166,9 @@ export function OnboardingForm() {
                   </button>
                 ))}
               </div>
-              {errors.type && (
-                <p className="text-xs text-destructive">{errors.type.message}</p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="initial_balance">Saldo Awal</Label>
+            <FormField label="Saldo Awal" htmlFor="initial_balance" error={errors.initial_balance}>
               <div className="rounded-lg bg-muted/50 p-3 text-center text-lg font-semibold text-foreground">
                 {previewBalance}
               </div>
@@ -195,10 +186,7 @@ export function OnboardingForm() {
                   initialBalanceField.onChange(e)
                 }}
               />
-              {errors.initial_balance && (
-                <p className="text-xs text-destructive">{errors.initial_balance.message}</p>
-              )}
-            </div>
+            </FormField>
 
             <Button type="submit" className="w-full touch-target" disabled={isSubmitting}>
               {isSubmitting ? <LoadingSpinner size={18} /> : "Mulai Sekarang"}

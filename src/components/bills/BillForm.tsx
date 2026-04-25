@@ -9,10 +9,13 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
-import { formatCurrency } from "@/lib/formatters"
+import { AccountInfoPanel } from "@/components/shared/AccountInfoPanel"
+import { FormField } from "@/components/shared/FormField"
+import { useBalanceCheck } from "@/hooks/useBalanceCheck"
 import { getAccounts } from "@/services/accounts.service"
 import { getCategories } from "@/services/admin.service"
 import { billSchema, type BillInput as BillFormInput } from "@/lib/validators"
+import { addDaysYmd, addMonthsYmd, todayYmd } from "@/lib/dates"
 import { formatIdrIntegerInput, parseIdrInteger } from "@/lib/money"
 import { queryKeys } from "@/lib/query-client"
 import type { Account, Category } from "@/types/financial"
@@ -22,56 +25,6 @@ const frequencyLabels: Record<BillFormInput["frequency"], string> = {
   weekly: "Mingguan",
   monthly: "Bulanan",
   yearly: "Tahunan",
-}
-
-function todayYmd(): string {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, "0")
-  const d = String(now.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
-
-function daysInMonthUtc(year: number, month1: number): number {
-  return new Date(Date.UTC(year, month1, 0)).getUTCDate()
-}
-
-function addDaysYmd(ymd: string, days: number): string {
-  const [yStr, mStr, dStr] = ymd.split("-")
-  const year = Number(yStr)
-  const month1 = Number(mStr)
-  const day = Number(dStr)
-
-  if (!Number.isFinite(year) || !Number.isFinite(month1) || !Number.isFinite(day)) return ymd
-
-  const base = new Date(Date.UTC(year, month1 - 1, day))
-  base.setUTCDate(base.getUTCDate() + days)
-
-  const outY = base.getUTCFullYear()
-  const outM = String(base.getUTCMonth() + 1).padStart(2, "0")
-  const outD = String(base.getUTCDate()).padStart(2, "0")
-  return `${outY}-${outM}-${outD}`
-}
-
-function addMonthsYmd(ymd: string, months: number): string {
-  const [yStr, mStr, dStr] = ymd.split("-")
-  const year = Number(yStr)
-  const month1 = Number(mStr)
-  const day = Number(dStr)
-
-  if (!Number.isFinite(year) || !Number.isFinite(month1) || !Number.isFinite(day)) return ymd
-
-  const targetMonth0 = month1 - 1 + months
-  const base = new Date(Date.UTC(year, targetMonth0, 1))
-  const targetYear = base.getUTCFullYear()
-  const targetMonth1 = base.getUTCMonth() + 1
-  const clampedDay = Math.min(day, daysInMonthUtc(targetYear, targetMonth1))
-  const result = new Date(Date.UTC(targetYear, targetMonth1 - 1, clampedDay))
-
-  const outY = result.getUTCFullYear()
-  const outM = String(result.getUTCMonth() + 1).padStart(2, "0")
-  const outD = String(result.getUTCDate()).padStart(2, "0")
-  return `${outY}-${outM}-${outD}`
 }
 
 export function BillForm({
@@ -143,10 +96,6 @@ export function BillForm({
   }, [categories])
 
   const isLoading = isAccountsLoading || isCategoriesLoading
-  const selectedAccount = useMemo(
-    () => (accounts ?? []).find((a) => a.id === selectedAccountId) ?? null,
-    [accounts, selectedAccountId]
-  )
   const selectedAccountLabel = selectedAccountId ? (accountLabelById.get(selectedAccountId) ?? selectedAccountId) : ""
   const selectedAccountBalance =
     selectedAccountId && accountBalanceById.has(selectedAccountId) ? accountBalanceById.get(selectedAccountId) : undefined
@@ -155,11 +104,6 @@ export function BillForm({
   const today = useMemo(() => todayYmd(), [])
   const amountNumber = useMemo(() => parseIdrInteger(amountStr), [amountStr])
   const isStartToday = nextDate === today
-  const projectedBalance = useMemo(() => {
-    if (!selectedAccount) return null
-    if (!Number.isFinite(amountNumber)) return null
-    return selectedAccount.balance - amountNumber
-  }, [selectedAccount, amountNumber])
 
   useEffect(() => {
     if (!canEnd) {
@@ -184,30 +128,16 @@ export function BillForm({
     setValue("end_date", computed, { shouldValidate: true })
   }, [canEnd, selectedFrequency, nextDate, endDate, setValue])
 
-  useEffect(() => {
-    // Only block when we will insert the first transaction immediately (start date = today).
-    if (!isStartToday) {
-      clearErrors("amount")
-      return
-    }
-
-    if (!selectedAccountId) return
-    if (!selectedAccount) return
-    if (!Number.isFinite(amountNumber) || amountNumber <= 0) return
-
-    if (amountNumber > selectedAccount.balance) {
-      setFieldError("amount", { type: "validate", message: "Saldo tidak cukup untuk debit pertama (hari ini)." })
-    } else {
-      clearErrors("amount")
-    }
-  }, [
-    isStartToday,
-    selectedAccountId,
-    selectedAccount,
+  const { isInsufficient, projectedBalance } = useBalanceCheck({
     amountNumber,
+    accountId: selectedAccountId,
+    accountBalance: selectedAccountBalance,
+    setError: setFieldError,
     clearErrors,
-    setFieldError,
-  ])
+    fieldName: "amount",
+    activeWhen: isStartToday,
+    message: "Saldo tidak cukup untuk debit pertama (hari ini).",
+  })
 
   const amountField = register("amount")
 
@@ -216,6 +146,10 @@ export function BillForm({
       onSubmit={handleSubmit(async (data) => {
         try {
           setError("")
+          if (isInsufficient) {
+            setError("Saldo tidak cukup untuk debit pertama (hari ini).")
+            return
+          }
           await onSubmit(data)
         } catch (err) {
           setError(err instanceof Error ? err.message : "Gagal menyimpan auto-debit.")
@@ -225,17 +159,14 @@ export function BillForm({
       <div className="flex flex-col gap-4">
         {error && <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="name">Nama Tagihan</Label>
+        <FormField label="Nama Tagihan" htmlFor="name" error={errors.name}>
           <Input id="name" placeholder="Contoh: Netflix" className="touch-target" {...register("name")} />
-          {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
-        </div>
+        </FormField>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label>Rekening</Label>
+          <FormField label="Rekening" error={errors.account_id}>
             <Select value={selectedAccountId ?? ""} onValueChange={(v) => setValue("account_id", v ?? "", { shouldValidate: true })}>
-              <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading}>
+              <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading} aria-invalid={Boolean(errors.account_id)}>
                 <SelectValue>
                   {(v) => {
                     if (!v) return isLoading ? "Memuat rekening..." : "Pilih rekening"
@@ -254,46 +185,34 @@ export function BillForm({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            {errors.account_id && <p className="text-xs text-destructive">{errors.account_id.message}</p>}
             {!!selectedAccountId && !errors.account_id && (
-              <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-muted-foreground">Rekening dipilih:</span>
-                  <span className="font-medium">{selectedAccountLabel}</span>
-                </div>
-                {typeof selectedAccountBalance === "number" && (
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="text-muted-foreground">Equity saat ini:</span>
-                    <span className="font-medium tabular-nums">{formatCurrency(selectedAccountBalance)}</span>
-                  </div>
-                )}
-                {projectedBalance != null && Number.isFinite(amountNumber) && amountNumber > 0 ? (
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="text-muted-foreground">
-                      Equity setelah debit pertama ({isStartToday ? "hari ini" : "pada tanggal mulai"}):
-                    </span>
-                    <span className={["font-medium tabular-nums", projectedBalance < 0 ? "text-destructive" : ""].join(" ").trim()}>
-                      {formatCurrency(projectedBalance)}
-                    </span>
-                  </div>
-                ) : null}
-                {!!selectedCategoryLabel && (
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="text-muted-foreground">Kategori:</span>
-                    <span className="font-medium">{selectedCategoryLabel}</span>
-                  </div>
-                )}
-              </div>
+              <AccountInfoPanel
+                accountLabel={selectedAccountLabel}
+                balance={selectedAccountBalance}
+                projectedBalance={projectedBalance}
+                projectedLabel={
+                  isStartToday
+                    ? "Equity setelah debit pertama (hari ini):"
+                    : "Equity setelah debit pertama (pada tanggal mulai):"
+                }
+                extraRows={
+                  selectedCategoryLabel ? (
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="text-muted-foreground">Kategori:</span>
+                      <span className="font-medium">{selectedCategoryLabel}</span>
+                    </div>
+                  ) : undefined
+                }
+              />
             )}
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-2">
-            <Label>Kategori</Label>
+          <FormField label="Kategori" error={errors.category_id}>
             <Select
               value={selectedCategoryId ?? ""}
               onValueChange={(v) => setValue("category_id", v ?? "", { shouldValidate: true })}
             >
-              <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading}>
+              <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading} aria-invalid={Boolean(errors.category_id)}>
                 <SelectValue>
                   {(v) => {
                     if (!v) return isLoading ? "Memuat kategori..." : "Opsional"
@@ -312,13 +231,11 @@ export function BillForm({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            {errors.category_id && <p className="text-xs text-destructive">{errors.category_id.message}</p>}
-          </div>
+          </FormField>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="amount">Jumlah</Label>
+          <FormField label="Jumlah" htmlFor="amount" error={errors.amount}>
             <Input
               id="amount"
               type="text"
@@ -333,16 +250,14 @@ export function BillForm({
                 amountField.onChange(e)
               }}
             />
-            {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-2">
-            <Label>Frekuensi</Label>
+          <FormField label="Frekuensi" error={errors.frequency}>
             <Select
               value={selectedFrequency ?? "monthly"}
               onValueChange={(v) => setValue("frequency", v as BillFormInput["frequency"], { shouldValidate: true })}
             >
-              <SelectTrigger className="touch-target w-full" disabled={isSubmitting}>
+              <SelectTrigger className="touch-target w-full" disabled={isSubmitting} aria-invalid={Boolean(errors.frequency)}>
                 <SelectValue>
                   {(v) => {
                     const key = (v as BillFormInput["frequency"]) ?? "monthly"
@@ -360,16 +275,13 @@ export function BillForm({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            {errors.frequency && <p className="text-xs text-destructive">{errors.frequency.message}</p>}
-          </div>
+          </FormField>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="next_date">Tanggal Mulai</Label>
+          <FormField label="Tanggal Mulai" htmlFor="next_date" error={errors.next_date}>
             <Input id="next_date" type="date" min={todayYmd()} className="touch-target" {...register("next_date")} />
-            {errors.next_date && <p className="text-xs text-destructive">{errors.next_date.message}</p>}
-          </div>
+          </FormField>
 
           <div className="flex flex-col gap-2">
             <Label className="flex items-center justify-between gap-3">
@@ -381,22 +293,18 @@ export function BillForm({
               />
             </Label>
             {canEnd ? (
-              <>
-                <Label htmlFor="end_date">Tanggal Berakhir</Label>
+              <FormField label="Tanggal Berakhir" htmlFor="end_date" error={errors.end_date}>
                 <Input id="end_date" type="date" className="touch-target" {...register("end_date")} />
-                {errors.end_date && <p className="text-xs text-destructive">{errors.end_date.message}</p>}
-              </>
+              </FormField>
             ) : (
               <p className="text-xs text-muted-foreground">Jika dimatikan, auto-debit berjalan terus sampai kamu jeda/hapus.</p>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="description">Catatan (opsional)</Label>
+        <FormField label="Catatan (opsional)" htmlFor="description" error={errors.description}>
           <Input id="description" placeholder="Contoh: auto-debit setiap tanggal 1" className="touch-target" {...register("description")} />
-          {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
-        </div>
+        </FormField>
 
         <div className="flex items-center justify-end gap-2">
           <Button type="submit" className="touch-target" disabled={isSubmitting || isLoading || (accounts?.length ?? 0) === 0}>
@@ -407,4 +315,3 @@ export function BillForm({
     </form>
   )
 }
-

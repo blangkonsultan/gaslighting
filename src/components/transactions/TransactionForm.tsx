@@ -5,15 +5,17 @@ import { useQuery } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
+import { AccountInfoPanel } from "@/components/shared/AccountInfoPanel"
+import { FormField } from "@/components/shared/FormField"
+import { useBalanceCheck } from "@/hooks/useBalanceCheck"
 import { getAccounts } from "@/services/accounts.service"
 import { getCategories } from "@/services/admin.service"
 import { queryKeys } from "@/lib/query-client"
-import { formatCurrency } from "@/lib/formatters"
 import { transactionSchema, type TransactionInput } from "@/lib/validators"
 import { formatIdrIntegerInput, parseIdrInteger } from "@/lib/money"
+import { todayYmd } from "@/lib/dates"
 import type { Account, Category } from "@/types/financial"
 
 export type TransactionFormInitialValues = Partial<{
@@ -24,14 +26,6 @@ export type TransactionFormInitialValues = Partial<{
   description: string | null
   transaction_date: string
 }>
-
-function todayYmd(): string {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, "0")
-  const d = String(now.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
 
 function toFormDefaults(initial?: TransactionFormInitialValues): TransactionInput {
   const category = initial?.category_id ?? ""
@@ -65,6 +59,8 @@ export function TransactionForm({
     register,
     setValue,
     watch,
+    setError: setFieldError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<TransactionInput>({
     resolver: zodResolver(transactionSchema),
@@ -116,6 +112,15 @@ export function TransactionForm({
   const isLoading = isAccountsLoading || isCategoriesLoading
   const isCategoryMissing = !selectedCategoryId || selectedCategoryId === ""
 
+  const { isInsufficient } = useBalanceCheck({
+    amountNumber,
+    accountId: selectedAccountId,
+    accountBalance: selectedAccountBalance,
+    setError: setFieldError,
+    clearErrors,
+    activeWhen: txType === "expense",
+  })
+
   const equityNow = typeof selectedAccountBalance === "number" ? selectedAccountBalance : null
   const equityAfter =
     equityNow != null && Number.isFinite(amountNumber) && amountNumber > 0
@@ -131,13 +136,9 @@ export function TransactionForm({
       onSubmit={handleSubmit(async (data) => {
         try {
           setError("")
-          if (data.type === "expense") {
-            const amount = parseIdrInteger(data.amount)
-            const balance = selectedAccountId ? accountBalanceById.get(selectedAccountId) : undefined
-            if (Number.isFinite(amount) && balance != null && amount > balance) {
-              setError("Saldo tidak cukup.")
-              return
-            }
+          if (isInsufficient) {
+            setError("Saldo tidak cukup.")
+            return
           }
           await onSubmit(data)
         } catch (err) {
@@ -148,8 +149,7 @@ export function TransactionForm({
       <div className="flex flex-col gap-5">
         {error && <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
 
-        <div className="flex flex-col gap-2">
-          <Label>Tipe</Label>
+        <FormField label="Tipe" error={errors.type}>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -178,13 +178,11 @@ export function TransactionForm({
               Pemasukan
             </button>
           </div>
-          {errors.type && <p className="text-xs text-destructive">{errors.type.message}</p>}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-2">
-          <Label>Rekening</Label>
+        <FormField label="Rekening" error={errors.account_id}>
           <Select value={selectedAccountId ?? ""} onValueChange={(v) => setValue("account_id", v ?? "", { shouldValidate: true })}>
-            <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading}>
+            <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading} aria-invalid={Boolean(errors.account_id)}>
               <SelectValue>
                 {(v) => {
                   if (!v) return isLoading ? "Memuat rekening..." : "Pilih rekening"
@@ -203,42 +201,27 @@ export function TransactionForm({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {errors.account_id && <p className="text-xs text-destructive">{errors.account_id.message}</p>}
           {!!selectedAccountId && !errors.account_id && (
-            <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-muted-foreground">Rekening dipilih:</span>
-                <span className="font-medium">{selectedAccountLabel}</span>
-              </div>
-              {typeof selectedAccountBalance === "number" && (
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-muted-foreground">Equity saat ini:</span>
-                  <span className="font-medium tabular-nums">{formatCurrency(selectedAccountBalance)}</span>
-                </div>
-              )}
-              {equityAfter != null ? (
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-muted-foreground">Equity setelah transaksi:</span>
-                  <span className={["font-medium tabular-nums", equityAfter < 0 ? "text-destructive" : ""].join(" ").trim()}>
-                    {formatCurrency(equityAfter)}
-                  </span>
-                </div>
-              ) : null}
-              {!!selectedCategoryLabel && (
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-muted-foreground">Kategori:</span>
-                  <span className="font-medium">{selectedCategoryLabel}</span>
-                </div>
-              )}
-            </div>
+            <AccountInfoPanel
+              accountLabel={selectedAccountLabel}
+              balance={selectedAccountBalance}
+              projectedBalance={equityAfter}
+              extraRows={
+                selectedCategoryLabel ? (
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-muted-foreground">Kategori:</span>
+                    <span className="font-medium">{selectedCategoryLabel}</span>
+                  </div>
+                ) : undefined
+              }
+            />
           )}
           {!isLoading && (accounts?.length ?? 0) === 0 && (
             <p className="text-xs text-muted-foreground">Kamu belum punya rekening. Buat dulu di halaman Rekening.</p>
           )}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-2">
-          <Label>Kategori</Label>
+        <FormField label="Kategori" error={errors.category_id}>
           <Select value={selectedCategoryId ?? ""} onValueChange={(v) => setValue("category_id", v ?? "", { shouldValidate: true })}>
             <SelectTrigger
               className="touch-target w-full"
@@ -263,11 +246,9 @@ export function TransactionForm({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {errors.category_id && <p className="text-xs text-destructive">{errors.category_id.message}</p>}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="amount">Jumlah</Label>
+        <FormField label="Jumlah" htmlFor="amount" error={errors.amount}>
           <Input
             id="amount"
             type="text"
@@ -281,25 +262,20 @@ export function TransactionForm({
               amountField.onChange(e)
             }}
           />
-          {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="description">Deskripsi</Label>
+        <FormField label="Deskripsi" htmlFor="description" error={errors.description}>
           <Input
             id="description"
             placeholder={txType === "expense" ? "Contoh: makan siang" : "Contoh: gaji"}
             className="touch-target"
             {...register("description")}
           />
-          {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="transaction_date">Tanggal</Label>
+        <FormField label="Tanggal" htmlFor="transaction_date" error={errors.transaction_date}>
           <Input id="transaction_date" type="date" className="touch-target" {...register("transaction_date")} />
-          {errors.transaction_date && <p className="text-xs text-destructive">{errors.transaction_date.message}</p>}
-        </div>
+        </FormField>
 
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" className="touch-target" onClick={onCancel} disabled={isSubmitting}>
@@ -317,4 +293,3 @@ export function TransactionForm({
     </form>
   )
 }
-

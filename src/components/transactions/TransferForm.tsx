@@ -5,14 +5,16 @@ import { useQuery } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
+import { AccountInfoPanel } from "@/components/shared/AccountInfoPanel"
+import { FormField } from "@/components/shared/FormField"
+import { useBalanceCheck } from "@/hooks/useBalanceCheck"
 import { getAccounts } from "@/services/accounts.service"
 import { queryKeys } from "@/lib/query-client"
-import { formatCurrency } from "@/lib/formatters"
 import { transferSchema, type TransferInput } from "@/lib/validators"
 import { formatIdrIntegerInput, parseIdrInteger } from "@/lib/money"
+import { todayYmd } from "@/lib/dates"
 import type { Account } from "@/types/financial"
 
 export type TransferFormInitialValues = Partial<{
@@ -22,14 +24,6 @@ export type TransferFormInitialValues = Partial<{
   description: string | null
   transaction_date: string
 }>
-
-function todayYmd(): string {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, "0")
-  const d = String(now.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
 
 function toFormDefaults(initial?: TransferFormInitialValues): TransferInput {
   return {
@@ -61,6 +55,8 @@ export function TransferForm({
     register,
     setValue,
     watch,
+    setError: setFieldError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<TransferInput>({
     resolver: zodResolver(transferSchema),
@@ -110,6 +106,16 @@ export function TransferForm({
   const toAfter =
     typeof toBalance === "number" && Number.isFinite(amountNumber) && amountNumber > 0 ? toBalance + amountNumber : null
 
+  const { isInsufficient } = useBalanceCheck({
+    amountNumber,
+    accountId: fromAccountId,
+    accountBalance: fromBalance,
+    setError: setFieldError,
+    clearErrors,
+    fieldName: "amount",
+    activeWhen: true,
+  })
+
   const amountField = register("amount")
 
   return (
@@ -124,8 +130,7 @@ export function TransferForm({
             return
           }
 
-          const balance = fromAccountId ? accountBalanceById.get(fromAccountId) : undefined
-          if (balance != null && amount > balance) {
+          if (isInsufficient) {
             setError("Saldo tidak cukup.")
             return
           }
@@ -139,24 +144,28 @@ export function TransferForm({
       <div className="flex flex-col gap-5">
         {error && <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-3">
-            <Label>Rekening asal</Label>
-            {fromAccountId ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
-                onClick={() => setValue("from_account_id", "", { shouldValidate: true })}
-                disabled={isSubmitting}
-              >
-                Hapus pilihan
-              </Button>
-            ) : null}
-          </div>
+        <FormField
+          label={
+            <div className="flex items-center justify-between gap-3">
+              <span>Rekening asal</span>
+              {fromAccountId ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() => setValue("from_account_id", "", { shouldValidate: true })}
+                  disabled={isSubmitting}
+                >
+                  Hapus pilihan
+                </Button>
+              ) : null}
+            </div>
+          }
+          error={errors.from_account_id}
+        >
           <Select value={fromAccountId ?? ""} onValueChange={(v) => setValue("from_account_id", v ?? "", { shouldValidate: true })}>
-            <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading}>
+            <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading} aria-invalid={Boolean(errors.from_account_id)}>
               <SelectValue>
                 {(v) => {
                   if (!v) return isLoading ? "Memuat rekening..." : "Pilih rekening asal"
@@ -175,49 +184,38 @@ export function TransferForm({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {errors.from_account_id && <p className="text-xs text-destructive">{errors.from_account_id.message}</p>}
           {!!fromAccountId && !errors.from_account_id && (
-            <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-muted-foreground">Rekening dipilih:</span>
-                <span className="font-medium">{fromLabel}</span>
-              </div>
-              {typeof fromBalance === "number" && (
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-muted-foreground">Saldo saat ini:</span>
-                  <span className="font-medium tabular-nums">{formatCurrency(fromBalance)}</span>
-                </div>
-              )}
-              {fromAfter != null ? (
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-muted-foreground">Saldo setelah transfer:</span>
-                  <span className={["font-medium tabular-nums", fromAfter < 0 ? "text-destructive" : ""].join(" ").trim()}>
-                    {formatCurrency(fromAfter)}
-                  </span>
-                </div>
+            <AccountInfoPanel
+              accountLabel={fromLabel}
+              balance={fromBalance}
+              projectedBalance={fromAfter}
+              projectedLabel="Saldo setelah transfer:"
+            />
+          )}
+        </FormField>
+
+        <FormField
+          label={
+            <div className="flex items-center justify-between gap-3">
+              <span>Rekening tujuan</span>
+              {toAccountId ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() => setValue("to_account_id", "", { shouldValidate: true })}
+                  disabled={isSubmitting}
+                >
+                  Hapus pilihan
+                </Button>
               ) : null}
             </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-3">
-            <Label>Rekening tujuan</Label>
-            {toAccountId ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
-                onClick={() => setValue("to_account_id", "", { shouldValidate: true })}
-                disabled={isSubmitting}
-              >
-                Hapus pilihan
-              </Button>
-            ) : null}
-          </div>
+          }
+          error={errors.to_account_id}
+        >
           <Select value={toAccountId ?? ""} onValueChange={(v) => setValue("to_account_id", v ?? "", { shouldValidate: true })}>
-            <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading}>
+            <SelectTrigger className="touch-target w-full" disabled={isSubmitting || isLoading} aria-invalid={Boolean(errors.to_account_id)}>
               <SelectValue>
                 {(v) => {
                   if (!v) return isLoading ? "Memuat rekening..." : "Pilih rekening tujuan"
@@ -236,31 +234,17 @@ export function TransferForm({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {errors.to_account_id && <p className="text-xs text-destructive">{errors.to_account_id.message}</p>}
           {!!toAccountId && !errors.to_account_id && (
-            <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-muted-foreground">Rekening dipilih:</span>
-                <span className="font-medium">{toLabel}</span>
-              </div>
-              {typeof toBalance === "number" && (
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-muted-foreground">Saldo saat ini:</span>
-                  <span className="font-medium tabular-nums">{formatCurrency(toBalance)}</span>
-                </div>
-              )}
-              {toAfter != null ? (
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-muted-foreground">Saldo setelah transfer:</span>
-                  <span className="font-medium tabular-nums">{formatCurrency(toAfter)}</span>
-                </div>
-              ) : null}
-            </div>
+            <AccountInfoPanel
+              accountLabel={toLabel}
+              balance={toBalance}
+              projectedBalance={toAfter}
+              projectedLabel="Saldo setelah transfer:"
+            />
           )}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="amount">Jumlah</Label>
+        <FormField label="Jumlah" htmlFor="amount" error={errors.amount}>
           <Input
             id="amount"
             type="text"
@@ -274,20 +258,15 @@ export function TransferForm({
               amountField.onChange(e)
             }}
           />
-          {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="description">Catatan (opsional)</Label>
+        <FormField label="Catatan (opsional)" htmlFor="description" error={errors.description}>
           <Input id="description" placeholder="Contoh: pindah dana untuk bayar tagihan" className="touch-target" {...register("description")} />
-          {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="transaction_date">Tanggal</Label>
+        <FormField label="Tanggal" htmlFor="transaction_date" error={errors.transaction_date}>
           <Input id="transaction_date" type="date" className="touch-target" {...register("transaction_date")} />
-          {errors.transaction_date && <p className="text-xs text-destructive">{errors.transaction_date.message}</p>}
-        </div>
+        </FormField>
 
         {!isLoading && allAccounts.length === 0 && (
           <p className="text-xs text-muted-foreground">Kamu belum punya rekening. Buat dulu di halaman Rekening.</p>
@@ -305,4 +284,3 @@ export function TransferForm({
     </form>
   )
 }
-
