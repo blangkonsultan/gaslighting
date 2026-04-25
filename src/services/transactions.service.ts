@@ -9,7 +9,9 @@ export type TransactionListRow = Pick<
   categories?: { name: string } | null
 }
 
-export async function getTransactions(userId: string, filters: TransactionFilters = {}): Promise<TransactionListRow[]> {
+export const TRANSACTIONS_PAGE_SIZE_DEFAULT = 10
+
+function buildTransactionsListQuery(userId: string, filters: TransactionFilters = {}) {
   let q = supabase
     .from("transactions")
     .select("id,amount,type,description,transaction_date,created_at,transfer_id,accounts(name),categories(name)")
@@ -22,9 +24,29 @@ export async function getTransactions(userId: string, filters: TransactionFilter
   if (filters.dateTo) q = q.lte("transaction_date", filters.dateTo)
   if (filters.search?.trim()) q = q.ilike("description", `%${filters.search.trim()}%`)
 
-  const { data, error } = await q
+  return q
     .order("transaction_date", { ascending: false })
     .order("created_at", { ascending: false })
+}
+
+export async function getTransactions(userId: string, filters: TransactionFilters = {}): Promise<TransactionListRow[]> {
+  const { data, error } = await buildTransactionsListQuery(userId, filters)
+
+  if (error) throw error
+  return (data ?? []) as TransactionListRow[]
+}
+
+export async function getTransactionsPage(args: {
+  userId: string
+  filters?: TransactionFilters
+  pageIndex: number
+  pageSize?: number
+}): Promise<TransactionListRow[]> {
+  const pageSize = args.pageSize ?? TRANSACTIONS_PAGE_SIZE_DEFAULT
+  const from = Math.max(0, args.pageIndex) * pageSize
+  const to = from + pageSize - 1
+
+  const { data, error } = await buildTransactionsListQuery(args.userId, args.filters ?? {}).range(from, to)
 
   if (error) throw error
   return (data ?? []) as TransactionListRow[]
