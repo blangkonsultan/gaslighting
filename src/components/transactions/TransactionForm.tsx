@@ -277,11 +277,11 @@ export function TransactionForm({
           <Input id="transaction_date" type="date" className="touch-target" {...register("transaction_date")} />
         </FormField>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <div className="grid grid-cols-2 gap-2">
           <Button
             type="button"
             variant="outline"
-            className="w-full touch-target sm:w-auto"
+            className="w-full touch-target"
             onClick={onCancel}
             disabled={isSubmitting}
           >
@@ -289,7 +289,7 @@ export function TransactionForm({
           </Button>
           <Button
             type="submit"
-            className="w-full touch-target sm:w-auto"
+            className="w-full touch-target"
             disabled={isSubmitting || (accounts?.length ?? 0) === 0 || isCategoryMissing}
           >
             {isSubmitting ? <LoadingSpinner size={18} /> : submitLabel}

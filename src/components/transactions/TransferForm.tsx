@@ -272,17 +272,17 @@ export function TransferForm({
           <p className="text-xs text-muted-foreground">Kamu belum punya rekening. Buat dulu di halaman Rekening.</p>
         )}
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <div className="grid grid-cols-2 gap-2">
           <Button
             type="button"
             variant="outline"
-            className="w-full touch-target sm:w-auto"
+            className="w-full touch-target"
             onClick={onCancel}
             disabled={isSubmitting}
           >
             Batal
           </Button>
-          <Button type="submit" className="w-full touch-target sm:w-auto" disabled={isSubmitting || allAccounts.length < 2}>
+          <Button type="submit" className="w-full touch-target" disabled={isSubmitting || allAccounts.length < 2}>
             {isSubmitting ? <LoadingSpinner size={18} /> : submitLabel}
           </Button>
         </div>

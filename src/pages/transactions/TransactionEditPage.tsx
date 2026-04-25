@@ -260,13 +260,13 @@ export default function TransactionEditPage() {
               onSubmit={onSubmitTransfer}
             />
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <div className="flex w-full flex-col gap-2">
               <Dialog>
                 <DialogTrigger
                   render={
                     <Button
                       variant="destructive"
-                      className="touch-target sm:mr-auto"
+                      className="touch-target w-full"
                       disabled={reverseTransferMutation.isPending}
                     />
                   }
@@ -323,13 +323,13 @@ export default function TransactionEditPage() {
             onSubmit={onSubmit}
           />
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <div className="flex w-full flex-col gap-2">
             <Dialog>
               <DialogTrigger
                 render={
                   <Button
                     variant="destructive"
-                    className="touch-target sm:mr-auto"
+                    className="touch-target w-full"
                     disabled={deleteTxMutation.isPending}
                   />
                 }

@@ -279,51 +279,80 @@ function BillSection({
           const isBusy = busyIds.has(b.id)
           const accountName = b.accounts?.name ?? "—"
           const categoryName = b.categories?.name ?? ""
-          const meta = [
-            `Rekening: ${accountName}`,
-            categoryName ? `Kategori: ${categoryName}` : null,
-            `Frekuensi: ${frequencyLabel[b.frequency] ?? b.frequency}`,
-            `Berikutnya: ${b.next_date}`,
-            b.end_date ? `Sampai: ${b.end_date}` : null,
-          ].filter(Boolean)
 
           return (
             <div key={b.id} className="rounded-lg border bg-card p-3">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="font-semibold">{b.name}</span>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                      Pengeluaran
-                    </span>
-                    <span className="font-semibold tabular-nums">{formatCurrency(Number(b.amount))}</span>
-                  </div>
-                  <div className="mt-1 flex flex-col gap-0.5 text-xs text-muted-foreground">
-                    {meta.map((m) => (
-                      <span key={m as string}>{m}</span>
-                    ))}
-                    {b.description ? <span>Catatan: {b.description}</span> : null}
+              <div className="grid gap-3">
+                <div className="grid grid-cols-1 gap-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold">{b.name}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                          Pengeluaran
+                        </span>
+                        {categoryName ? (
+                          <span className="text-xs text-muted-foreground truncate">Kategori: {categoryName}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="font-semibold money">{formatCurrency(Number(b.amount))}</div>
+                      <div className="text-xs text-muted-foreground">Berikutnya: {b.next_date}</div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-2">
+                <dl className="grid grid-cols-1 gap-1 text-xs text-muted-foreground sm:grid-cols-2 sm:gap-x-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <dt className="shrink-0">Rekening</dt>
+                    <dd className="min-w-0 truncate text-foreground/80">{accountName}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <dt className="shrink-0">Frekuensi</dt>
+                    <dd className="min-w-0 truncate text-foreground/80">
+                      {frequencyLabel[b.frequency] ?? b.frequency}
+                    </dd>
+                  </div>
+                  {b.end_date ? (
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="shrink-0">Sampai</dt>
+                      <dd className="min-w-0 truncate text-foreground/80">{b.end_date}</dd>
+                    </div>
+                  ) : null}
+                  {b.description ? (
+                    <div className="flex items-center justify-between gap-3 sm:col-span-2">
+                      <dt className="shrink-0">Catatan</dt>
+                      <dd className="min-w-0 truncate text-foreground/80">{b.description}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+
+                <div className="grid grid-cols-2 gap-2">
                   {b.is_active && b.status === "active" ? (
                     <Button
+                      size="sm"
                       variant="outline"
-                      className="touch-target"
+                      className="w-full"
                       onClick={() => onPause(b.id)}
                       disabled={isBusy}
                     >
                       Jeda
                     </Button>
                   ) : (
-                    <Button className="touch-target" onClick={() => onResume(b.id)} disabled={isBusy}>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={() => onResume(b.id)}
+                      disabled={isBusy}
+                    >
                       Aktifkan
                     </Button>
                   )}
                   <Button
+                    size="sm"
                     variant="outline"
-                    className="touch-target text-destructive hover:text-destructive"
+                    className="w-full text-destructive hover:text-destructive"
                     onClick={() => onDelete(b.id)}
                     disabled={isBusy}
                   >
