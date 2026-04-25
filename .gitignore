@@ -13,6 +13,10 @@ dist-ssr
 *.local
 .env
 
+# Local agent/skill bundles (tracked under .claude/skills instead)
+.agents/
+skills/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
