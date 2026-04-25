@@ -38,8 +38,8 @@ export default function RegisterPage() {
     <div className="flex min-h-dvh items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">Daftar</CardTitle>
-          <CardDescription>Buat akun baru di Gaslighting</CardDescription>
+          <CardTitle className="page-title text-primary">Daftar</CardTitle>
+          <CardDescription className="section-subtitle">Buat akun baru di Gaslighting</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="flex flex-col gap-4">
