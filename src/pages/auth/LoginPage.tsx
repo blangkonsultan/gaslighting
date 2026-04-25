@@ -6,9 +6,9 @@ import { login } from "@/services/auth.service"
 import { loginSchema, type LoginInput } from "@/lib/validators"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
+import { FormField } from "@/components/shared/FormField"
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -42,8 +42,7 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
+            <FormField label="Email" htmlFor="email" error={errors.email}>
               <Input
                 id="email"
                 type="email"
@@ -52,12 +51,8 @@ export default function LoginPage() {
                 className="touch-target"
                 {...register("email")}
               />
-              {errors.email && (
-                <p className="text-xs text-destructive">{errors.email.message}</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
+            </FormField>
+            <FormField label="Password" htmlFor="password" error={errors.password}>
               <Input
                 id="password"
                 type="password"
@@ -66,10 +61,7 @@ export default function LoginPage() {
                 className="touch-target"
                 {...register("password")}
               />
-              {errors.password && (
-                <p className="text-xs text-destructive">{errors.password.message}</p>
-              )}
-            </div>
+            </FormField>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
             <Button type="submit" className="w-full touch-target" disabled={isSubmitting}>

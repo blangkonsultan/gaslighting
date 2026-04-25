@@ -1,31 +1,34 @@
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getCategories, createCategory, updateCategory, deleteCategory } from "@/services/admin.service"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
+import { FormField } from "@/components/shared/FormField"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Plus, Pencil, Trash2, Tag } from "lucide-react"
 import { toast } from "sonner"
+import { adminCategorySchema, type AdminCategoryInput } from "@/lib/validators"
 
 export default function AdminCategoriesPage() {
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState({
-    name: "",
-    type: "expense" as "income" | "expense",
-    icon: "circle",
-    color: "#9AB17A",
-    sort_order: 0,
+
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<AdminCategoryInput>({
+    resolver: zodResolver(adminCategorySchema),
+    defaultValues: { name: "", type: "expense", icon: "circle", color: "#9AB17A", sort_order: 0 },
   })
+
+  const formType = watch("type")
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ["admin", "categories"],
@@ -65,13 +68,13 @@ export default function AdminCategoriesPage() {
 
   function openCreate() {
     setEditingId(null)
-    setForm({ name: "", type: "expense", icon: "circle", color: "#9AB17A", sort_order: 0 })
+    reset({ name: "", type: "expense", icon: "circle", color: "#9AB17A", sort_order: 0 })
     setFormOpen(true)
   }
 
   function openEdit(cat: typeof categories extends (infer T)[] | undefined ? T : never) {
     setEditingId(cat.id)
-    setForm({
+    reset({
       name: cat.name,
       type: cat.type as "income" | "expense",
       icon: cat.icon || "circle",
@@ -86,12 +89,11 @@ export default function AdminCategoriesPage() {
     setEditingId(null)
   }
 
-  function handleSubmit() {
-    if (!form.name.trim()) return
+  function onSubmit(data: AdminCategoryInput) {
     if (editingId) {
-      updateMutation.mutate({ id: editingId, payload: form })
+      updateMutation.mutate({ id: editingId, payload: data })
     } else {
-      createMutation.mutate({ ...form, is_global: true })
+      createMutation.mutate({ ...data, is_global: true })
     }
   }
 
@@ -154,80 +156,77 @@ export default function AdminCategoriesPage() {
           <DialogHeader>
             <DialogTitle>{editingId ? "Edit Kategori" : "Tambah Kategori"}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="cat-name">Nama</Label>
-              <Input
-                id="cat-name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="touch-target"
-                placeholder="Contoh: Makanan"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Tipe</Label>
-              <Select
-                value={form.type}
-                onValueChange={(v) => setForm({ ...form, type: v as "income" | "expense" })}
-              >
-                <SelectTrigger className="touch-target"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="income">Pemasukan</SelectItem>
-                  <SelectItem value="expense">Pengeluaran</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="cat-icon">Ikon (Lucide)</Label>
-              <Input
-                id="cat-icon"
-                value={form.icon}
-                onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                className="touch-target"
-                placeholder="circle"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="cat-color">Warna</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={form.color}
-                  onChange={(e) => setForm({ ...form, color: e.target.value })}
-                  className="h-10 w-10 cursor-pointer rounded border border-border"
-                />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex flex-col gap-4">
+              <FormField label="Nama" htmlFor="cat-name" error={errors.name}>
                 <Input
-                  id="cat-color"
-                  value={form.color}
-                  onChange={(e) => setForm({ ...form, color: e.target.value })}
-                  className="touch-target flex-1"
+                  id="cat-name"
+                  placeholder="Contoh: Makanan"
+                  className="touch-target"
+                  {...register("name")}
                 />
-              </div>
+              </FormField>
+
+              <FormField label="Tipe" error={errors.type}>
+                <Select
+                  value={formType}
+                  onValueChange={(v) => setValue("type", v as "income" | "expense", { shouldValidate: true })}
+                >
+                  <SelectTrigger className="touch-target" aria-invalid={Boolean(errors.type)}><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="income">Pemasukan</SelectItem>
+                    <SelectItem value="expense">Pengeluaran</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormField>
+
+              <FormField label="Ikon (Lucide)" htmlFor="cat-icon" error={errors.icon}>
+                <Input
+                  id="cat-icon"
+                  placeholder="circle"
+                  className="touch-target"
+                  {...register("icon")}
+                />
+              </FormField>
+
+              <FormField label="Warna" htmlFor="cat-color" error={errors.color}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={watch("color")}
+                    onChange={(e) => setValue("color", e.target.value, { shouldValidate: true })}
+                    className="h-10 w-10 cursor-pointer rounded border border-border"
+                  />
+                  <Input
+                    id="cat-color"
+                    className="touch-target flex-1"
+                    {...register("color")}
+                  />
+                </div>
+              </FormField>
+
+              <FormField label="Urutan" htmlFor="cat-order" error={errors.sort_order}>
+                <Input
+                  id="cat-order"
+                  type="number"
+                  className="touch-target"
+                  {...register("sort_order", { valueAsNumber: true })}
+                />
+              </FormField>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="cat-order">Urutan</Label>
-              <Input
-                id="cat-order"
-                type="number"
-                value={form.sort_order}
-                onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
-                className="touch-target"
-              />
-            </div>
-          </div>
-          <DialogFooter className="flex-row gap-2 sm:justify-end">
-            <Button variant="outline" onClick={closeForm} className="flex-1 touch-target sm:flex-none">
-              Batal
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={!form.name.trim() || createMutation.isPending || updateMutation.isPending}
-              className="flex-1 touch-target sm:flex-none"
-            >
-              {createMutation.isPending || updateMutation.isPending ? "Menyimpan..." : "Simpan"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter className="mt-4 flex-row gap-2 sm:justify-end">
+              <Button variant="outline" onClick={closeForm} type="button" className="flex-1 touch-target sm:flex-none">
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+                className="flex-1 touch-target sm:flex-none"
+              >
+                {(createMutation.isPending || updateMutation.isPending) ? "Menyimpan..." : "Simpan"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -254,25 +253,23 @@ function CategoryRow({
   onDelete: () => void
 }) {
   return (
-    <>
-      <div className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-muted/50">
-        <div className="flex items-center gap-2">
-          <span
-            className="inline-block h-3 w-3 rounded-full"
-            style={{ backgroundColor: cat.color || "#9AB17A" }}
-          />
-          <span className="text-sm font-medium">{cat.name}</span>
-          {cat.is_global && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">global</Badge>}
-        </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon-xs" onClick={onEdit} className="touch-target">
-            <Pencil size={14} />
-          </Button>
-          <Button variant="ghost" size="icon-xs" onClick={onDelete} className="touch-target text-destructive">
-            <Trash2 size={14} />
-          </Button>
-        </div>
+    <div className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-muted/50">
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-block h-3 w-3 rounded-full"
+          style={{ backgroundColor: cat.color || "#9AB17A" }}
+        />
+        <span className="text-sm font-medium">{cat.name}</span>
+        {cat.is_global && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">global</Badge>}
       </div>
-    </>
+      <div className="flex items-center gap-1">
+        <Button variant="ghost" size="icon-xs" onClick={onEdit} className="touch-target">
+          <Pencil size={14} />
+        </Button>
+        <Button variant="ghost" size="icon-xs" onClick={onDelete} className="touch-target text-destructive">
+          <Trash2 size={14} />
+        </Button>
+      </div>
+    </div>
   )
 }

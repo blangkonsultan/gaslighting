@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   getAccountPresets,
@@ -9,14 +11,15 @@ import {
 import { PageLoading } from "@/components/shared/LoadingSpinner"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
+import { FormField } from "@/components/shared/FormField"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Plus, Pencil, Trash2, ListChecks } from "lucide-react"
-import { ACCOUNT_TYPES } from "@/lib/constants"
+import { ACCOUNT_TYPES, type AccountType } from "@/lib/constants"
+import { adminAccountPresetSchema, type AdminAccountPresetInput } from "@/lib/validators"
 import type { Tables } from "@/types/database"
 import { toast } from "sonner"
 
@@ -36,13 +39,13 @@ export default function AdminAccountPresetsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState({
-    name: "",
-    type: "bank",
-    icon: "wallet",
-    color: "#9AB17A",
-    sort_order: 0,
+
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<AdminAccountPresetInput>({
+    resolver: zodResolver(adminAccountPresetSchema),
+    defaultValues: { name: "", type: "bank", icon: "wallet", color: "#9AB17A", sort_order: 0 },
   })
+
+  const formType = watch("type")
 
   const { data: presets, isLoading } = useQuery({
     queryKey: ["admin", "account-presets"],
@@ -82,15 +85,15 @@ export default function AdminAccountPresetsPage() {
 
   function openCreate() {
     setEditingId(null)
-    setForm({ name: "", type: "bank", icon: "wallet", color: "#9AB17A", sort_order: 0 })
+    reset({ name: "", type: "bank", icon: "wallet", color: "#9AB17A", sort_order: 0 })
     setFormOpen(true)
   }
 
   function openEdit(p: AccountPreset) {
     setEditingId(p.id)
-    setForm({
+    reset({
       name: p.name,
-      type: p.type,
+      type: p.type as AccountType,
       icon: p.icon || "wallet",
       color: p.color || "#9AB17A",
       sort_order: p.sort_order,
@@ -103,12 +106,11 @@ export default function AdminAccountPresetsPage() {
     setEditingId(null)
   }
 
-  function handleSubmit() {
-    if (!form.name.trim()) return
+  function onSubmit(data: AdminAccountPresetInput) {
     if (editingId) {
-      updateMutation.mutate({ id: editingId, payload: form })
+      updateMutation.mutate({ id: editingId, payload: data })
     } else {
-      createMutation.mutate(form)
+      createMutation.mutate(data)
     }
   }
 
@@ -187,77 +189,74 @@ export default function AdminAccountPresetsPage() {
           <DialogHeader>
             <DialogTitle>{editingId ? "Edit Preset" : "Tambah Preset"}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="preset-name">Nama</Label>
-              <Input
-                id="preset-name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="touch-target"
-                placeholder="Contoh: BCA"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Tipe</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as string })}>
-                <SelectTrigger className="touch-target"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {ACCOUNT_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>{typeLabels[t] || t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="preset-icon">Ikon (Lucide)</Label>
-              <Input
-                id="preset-icon"
-                value={form.icon}
-                onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                className="touch-target"
-                placeholder="wallet"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Warna</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={form.color}
-                  onChange={(e) => setForm({ ...form, color: e.target.value })}
-                  className="h-10 w-10 cursor-pointer rounded border border-border"
-                />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex flex-col gap-4">
+              <FormField label="Nama" htmlFor="preset-name" error={errors.name}>
                 <Input
-                  value={form.color}
-                  onChange={(e) => setForm({ ...form, color: e.target.value })}
-                  className="touch-target flex-1"
+                  id="preset-name"
+                  placeholder="Contoh: BCA"
+                  className="touch-target"
+                  {...register("name")}
                 />
-              </div>
+              </FormField>
+
+              <FormField label="Tipe" error={errors.type}>
+                <Select value={formType} onValueChange={(v) => setValue("type", v as AdminAccountPresetInput["type"], { shouldValidate: true })}>
+                  <SelectTrigger className="touch-target" aria-invalid={Boolean(errors.type)}><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ACCOUNT_TYPES.map((t) => (
+                      <SelectItem key={t} value={t}>{typeLabels[t] || t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormField>
+
+              <FormField label="Ikon (Lucide)" htmlFor="preset-icon" error={errors.icon}>
+                <Input
+                  id="preset-icon"
+                  placeholder="wallet"
+                  className="touch-target"
+                  {...register("icon")}
+                />
+              </FormField>
+
+              <FormField label="Warna" error={errors.color}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={watch("color")}
+                    onChange={(e) => setValue("color", e.target.value, { shouldValidate: true })}
+                    className="h-10 w-10 cursor-pointer rounded border border-border"
+                  />
+                  <Input
+                    className="touch-target flex-1"
+                    {...register("color")}
+                  />
+                </div>
+              </FormField>
+
+              <FormField label="Urutan" htmlFor="preset-order" error={errors.sort_order}>
+                <Input
+                  id="preset-order"
+                  type="number"
+                  className="touch-target"
+                  {...register("sort_order", { valueAsNumber: true })}
+                />
+              </FormField>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="preset-order">Urutan</Label>
-              <Input
-                id="preset-order"
-                type="number"
-                value={form.sort_order}
-                onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
-                className="touch-target"
-              />
-            </div>
-          </div>
-          <DialogFooter className="flex-row gap-2 sm:justify-end">
-            <Button variant="outline" onClick={closeForm} className="flex-1 touch-target sm:flex-none">
-              Batal
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={!form.name.trim() || createMutation.isPending || updateMutation.isPending}
-              className="flex-1 touch-target sm:flex-none"
-            >
-              {createMutation.isPending || updateMutation.isPending ? "Menyimpan..." : "Simpan"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter className="mt-4 flex-row gap-2 sm:justify-end">
+              <Button variant="outline" onClick={closeForm} type="button" className="flex-1 touch-target sm:flex-none">
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+                className="flex-1 touch-target sm:flex-none"
+              >
+                {(createMutation.isPending || updateMutation.isPending) ? "Menyimpan..." : "Simpan"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

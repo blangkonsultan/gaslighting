@@ -117,7 +117,7 @@ export default function TransactionEditPage() {
       throw new Error("Silakan edit transfer melalui form transfer.")
     }
 
-    const amountNumber = Number(data.amount)
+    const amountNumber = parseIdrInteger(data.amount)
     if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
       throw new Error("Jumlah tidak valid.")
     }

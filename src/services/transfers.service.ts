@@ -54,7 +54,7 @@ export async function executeTransfer(input: ExecuteTransferInput): Promise<stri
     p_amount: input.amount,
     p_description: input.description ?? "",
     p_transaction_date: input.transactionDate,
-    p_category_id: input.categoryId ?? null,
+    p_category_id: input.categoryId ?? undefined,
   })
 
   if (error) {
@@ -77,7 +77,7 @@ export async function updateTransfer(input: UpdateTransferInput): Promise<void> 
     p_amount: input.amount,
     p_description: input.description ?? "",
     p_transaction_date: input.transactionDate,
-    p_category_id: input.categoryId ?? null,
+    p_category_id: input.categoryId ?? undefined,
   })
 
   if (error) throw new Error(mapTransferErrorToMessage(error))

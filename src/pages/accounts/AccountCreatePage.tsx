@@ -8,8 +8,8 @@ import { Wallet, Building2, Smartphone, PiggyBank, TrendingUp, CircleDot } from 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
+import { FormField } from "@/components/shared/FormField"
 import { supabase } from "@/services/supabase"
 import { useAuthStore } from "@/stores/auth-store"
 import { ACCOUNT_TYPES, type AccountType } from "@/lib/constants"
@@ -128,8 +128,7 @@ export default function AccountCreatePage() {
               </div>
             )}
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Nama Rekening</Label>
+            <FormField label="Nama Rekening" htmlFor="name" error={errors.name}>
               <Input
                 id="name"
                 placeholder="Contoh: BCA, GoPay, Dompet"
@@ -143,11 +142,9 @@ export default function AccountCreatePage() {
                   <option key={name} value={name} />
                 ))}
               </datalist>
-              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
-            </div>
+            </FormField>
 
-            <div className="flex flex-col gap-2">
-              <Label>Tipe Rekening</Label>
+            <FormField label="Tipe Rekening" error={errors.type}>
               <div className="grid grid-cols-3 gap-2">
                 {accountTypeOptions.map(({ value, label, icon: Icon }) => (
                   <button
@@ -166,11 +163,9 @@ export default function AccountCreatePage() {
                   </button>
                 ))}
               </div>
-              {errors.type && <p className="text-xs text-destructive">{errors.type.message}</p>}
-            </div>
+            </FormField>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="initial_balance">Saldo Awal</Label>
+            <FormField label="Saldo Awal" htmlFor="initial_balance" error={errors.initial_balance}>
               <div className="rounded-lg bg-muted/50 p-3 text-center text-lg font-semibold text-foreground">
                 {previewBalance}
               </div>
@@ -188,21 +183,16 @@ export default function AccountCreatePage() {
                   initialBalanceField.onChange(e)
                 }}
               />
-              {errors.initial_balance && (
-                <p className="text-xs text-destructive">{errors.initial_balance.message}</p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="notes">Catatan (opsional)</Label>
+            <FormField label="Catatan (opsional)" htmlFor="notes" error={errors.notes}>
               <Input
                 id="notes"
                 placeholder="Contoh: rekening utama"
                 className="touch-target"
                 {...register("notes")}
               />
-              {errors.notes && <p className="text-xs text-destructive">{errors.notes.message}</p>}
-            </div>
+            </FormField>
 
             <div className="flex items-center gap-2">
               <Button
@@ -224,4 +214,3 @@ export default function AccountCreatePage() {
     </div>
   )
 }
-
