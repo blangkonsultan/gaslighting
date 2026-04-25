@@ -29,7 +29,7 @@ function toFormDefaults(initial?: TransferFormInitialValues): TransferInput {
   return {
     from_account_id: initial?.from_account_id ?? "",
     to_account_id: initial?.to_account_id ?? "",
-    amount: initial?.amount != null ? String(initial.amount) : "",
+    amount: initial?.amount != null ? formatIdrIntegerInput(String(initial.amount)) : "",
     description: (initial?.description ?? "").trim(),
     transaction_date: initial?.transaction_date ?? todayYmd(),
   }
@@ -272,11 +272,17 @@ export function TransferForm({
           <p className="text-xs text-muted-foreground">Kamu belum punya rekening. Buat dulu di halaman Rekening.</p>
         )}
 
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" className="touch-target" onClick={onCancel} disabled={isSubmitting}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full touch-target sm:w-auto"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Batal
           </Button>
-          <Button type="submit" className="touch-target" disabled={isSubmitting || allAccounts.length < 2}>
+          <Button type="submit" className="w-full touch-target sm:w-auto" disabled={isSubmitting || allAccounts.length < 2}>
             {isSubmitting ? <LoadingSpinner size={18} /> : submitLabel}
           </Button>
         </div>

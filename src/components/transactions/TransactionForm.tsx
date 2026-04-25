@@ -33,7 +33,7 @@ function toFormDefaults(initial?: TransactionFormInitialValues): TransactionInpu
     type: initial?.type ?? "expense",
     account_id: initial?.account_id ?? "",
     category_id: category ?? "",
-    amount: initial?.amount != null ? String(initial.amount) : "",
+    amount: initial?.amount != null ? formatIdrIntegerInput(String(initial.amount)) : "",
     description: (initial?.description ?? "").trim(),
     transaction_date: initial?.transaction_date ?? todayYmd(),
   }
@@ -277,13 +277,19 @@ export function TransactionForm({
           <Input id="transaction_date" type="date" className="touch-target" {...register("transaction_date")} />
         </FormField>
 
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" className="touch-target" onClick={onCancel} disabled={isSubmitting}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full touch-target sm:w-auto"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Batal
           </Button>
           <Button
             type="submit"
-            className="touch-target"
+            className="w-full touch-target sm:w-auto"
             disabled={isSubmitting || (accounts?.length ?? 0) === 0 || isCategoryMissing}
           >
             {isSubmitting ? <LoadingSpinner size={18} /> : submitLabel}

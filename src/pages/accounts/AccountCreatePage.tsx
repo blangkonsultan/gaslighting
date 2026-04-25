@@ -194,17 +194,17 @@ export default function AccountCreatePage() {
               />
             </FormField>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
-                className="touch-target"
+                className="w-full touch-target sm:w-auto"
                 onClick={() => navigate("/accounts")}
                 disabled={isSubmitting}
               >
                 Batal
               </Button>
-              <Button type="submit" className="touch-target" disabled={isSubmitting}>
+              <Button type="submit" className="w-full touch-target sm:w-auto" disabled={isSubmitting}>
                 {isSubmitting ? <LoadingSpinner size={18} /> : "Simpan"}
               </Button>
             </div>
