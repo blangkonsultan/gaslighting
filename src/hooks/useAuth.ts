@@ -68,6 +68,10 @@ export function useAuth() {
             reset()
           }
         } else {
+          // Supabase can emit a transient "no session" event during startup while storage
+          // is still being restored. If we reset here, GuestRoute can briefly render the
+          // login form before init() resolves, causing a visible flash.
+          if (initInFlightRef.current) return
           reset()
         }
       }
