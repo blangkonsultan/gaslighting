@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { supabase } from "@/services/supabase"
 import { getProfile } from "@/services/auth.service"
 import { useAuthStore } from "@/stores/auth-store"
@@ -17,26 +17,46 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 
 export function useAuth() {
   const { profile, isLoading, setProfile, setLoading, reset } = useAuthStore()
+  const initInFlightRef = useRef(false)
+  const lastInitAtRef = useRef(0)
 
   useEffect(() => {
-    async function init() {
+    async function init(reason: string) {
+      if (initInFlightRef.current) return
+      const now = Date.now()
+      if (now - lastInitAtRef.current < 500) return
+
+      initInFlightRef.current = true
+      lastInitAtRef.current = now
+      setLoading(true)
+
+      // Hard-stop to avoid "infinite loading" on mobile tab restore/background edge cases.
+      // If auth restoration hangs (storage lock, bfcache restore, etc.), we prefer a safe
+      // unauthenticated state over a spinner that never resolves.
+      const hardStopId = window.setTimeout(() => {
+        reset()
+      }, 12_000)
+
       try {
         const {
           data: { session },
-        } = await withTimeout(supabase.auth.getSession(), 10_000, "supabase.auth.getSession")
+        } = await withTimeout(supabase.auth.getSession(), 10_000, `supabase.auth.getSession (${reason})`)
 
         if (session?.user) {
-          const p = await withTimeout(getProfile(session.user.id), 10_000, "getProfile")
+          const p = await withTimeout(getProfile(session.user.id), 10_000, `getProfile (${reason})`)
           setProfile(p)
         } else {
-          setLoading(false)
+          reset()
         }
       } catch {
-        setLoading(false)
+        reset()
+      } finally {
+        window.clearTimeout(hardStopId)
+        initInFlightRef.current = false
       }
     }
 
-    init()
+    void init("mount")
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event: string, session: Session | null) => {
@@ -45,7 +65,7 @@ export function useAuth() {
             const p = await withTimeout(getProfile(session.user.id), 10_000, "getProfile")
             setProfile(p)
           } catch {
-            setLoading(false)
+            reset()
           }
         } else {
           reset()
@@ -53,7 +73,27 @@ export function useAuth() {
       }
     )
 
-    return () => subscription.unsubscribe()
+    function onVisibilityChange() {
+      if (document.visibilityState === "visible" && useAuthStore.getState().isLoading) {
+        void init("visibilitychange")
+      }
+    }
+
+    function onPageShow(event: PageTransitionEvent) {
+      // When restored from back/forward cache, pending timers/promises may be in a bad state.
+      if (event.persisted && useAuthStore.getState().isLoading) {
+        void init("pageshow(bfcache)")
+      }
+    }
+
+    document.addEventListener("visibilitychange", onVisibilityChange)
+    window.addEventListener("pageshow", onPageShow)
+
+    return () => {
+      subscription.unsubscribe()
+      document.removeEventListener("visibilitychange", onVisibilityChange)
+      window.removeEventListener("pageshow", onPageShow)
+    }
   }, [setProfile, setLoading, reset])
 
   return { profile, isLoading }
