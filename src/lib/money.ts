@@ -1,4 +1,13 @@
-export const IDR_INTEGER_REGEX = /^(0|[1-9]\d{0,2}(?:\.\d{3})*)$/
+/**
+ * Accepts either:
+ * - plain digits without separators (e.g. "1000")
+ * - dot-grouped thousands (e.g. "1.000", "150.000.000")
+ *
+ * Notes:
+ * - Disallows leading zeros (except the single string "0")
+ * - Disallows invalid grouping like "1000.000" or "1.00"
+ */
+export const IDR_INTEGER_REGEX = /^(0|[1-9]\d*|[1-9]\d{0,2}(?:\.\d{3})+)$/
 
 export function isIdrIntegerString(value: string): boolean {
   const v = value.trim()

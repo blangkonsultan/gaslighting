@@ -240,7 +240,6 @@ export function BillForm({
               id="amount"
               type="text"
               inputMode="numeric"
-              pattern="^(0|[1-9]\d{0,2}(?:\.\d{3})*)$"
               placeholder="0"
               className="touch-target text-right tabular-nums"
               {...amountField}

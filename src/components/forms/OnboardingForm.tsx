@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react"
-import { useForm, useWatch } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
 import { FormField } from "@/components/shared/FormField"
+import { SuggestionInput } from "@/components/shared/SuggestionInput"
 import { Wallet, Building2, Smartphone, PiggyBank, TrendingUp, CircleDot } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { AccountType } from "@/lib/constants"
@@ -111,7 +112,6 @@ export function OnboardingForm() {
     }
   }
 
-  const datalistId = `account-name-presets-${selectedType}`
   const initialBalanceField = register("initial_balance")
 
   return (
@@ -132,19 +132,24 @@ export function OnboardingForm() {
             )}
 
             <FormField label="Nama Rekening" htmlFor="name" error={errors.name}>
-              <Input
-                id="name"
-                placeholder="Contoh: BCA, GoPay, Dompet"
-                autoComplete="organization"
-                className="touch-target"
-                list={datalistId}
-                {...register("name")}
+              <Controller
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <SuggestionInput
+                    id="name"
+                    placeholder="Contoh: BCA, GoPay, Dompet"
+                    autoComplete="organization"
+                    className="touch-target"
+                    suggestions={namePresetOptions}
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                )}
               />
-              <datalist id={datalistId}>
-                {namePresetOptions.map((name) => (
-                  <option key={name} value={name} />
-                ))}
-              </datalist>
             </FormField>
 
             <FormField label="Tipe Rekening" error={errors.type}>
@@ -176,7 +181,6 @@ export function OnboardingForm() {
                 id="initial_balance"
                 type="text"
                 inputMode="numeric"
-                pattern="^(0|[1-9]\\d{0,2}(?:\\.\\d{3})*)$"
                 placeholder="0"
                 className="touch-target text-right tabular-nums"
                 {...initialBalanceField}

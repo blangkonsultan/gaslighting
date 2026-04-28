@@ -43,6 +43,7 @@ describe("registerSchema", () => {
 describe("onboardingAccountSchema", () => {
   it("accepts valid input", () => {
     expect(onboardingAccountSchema.safeParse({ name: "BCA", type: "bank", initial_balance: "1.000.000" }).success).toBe(true)
+    expect(onboardingAccountSchema.safeParse({ name: "BCA", type: "bank", initial_balance: "1000" }).success).toBe(true)
   })
 
   it("rejects invalid amount format", () => {
@@ -59,6 +60,7 @@ describe("accountSchema", () => {
 
   it("accepts valid input without notes", () => {
     expect(accountSchema.safeParse({ name: "GoPay", type: "ewallet", initial_balance: "500.000" }).success).toBe(true)
+    expect(accountSchema.safeParse({ name: "GoPay", type: "ewallet", initial_balance: "1000" }).success).toBe(true)
   })
 })
 

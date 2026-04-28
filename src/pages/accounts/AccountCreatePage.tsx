@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
 import { FormField } from "@/components/shared/FormField"
+import { SuggestionInput } from "@/components/shared/SuggestionInput"
 import { supabase } from "@/services/supabase"
 import { useAuthStore } from "@/stores/auth-store"
 import { ACCOUNT_TYPES, type AccountType } from "@/lib/constants"
@@ -43,6 +44,7 @@ export default function AccountCreatePage() {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<AccountInput>({
     resolver: zodResolver(accountSchema),
@@ -78,7 +80,6 @@ export default function AccountCreatePage() {
     return unique
   }, [accountPresets, selectedType])
 
-  const datalistId = `account-name-presets-${selectedType}`
   const initialBalanceField = register("initial_balance")
 
   async function onSubmit(data: AccountInput) {
@@ -129,19 +130,24 @@ export default function AccountCreatePage() {
             )}
 
             <FormField label="Nama Rekening" htmlFor="name" error={errors.name}>
-              <Input
-                id="name"
-                placeholder="Contoh: BCA, GoPay, Dompet"
-                autoComplete="organization"
-                className="touch-target"
-                list={datalistId}
-                {...register("name")}
+              <Controller
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <SuggestionInput
+                    id="name"
+                    placeholder="Contoh: BCA, GoPay, Dompet"
+                    autoComplete="organization"
+                    className="touch-target"
+                    suggestions={namePresetOptions}
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                )}
               />
-              <datalist id={datalistId}>
-                {namePresetOptions.map((name) => (
-                  <option key={name} value={name} />
-                ))}
-              </datalist>
             </FormField>
 
             <FormField label="Tipe Rekening" error={errors.type}>
@@ -173,7 +179,6 @@ export default function AccountCreatePage() {
                 id="initial_balance"
                 type="text"
                 inputMode="numeric"
-                pattern="^(0|[1-9]\\d{0,2}(?:\\.\\d{3})*)$"
                 placeholder="0"
                 className="touch-target text-right tabular-nums"
                 {...initialBalanceField}
