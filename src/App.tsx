@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { useAuth } from "@/hooks/useAuth"
 import { queryClient } from "@/lib/query-client"
 import { AppShell } from "@/components/layout/AppShell"
-import { UserRoute, AdminRoute, DashboardRoute } from "@/components/auth/RoleRoutes"
+import { UserRoute, AdminRoute, DashboardRoute, GuestRoute } from "@/components/auth/RoleRoutes"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
@@ -20,6 +20,7 @@ import SettingsPage from "@/pages/settings/SettingsPage"
 import AdminCategoriesPage from "@/pages/admin/AdminCategoriesPage"
 import AdminAccountPresetsPage from "@/pages/admin/AdminAccountPresetsPage"
 import BillsPage from "@/pages/bills/BillsPage"
+import NotFoundPage from "@/pages/NotFoundPage"
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const { isLoading } = useAuth()
@@ -33,8 +34,10 @@ export default function App() {
       <BrowserRouter>
         <AuthInitializer>
           <Routes>
-            <Route path="/auth/login" element={<LoginPage />} />
-            <Route path="/auth/register" element={<RegisterPage />} />
+            <Route element={<GuestRoute />}>
+              <Route path="/auth/login" element={<LoginPage />} />
+              <Route path="/auth/register" element={<RegisterPage />} />
+            </Route>
             <Route path="/onboarding" element={<OnboardingPage />} />
 
             {/* Dashboard — shared (admin + user) but user requires onboarding */}
@@ -71,7 +74,7 @@ export default function App() {
               <Route path="settings" element={<SettingsPage />} />
             </Route>
 
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </AuthInitializer>
         <Toaster position="top-center" richColors />

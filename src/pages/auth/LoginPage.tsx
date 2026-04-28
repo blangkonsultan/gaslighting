@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { login } from "@/services/auth.service"
 import { loginSchema, type LoginInput } from "@/lib/validators"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,13 @@ import { FormField } from "@/components/shared/FormField"
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [error, setError] = useState("")
+
+  const searchParams = new URLSearchParams(location.search)
+  const nextParam = searchParams.get("next")
+  const next = nextParam ? decodeURIComponent(nextParam) : ""
+  const safeNext = next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : ""
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -22,7 +28,7 @@ export default function LoginPage() {
     try {
       setError("")
       await login(data)
-      navigate("/dashboard")
+      navigate(safeNext || "/dashboard")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal masuk. Periksa email dan password.")
     }
