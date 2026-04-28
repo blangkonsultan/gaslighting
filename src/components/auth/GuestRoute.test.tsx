@@ -23,11 +23,11 @@ function renderWithRoutes(initialEntry: string) {
 }
 
 function setProfile(profile: Profile | null) {
-  useAuthStore.setState({ profile, isLoading: false })
+  useAuthStore.setState({ sessionUserId: profile ? "user-1" : null, profile, isLoading: false })
 }
 
 beforeEach(() => {
-  useAuthStore.setState({ profile: null, isLoading: false })
+  useAuthStore.setState({ sessionUserId: null, profile: null, isLoading: false })
 })
 
 describe("GuestRoute", () => {
@@ -53,6 +53,12 @@ describe("GuestRoute", () => {
     setProfile({ role: "user", onboarding_completed: true } as unknown as Profile)
     renderWithRoutes("/auth/register")
     expect(screen.getByText("Dashboard")).toBeInTheDocument()
+  })
+
+  it("does not show auth pages while session exists but profile is still loading", () => {
+    useAuthStore.setState({ sessionUserId: "user-1", profile: null, isLoading: false })
+    renderWithRoutes("/auth/login")
+    expect(screen.queryByText("Login")).not.toBeInTheDocument()
   })
 })
 
