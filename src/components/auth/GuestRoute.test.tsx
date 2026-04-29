@@ -23,11 +23,11 @@ function renderWithRoutes(initialEntry: string) {
 }
 
 function setProfile(profile: Profile | null) {
-  useAuthStore.setState({ sessionUserId: profile ? "user-1" : null, profile, isLoading: false })
+  useAuthStore.setState({ sessionUserId: profile ? "user-1" : null, profile, isLoading: false, hydrated: true })
 }
 
 beforeEach(() => {
-  useAuthStore.setState({ sessionUserId: null, profile: null, isLoading: false })
+  useAuthStore.setState({ sessionUserId: null, profile: null, isLoading: false, hydrated: true })
 })
 
 describe("GuestRoute", () => {

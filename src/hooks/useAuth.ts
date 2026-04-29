@@ -18,7 +18,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 }
 
 export function useAuth() {
-  const { profile, isLoading, setAuthenticated, setLoading, reset } = useAuthStore()
+  const { profile, isLoading, hydrated, setAuthenticated, setLoading, reset } = useAuthStore()
   const initInFlightRef = useRef(false)
   const lastInitAtRef = useRef(0)
   const receivedInitialSessionRef = useRef(false)
@@ -35,44 +35,50 @@ export function useAuth() {
             pendingNullSessionResetIdRef.current = null
           }
 
-          // TOKEN_REFRESHED fires on tab focus — don't refetch profile or show loading spinner.
-          // Only fetch profile when the user identity changes or may have been updated.
           const needsProfileFetch = event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "USER_UPDATED"
 
           if (needsProfileFetch) {
-            setLoading(true)
-            try {
-              const p = await withTimeout(getProfile(session.user.id), 10_000, "getProfile")
-              setAuthenticated(session.user.id, p)
-            } catch {
-              const state = useAuthStore.getState()
-              if (state.profile === null && !initInFlightRef.current) reset()
+            // If we have a cached profile, use it immediately and revalidate in background.
+            const state = useAuthStore.getState()
+            if (state.hydrated && state.profile) {
+              if (state.sessionUserId !== session.user.id) {
+                setAuthenticated(session.user.id, state.profile)
+              } else if (state.isLoading) {
+                // Cached profile is present — clear the loading state.
+                setLoading(false)
+              }
+              // Background revalidation to pick up any profile changes (e.g. role change by admin).
+              withTimeout(getProfile(session.user.id), 10_000, "getProfile (bg)")
+                .then((p) => setAuthenticated(session.user.id, p))
+                .catch(() => {
+                  // Silent — cached profile is still valid enough.
+                })
+            } else {
+              setLoading(true)
+              try {
+                const p = await withTimeout(getProfile(session.user.id), 10_000, "getProfile")
+                setAuthenticated(session.user.id, p)
+              } catch {
+                const state = useAuthStore.getState()
+                if (state.profile === null && !initInFlightRef.current) reset()
+              }
             }
           } else {
-            // Clear any loading state left by a transient null-session event, and keep
-            // the session user ID current — without fetching the profile again.
             const state = useAuthStore.getState()
             if (state.sessionUserId !== session.user.id || state.isLoading) {
               setAuthenticated(session.user.id, state.profile!)
             }
           }
         } else {
-          // Supabase can emit a transient "no session" event during startup while storage
-          // is still being restored. If we reset here while init() is in flight, GuestRoute
-          // can briefly render the login form before init() resolves, causing a visible flash.
-          // If this is a real sign-out, apply immediately.
           if (event === "SIGNED_OUT") {
             reset()
             return
           }
 
-          // Otherwise (commonly: INITIAL_SESSION=null then SIGNED_IN shortly after),
-          // debounce the reset to avoid a brief redirect-to-login flash.
           if (pendingNullSessionResetIdRef.current !== null) return
           setLoading(true)
           pendingNullSessionResetIdRef.current = window.setTimeout(() => {
             pendingNullSessionResetIdRef.current = null
-            // Don't reset if init() is still in flight — it may find the session.
             if (initInFlightRef.current) return
             const state = useAuthStore.getState()
             if (state.sessionUserId === null && state.profile === null) reset()
@@ -88,13 +94,8 @@ export function useAuth() {
 
       initInFlightRef.current = true
       lastInitAtRef.current = now
-      setLoading(true)
 
-      // Hard-stop to avoid "infinite loading" on mobile tab restore/background edge cases.
-      // If auth restoration hangs (storage lock, bfcache restore, etc.), we prefer a safe
-      // unauthenticated state over a spinner that never resolves.
       const hardStopId = window.setTimeout(() => {
-        // Only reset if no session has been established yet.
         const state = useAuthStore.getState()
         if (state.profile === null) reset()
       }, 12_000)
@@ -105,16 +106,20 @@ export function useAuth() {
         } = await withTimeout(supabase.auth.getSession(), 10_000, `supabase.auth.getSession (${reason})`)
 
         if (session?.user) {
-          const p = await withTimeout(getProfile(session.user.id), 10_000, `getProfile (${reason})`)
-          setAuthenticated(session.user.id, p)
-        } else {
-          // `getSession()` can transiently return null while storage is still restoring during a refresh.
-          // Never resolve to unauthenticated from this alone; wait for Supabase auth events to settle.
-          // If the user is truly logged out, onAuthStateChange will emit a null session and we'll
-          // resolve via the debounced null-session handler above.
+          // If we already have a cached profile, don't block — just revalidate in background.
+          const state = useAuthStore.getState()
+          if (state.hydrated && state.profile) {
+            if (state.isLoading) setLoading(false)
+            withTimeout(getProfile(session.user.id), 10_000, `getProfile (bg ${reason})`)
+              .then((p) => setAuthenticated(session.user.id, p))
+              .catch(() => {})
+          } else {
+            setLoading(true)
+            const p = await withTimeout(getProfile(session.user.id), 10_000, `getProfile (${reason})`)
+            setAuthenticated(session.user.id, p)
+          }
         }
       } catch {
-        // Only reset if onAuthStateChange hasn't already established a session.
         const state = useAuthStore.getState()
         if (state.profile === null) reset()
       } finally {
@@ -132,7 +137,6 @@ export function useAuth() {
     }
 
     function onPageShow(event: PageTransitionEvent) {
-      // When restored from back/forward cache, pending timers/promises may be in a bad state.
       if (event.persisted && useAuthStore.getState().isLoading) {
         void init("pageshow(bfcache)")
       }

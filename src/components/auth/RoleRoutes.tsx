@@ -12,10 +12,17 @@ function useNextPath() {
   return `${location.pathname}${location.search}${location.hash}`
 }
 
-export function GuestRoute() {
-  const { sessionUserId, profile, isLoading } = useAuthStore()
+function useResolved() {
+  const { sessionUserId, profile, isLoading, hydrated } = useAuthStore()
+  // If we have a cached profile, treat as resolved even while background revalidation runs.
+  const resolved = hydrated && !isLoading
+  return { sessionUserId, profile, isLoading, resolved }
+}
 
-  if (isLoading) return <PageLoading />
+export function GuestRoute() {
+  const { sessionUserId, profile, resolved } = useResolved()
+
+  if (!resolved) return <PageLoading />
   if (sessionUserId && !profile) return <PageLoading />
   if (profile) return <Navigate to={postAuthDestination(profile)} replace />
 
@@ -23,26 +30,21 @@ export function GuestRoute() {
 }
 
 export function ProtectedRoute() {
-  const { sessionUserId, profile, isLoading } = useAuthStore()
+  const { sessionUserId, profile, resolved } = useResolved()
   const next = useNextPath()
 
-  if (isLoading) return <PageLoading />
+  if (!resolved) return <PageLoading />
   if (!sessionUserId) return <Navigate to={toLoginWithNext(next)} replace />
   if (!profile) return <PageLoading />
 
   return <Outlet />
 }
 
-/**
- * Dashboard is available for both roles:
- * - **admin**: allowed (no onboarding requirement)
- * - **user**: must complete onboarding first
- */
 export function DashboardRoute() {
-  const { sessionUserId, profile, isLoading } = useAuthStore()
+  const { sessionUserId, profile, resolved } = useResolved()
   const next = useNextPath()
 
-  if (isLoading) return <PageLoading />
+  if (!resolved) return <PageLoading />
   if (!sessionUserId) return <Navigate to={toLoginWithNext(next)} replace />
   if (!profile) return <PageLoading />
   if (profile.role !== "admin" && !profile.onboarding_completed) {
@@ -53,10 +55,10 @@ export function DashboardRoute() {
 }
 
 export function UserRoute() {
-  const { sessionUserId, profile, isLoading } = useAuthStore()
+  const { sessionUserId, profile, resolved } = useResolved()
   const next = useNextPath()
 
-  if (isLoading) return <PageLoading />
+  if (!resolved) return <PageLoading />
   if (!sessionUserId) return <Navigate to={toLoginWithNext(next)} replace />
   if (!profile) return <PageLoading />
   if (profile.role === "admin") return <Navigate to="/admin/categories" replace />
@@ -66,10 +68,10 @@ export function UserRoute() {
 }
 
 export function AdminRoute() {
-  const { sessionUserId, profile, isLoading } = useAuthStore()
+  const { sessionUserId, profile, resolved } = useResolved()
   const next = useNextPath()
 
-  if (isLoading) return <PageLoading />
+  if (!resolved) return <PageLoading />
   if (!sessionUserId) return <Navigate to={toLoginWithNext(next)} replace />
   if (!profile) return <PageLoading />
   if (profile.role !== "admin") return <Navigate to="/dashboard" replace />
