@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { useAuth } from "@/hooks/useAuth"
 import { queryClient } from "@/lib/query-client"
 import { AppShell } from "@/components/layout/AppShell"
-import { UserRoute, AdminRoute, DashboardRoute, GuestRoute } from "@/components/auth/RoleRoutes"
+import { UserRoute, AdminRoute, DashboardRoute, GuestRoute, ProtectedRoute } from "@/components/auth/RoleRoutes"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
@@ -70,8 +70,10 @@ export default function App() {
             </Route>
 
             {/* Shared routes (both roles) */}
-            <Route element={<AppShell />}>
-              <Route path="settings" element={<SettingsPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AppShell />}>
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
             </Route>
 
             <Route path="*" element={<NotFoundPage />} />

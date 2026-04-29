@@ -1,12 +1,7 @@
 import { Link } from "react-router-dom"
 import { useAuthStore } from "@/stores/auth-store"
 import { buttonVariants } from "@/components/ui/button"
-
-function postAuthDestination(profile: NonNullable<ReturnType<typeof useAuthStore.getState>["profile"]>) {
-  if (profile.role === "admin") return "/admin/categories"
-  if (!profile.onboarding_completed) return "/onboarding"
-  return "/dashboard"
-}
+import { postAuthDestination } from "@/lib/auth-utils"
 
 export default function NotFoundPage() {
   const { profile, isLoading } = useAuthStore()

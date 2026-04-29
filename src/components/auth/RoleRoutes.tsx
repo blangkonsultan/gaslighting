@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom"
 import { useAuthStore } from "@/stores/auth-store"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
+import { postAuthDestination } from "@/lib/auth-utils"
 
 function toLoginWithNext(next: string) {
   return `/auth/login?next=${encodeURIComponent(next)}`
@@ -9,12 +10,6 @@ function toLoginWithNext(next: string) {
 function useNextPath() {
   const location = useLocation()
   return `${location.pathname}${location.search}${location.hash}`
-}
-
-function postAuthDestination(profile: NonNullable<ReturnType<typeof useAuthStore.getState>["profile"]>) {
-  if (profile.role === "admin") return "/admin/categories"
-  if (!profile.onboarding_completed) return "/onboarding"
-  return "/dashboard"
 }
 
 export function GuestRoute() {

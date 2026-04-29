@@ -18,7 +18,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 }
 
 export function useAuth() {
-  const { profile, isLoading, setSessionUserId, setProfile, setLoading, reset } = useAuthStore()
+  const { profile, isLoading, setAuthenticated, setLoading, reset } = useAuthStore()
   const initInFlightRef = useRef(false)
   const lastInitAtRef = useRef(0)
   const receivedInitialSessionRef = useRef(false)
@@ -36,12 +36,14 @@ export function useAuth() {
             window.clearTimeout(pendingNullSessionResetIdRef.current)
             pendingNullSessionResetIdRef.current = null
           }
-          setSessionUserId(session.user.id)
+          setLoading(true)
           try {
             const p = await withTimeout(getProfile(session.user.id), 10_000, "getProfile")
-            setProfile(p)
+            setAuthenticated(session.user.id, p)
           } catch {
-            reset()
+            // Only reset if no session has been established AND init() isn't still in flight.
+            const state = useAuthStore.getState()
+            if (state.profile === null && !initInFlightRef.current) reset()
           }
         } else {
           // Supabase can emit a transient "no session" event during startup while storage
@@ -59,6 +61,8 @@ export function useAuth() {
           setLoading(true)
           pendingNullSessionResetIdRef.current = window.setTimeout(() => {
             pendingNullSessionResetIdRef.current = null
+            // Don't reset if init() is still in flight — it may find the session.
+            if (initInFlightRef.current) return
             const state = useAuthStore.getState()
             if (state.sessionUserId === null && state.profile === null) reset()
           }, NULL_SESSION_DEBOUNCE_MS)
@@ -79,7 +83,9 @@ export function useAuth() {
       // If auth restoration hangs (storage lock, bfcache restore, etc.), we prefer a safe
       // unauthenticated state over a spinner that never resolves.
       const hardStopId = window.setTimeout(() => {
-        reset()
+        // Only reset if no session has been established yet.
+        const state = useAuthStore.getState()
+        if (state.profile === null) reset()
       }, 12_000)
 
       try {
@@ -88,9 +94,8 @@ export function useAuth() {
         } = await withTimeout(supabase.auth.getSession(), 10_000, `supabase.auth.getSession (${reason})`)
 
         if (session?.user) {
-          setSessionUserId(session.user.id)
           const p = await withTimeout(getProfile(session.user.id), 10_000, `getProfile (${reason})`)
-          setProfile(p)
+          setAuthenticated(session.user.id, p)
         } else {
           // `getSession()` can transiently return null while storage is still restoring during a refresh.
           // Never resolve to unauthenticated from this alone; wait for Supabase auth events to settle.
@@ -98,7 +103,9 @@ export function useAuth() {
           // resolve via the debounced null-session handler above.
         }
       } catch {
-        reset()
+        // Only reset if onAuthStateChange hasn't already established a session.
+        const state = useAuthStore.getState()
+        if (state.profile === null) reset()
       } finally {
         window.clearTimeout(hardStopId)
         initInFlightRef.current = false
@@ -132,7 +139,7 @@ export function useAuth() {
       document.removeEventListener("visibilitychange", onVisibilityChange)
       window.removeEventListener("pageshow", onPageShow)
     }
-  }, [setSessionUserId, setProfile, setLoading, reset])
+  }, [setAuthenticated, setLoading, reset])
 
   return { profile, isLoading }
 }
