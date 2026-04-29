@@ -18,7 +18,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 }
 
 export function useAuth() {
-  const { profile, isLoading, hydrated, setAuthenticated, setLoading, reset } = useAuthStore()
+  const { profile, isLoading, setAuthenticated, setLoading, reset } = useAuthStore()
   const initInFlightRef = useRef(false)
   const lastInitAtRef = useRef(0)
   const receivedInitialSessionRef = useRef(false)
