@@ -18,7 +18,6 @@ const userMainNav = [
   { to: "/accounts", icon: Wallet, label: "Rekening" },
   { to: "/transactions/new", icon: ArrowLeftRight, label: "Transaksi Baru" },
   { to: "/transactions", icon: FileBarChart, label: "Riwayat" },
-  { to: "/transfers/new", icon: Receipt, label: "Transfer" },
   { to: "/bills", icon: Receipt, label: "Tagihan" },
 ]
 

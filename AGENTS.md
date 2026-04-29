@@ -11,6 +11,7 @@ Multi-user financial management app (budgeting for couples/shared finance). Mobi
 - **State:** TanStack Query v5 (server) + Zustand (client)
 - **Forms:** React Hook Form + Zod v4
 - **Charts:** Recharts
+- **Routing:** react-router-dom v7
 - **Backend:** Supabase (PostgreSQL, Auth, RLS, Edge Functions)
 - **Icons:** Lucide React
 - **Toasts:** Sonner
@@ -23,11 +24,15 @@ Multi-user financial management app (budgeting for couples/shared finance). Mobi
 - `src/pages/` — Route-level components
 - `src/components/layout/` — AppShell, MobileBottomNav, DesktopSidebar, Header
 - `src/components/ui/` — Shadcn UI components (auto-generated, do not edit manually)
-- `src/components/shared/` — Reusable app components
+- `src/components/shared/` — Reusable app components (AmountDisplay, ConfirmDialog, EmptyState, ErrorBoundary, LoadingSpinner, etc.)
 - `src/components/forms/` — Form components (one per entity)
-- `src/lib/` — Utilities (utils, constants, validators, formatters, query-client)
-- `src/types/` — TypeScript type definitions
-- `src/test/` — Test utilities (setup, render wrapper, mocks, fixtures)
+- `src/components/{auth,bills,charts,dashboard,reports,transactions}/` — Domain-specific components
+- `src/lib/` — Utilities (utils, constants, validators, formatters, query-client, dates, money)
+- `src/lib/reports/` — Report generation helpers
+- `src/types/` — TypeScript type definitions (database.ts, financial.ts)
+- `src/stores/` — Zustand stores (auth-store, transaction-filters, ui-store)
+- `src/test/` — Test setup (setup.ts with jest-dom matchers)
+- `src/assets/` — Static assets
 
 ## Key Conventions
 
@@ -40,6 +45,14 @@ Multi-user financial management app (budgeting for couples/shared finance). Mobi
 - **Color palette:** Primary `#9AB17A` (Sage), Secondary `#C3CC9B` (Olive), Background `#FBE8CE` (Warm Cream), Card `#E4DFB5` (Beige)
 - **Language:** Indonesian (id-ID) for user-facing text, English for code and commits
 - **No dark mode:** Light-only theme
+
+## Pages
+
+`src/pages/` — Route-level components: admin, auth, bills, dashboard, onboarding, reports, settings, transactions, transfers, NotFoundPage.
+
+## Environment
+
+Copy `.env.example` to `.env`. Required: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
 
 ## Database
 
@@ -57,6 +70,7 @@ Multi-user financial management app (budgeting for couples/shared finance). Mobi
 npm run dev          # Start dev server
 npm run build        # Type-check + production build
 npm run lint         # ESLint
+npm run test         # Run all tests
 npx shadcn@latest add <component>  # Add Shadcn UI component
 ```
 
@@ -67,37 +81,47 @@ Every new component and page **must** have a corresponding test file. No excepti
 ### Stack
 
 - **Unit tests:** Vitest + @testing-library/react + @testing-library/jest-dom
-- **API mocks:** MSW (Mock Service Worker) for Supabase API calls
 - **E2E (future):** Playwright
 
 ### File Locations & Naming
 
-- Component tests: `src/components/<domain>/<Component>.test.tsx` (co-located with component)
-- Page tests: `src/pages/<domain>/<Page>.test.tsx` (co-located with page)
-- Hook tests: `src/hooks/<hook>.test.ts` (co-located with hook)
-- Service tests: `src/services/<service>.test.ts` (co-located with service)
-- Lib tests: `src/lib/<module>.test.ts` (already exists for formatters, validators, reports)
+Tests are co-located with source files:
+- `src/components/<domain>/<Component>.test.tsx`
+- `src/pages/<domain>/<Page>.test.tsx`
+- `src/hooks/<hook>.test.ts` / `src/hooks/<hook>.test.tsx`
+- `src/services/<service>.test.ts`
+- `src/lib/<module>.test.ts`
 
 ### Test Utilities
 
-- `src/test/setup.ts` — Global setup (testing-library matchers, MSW server)
-- `src/test/render.tsx` — Custom `render()` wrapper with providers (QueryClient, Router, etc.)
-- `src/test/mocks/` — Supabase client mocks, fixture data, factory helpers
+- `src/test/setup.ts` — Global setup (jest-dom matchers, cleanup)
 
 ### Rules
 
-- **Components:** Test rendered output, user interactions, and conditional rendering. Mock Supabase hooks/services.
+- **Components:** Test rendered output, user interactions, conditional rendering. Mock Supabase hooks/services.
 - **Pages:** Test route rendering, data loading states (loading, error, empty, populated). Mock hooks at the module level.
-- **Forms:** Test validation errors (Zod schemas), successful submission, and field interactions.
-- **Hooks:** Test query/mutation behavior using `renderHook` + MSW. Test loading/error/success states.
+- **Forms:** Test validation errors (Zod schemas), successful submission, field interactions.
+- **Hooks:** Test query/mutation behavior using `renderHook`. Test loading/error/success states.
 - **Services:** Test API call shapes and parameters using mocked Supabase client.
 - **Lib/Utils:** Pure function tests — input/output, edge cases, error handling.
 
 ### Commands
 
 ```bash
-npx vitest           # Run all tests
-npx vitest --watch   # Watch mode
+npm run test                           # Run all tests (single pass)
+npx vitest --watch                     # Watch mode
 npx vitest run src/components/shared/  # Run tests for specific directory
-npx vitest run --coverage  # Coverage report (when configured)
 ```
+
+## Task Handoff
+
+Read `tasks/current.md` at session start. To resume: read `git log --oneline -10` + `git diff`, then continue from the handoff's next steps. Clear completed tasks — they're already in git history.
+
+**During work:** Update `tasks/current.md` after each sub-task so mid-task handoff works. Commit once per completed task.
+
+**Before ending or when context is running low,** update `tasks/current.md` with:
+- Status (in-progress / blocked / done)
+- Files modified (what changed in each)
+- Test results (passing/failing, any errors)
+- Decisions made and why
+- Next steps — specific enough for a fresh agent to continue
