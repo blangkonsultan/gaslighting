@@ -27,8 +27,6 @@ export function useAuth() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: string, session: Session | null) => {
-        // Any auth event implies Supabase has finished its initial storage/session reconciliation.
-        // We treat this as a signal that it's safe to resolve to "logged out" if session is null.
         if (event === "INITIAL_SESSION") receivedInitialSessionRef.current = true
 
         if (session?.user) {
@@ -36,14 +34,27 @@ export function useAuth() {
             window.clearTimeout(pendingNullSessionResetIdRef.current)
             pendingNullSessionResetIdRef.current = null
           }
-          setLoading(true)
-          try {
-            const p = await withTimeout(getProfile(session.user.id), 10_000, "getProfile")
-            setAuthenticated(session.user.id, p)
-          } catch {
-            // Only reset if no session has been established AND init() isn't still in flight.
+
+          // TOKEN_REFRESHED fires on tab focus — don't refetch profile or show loading spinner.
+          // Only fetch profile when the user identity changes or may have been updated.
+          const needsProfileFetch = event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "USER_UPDATED"
+
+          if (needsProfileFetch) {
+            setLoading(true)
+            try {
+              const p = await withTimeout(getProfile(session.user.id), 10_000, "getProfile")
+              setAuthenticated(session.user.id, p)
+            } catch {
+              const state = useAuthStore.getState()
+              if (state.profile === null && !initInFlightRef.current) reset()
+            }
+          } else {
+            // Clear any loading state left by a transient null-session event, and keep
+            // the session user ID current — without fetching the profile again.
             const state = useAuthStore.getState()
-            if (state.profile === null && !initInFlightRef.current) reset()
+            if (state.sessionUserId !== session.user.id || state.isLoading) {
+              setAuthenticated(session.user.id, state.profile!)
+            }
           }
         } else {
           // Supabase can emit a transient "no session" event during startup while storage
