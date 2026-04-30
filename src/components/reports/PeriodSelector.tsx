@@ -43,8 +43,8 @@ export function PeriodSelector({ monthKey, onMonthChange, minMonthKey }: PeriodS
           {formatter.format(displayDate)}
         </span>
         {!isCurrentMonth && (
-          <Button variant="ghost" size="sm" onClick={handleToday} className="h-7 px-2 text-xs">
-            Hari ini
+          <Button variant="outline" size="sm" onClick={handleToday} className="h-7 px-2 text-xs">
+            Bulan ini
           </Button>
         )}
       </div>
