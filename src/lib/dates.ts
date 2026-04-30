@@ -28,7 +28,8 @@ export function addMonthsYmd(ymd: string, months: number): string {
   const parts = ymd.split("-")
   const year = Number(parts[0])
   const month1 = Number(parts[1])
-  const day = parts.length > 2 ? Number(parts[2]) : 1
+  const hadDay = parts.length > 2
+  const day = hadDay ? Number(parts[2]) : 1
 
   if (!Number.isFinite(year) || !Number.isFinite(month1) || !Number.isFinite(day)) return ymd
 
@@ -39,7 +40,11 @@ export function addMonthsYmd(ymd: string, months: number): string {
   const clampedDay = Math.min(day, daysInMonthUtc(targetYear, targetMonth1))
   const result = new Date(Date.UTC(targetYear, targetMonth1 - 1, clampedDay))
 
-  return formatYmdUtc(result)
+  if (hadDay) return formatYmdUtc(result)
+
+  const y = result.getUTCFullYear()
+  const m = String(result.getUTCMonth() + 1).padStart(2, "0")
+  return `${y}-${m}`
 }
 
 function formatYmdUtc(d: Date): string {

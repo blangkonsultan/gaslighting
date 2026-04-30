@@ -107,3 +107,16 @@ export async function deleteTransaction(userId: string, transactionId: string): 
   if (error) throw error
 }
 
+export async function getEarliestTransactionDate(userId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("transaction_date")
+    .eq("user_id", userId)
+    .order("transaction_date", { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw error
+  return data?.transaction_date ?? null
+}
+

@@ -68,8 +68,8 @@ describe("addMonthsYmd", () => {
   })
 
   it("handles YYYY-MM format without day", () => {
-    expect(addMonthsYmd("2026-04", -1)).toBe("2026-03-01")
-    expect(addMonthsYmd("2026-04", 1)).toBe("2026-05-01")
+    expect(addMonthsYmd("2026-04", -1)).toBe("2026-03")
+    expect(addMonthsYmd("2026-04", 1)).toBe("2026-05")
   })
 
   it("returns input unchanged for invalid input", () => {

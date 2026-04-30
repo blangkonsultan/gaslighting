@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useQueryClient, useQuery } from "@tanstack/react-query"
 import { EmptyState } from "@/components/shared/EmptyState"
-import { useQuery } from "@tanstack/react-query"
 import { useAuthStore } from "@/stores/auth-store"
 import { queryKeys } from "@/lib/query-client"
 import { getTransactions } from "@/services/transactions.service"
@@ -11,13 +11,15 @@ import { ExpenseBreakdown } from "@/components/reports/ExpenseBreakdown"
 import { IncomeBreakdown } from "@/components/reports/IncomeBreakdown"
 import { TrendSection } from "@/components/reports/TrendSection"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { addMonthsYmd } from "@/lib/dates"
+import { addMonthsYmd, todayYmd } from "@/lib/dates"
+import { getEarliestTransactionDate } from "@/services/transactions.service"
 
-const currentMonthKey = new Date().toISOString().slice(0, 7)
+const currentMonthKey = todayYmd().slice(0, 7)
 
 export default function ReportsPage() {
   const { profile } = useAuthStore()
   const userId = profile?.id
+  const queryClient = useQueryClient()
 
   const [monthKey, setMonthKey] = useState(currentMonthKey)
 
@@ -36,29 +38,47 @@ export default function ReportsPage() {
   const report = txQuery.data ? computeMonthlyReport(txQuery.data) : null
 
   const trendQuery = useQuery({
-    queryKey: queryKeys.reports.trend(monthKey, 6),
+    queryKey: queryKeys.reports.trend(monthKey, 12),
     queryFn: async () => {
-      const monthKeys: string[] = []
-      let tempMonth = addMonthsYmd(monthKey, -5)
-      for (let i = 0; i < 6; i++) {
-        monthKeys.push(tempMonth)
-        tempMonth = addMonthsYmd(tempMonth, 1)
-      }
-      const firstMonth = monthKeys[0]
-      const firstRange = monthRangeYmdFromMonthKey(firstMonth)
-      const txs = await getTransactions(userId as string, { dateFrom: firstRange.start, dateTo: end })
+      const year = monthKey.split("-")[0]
+      const monthKeys = Array.from({ length: 12 }, (_, i) =>
+        `${year}-${String(i + 1).padStart(2, "0")}`
+      )
+      const txs = await getTransactions(userId as string, {
+        dateFrom: `${year}-01-01`,
+        dateTo: `${year}-12-31`,
+      })
       return computeTrendData(txs, monthKeys)
     },
     enabled: Boolean(userId),
   })
 
+  const earliestQuery = useQuery({
+    queryKey: queryKeys.reports.earliest,
+    queryFn: () => getEarliestTransactionDate(userId as string),
+    enabled: Boolean(userId),
+  })
+
+  const minMonthKey = earliestQuery.data
+    ? earliestQuery.data.slice(0, 7)
+    : null
+
   const trendData: MonthlyTrendPoint[] | undefined = trendQuery.data
 
-  const hasRecords = (targetMonth: string): boolean => {
-    if (!trendData) return false
-    const record = trendData.find((d) => d.monthKey === targetMonth)
-    return (record?.income ?? 0) > 0 || (record?.expense ?? 0) > 0
-  }
+  useEffect(() => {
+    if (!userId) return
+    const prev = addMonthsYmd(monthKey, -1)
+    const next = addMonthsYmd(monthKey, 1)
+    const fetchAdjacent = async (mk: string) => {
+      const { start: s, end: e } = monthRangeYmdFromMonthKey(mk)
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.reports.monthly(mk),
+        queryFn: () => getTransactions(userId, { dateFrom: s, dateTo: e }),
+      })
+    }
+    fetchAdjacent(prev)
+    if (next <= currentMonthKey) fetchAdjacent(next)
+  }, [monthKey, userId, queryClient])
 
   return (
     <div className="flex flex-col gap-6">
@@ -66,7 +86,7 @@ export default function ReportsPage() {
         <h1 className="text-2xl font-bold">Laporan</h1>
       </div>
 
-      <PeriodSelector monthKey={monthKey} onMonthChange={setMonthKey} hasRecords={hasRecords} />
+      <PeriodSelector monthKey={monthKey} onMonthChange={setMonthKey} minMonthKey={minMonthKey} />
 
       {!userId ? (
         <EmptyState
