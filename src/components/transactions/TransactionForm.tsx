@@ -42,12 +42,14 @@ function toFormDefaults(initial?: TransactionFormInitialValues): TransactionInpu
 export function TransactionForm({
   userId,
   initialValues,
+  editingAmount,
   submitLabel,
   onCancel,
   onSubmit,
 }: {
   userId: string
   initialValues?: TransactionFormInitialValues
+  editingAmount?: number
   submitLabel: string
   onCancel: () => void
   onSubmit: (data: TransactionInput) => Promise<void>
@@ -116,17 +118,26 @@ export function TransactionForm({
     amountNumber,
     accountId: selectedAccountId,
     accountBalance: selectedAccountBalance,
+    editingAmount: txType === "expense" ? editingAmount : undefined,
     setError: setFieldError,
     clearErrors,
     activeWhen: txType === "expense",
   })
 
-  const equityNow = typeof selectedAccountBalance === "number" ? selectedAccountBalance : null
+  const baseBalance = useMemo(() => {
+    if (typeof selectedAccountBalance !== "number") return null
+    if (editingAmount != null && Number.isFinite(editingAmount) && editingAmount > 0) {
+      if (txType === "expense") return selectedAccountBalance + editingAmount
+      if (txType === "income") return selectedAccountBalance - editingAmount
+    }
+    return selectedAccountBalance
+  }, [selectedAccountBalance, editingAmount, txType])
+
   const equityAfter =
-    equityNow != null && Number.isFinite(amountNumber) && amountNumber > 0
+    baseBalance != null && Number.isFinite(amountNumber) && amountNumber > 0
       ? txType === "income"
-        ? equityNow + amountNumber
-        : equityNow - amountNumber
+        ? baseBalance + amountNumber
+        : baseBalance - amountNumber
       : null
 
   const amountField = register("amount")

@@ -38,12 +38,18 @@ function toFormDefaults(initial?: TransferFormInitialValues): TransferInput {
 export function TransferForm({
   userId,
   initialValues,
+  originalFromAccountId,
+  originalToAccountId,
+  editingAmount,
   submitLabel,
   onCancel,
   onSubmit,
 }: {
   userId: string
   initialValues?: TransferFormInitialValues
+  originalFromAccountId?: string
+  originalToAccountId?: string
+  editingAmount?: number
   submitLabel: string
   onCancel: () => void
   onSubmit: (data: TransferInput) => Promise<void>
@@ -101,15 +107,32 @@ export function TransferForm({
     fromAccountId && accountBalanceById.has(fromAccountId) ? accountBalanceById.get(fromAccountId) : undefined
   const toBalance = toAccountId && accountBalanceById.has(toAccountId) ? accountBalanceById.get(toAccountId) : undefined
 
+  const fromBase = useMemo(() => {
+    if (typeof fromBalance !== "number") return null
+    if (editingAmount != null && Number.isFinite(editingAmount) && editingAmount > 0 && fromAccountId === originalFromAccountId) {
+      return fromBalance + editingAmount
+    }
+    return fromBalance
+  }, [fromBalance, editingAmount, fromAccountId, originalFromAccountId])
+
+  const toBase = useMemo(() => {
+    if (typeof toBalance !== "number") return null
+    if (editingAmount != null && Number.isFinite(editingAmount) && editingAmount > 0 && toAccountId === originalToAccountId) {
+      return toBalance - editingAmount
+    }
+    return toBalance
+  }, [toBalance, editingAmount, toAccountId, originalToAccountId])
+
   const fromAfter =
-    typeof fromBalance === "number" && Number.isFinite(amountNumber) && amountNumber > 0 ? fromBalance - amountNumber : null
+    fromBase != null && Number.isFinite(amountNumber) && amountNumber > 0 ? fromBase - amountNumber : null
   const toAfter =
-    typeof toBalance === "number" && Number.isFinite(amountNumber) && amountNumber > 0 ? toBalance + amountNumber : null
+    toBase != null && Number.isFinite(amountNumber) && amountNumber > 0 ? toBase + amountNumber : null
 
   const { isInsufficient } = useBalanceCheck({
     amountNumber,
     accountId: fromAccountId,
     accountBalance: fromBalance,
+    editingAmount: fromAccountId === originalFromAccountId ? editingAmount : undefined,
     setError: setFieldError,
     clearErrors,
     fieldName: "amount",
@@ -187,7 +210,7 @@ export function TransferForm({
           {!!fromAccountId && !errors.from_account_id && (
             <AccountInfoPanel
               accountLabel={fromLabel}
-              balance={fromBalance}
+              balance={fromBase ?? undefined}
               projectedBalance={fromAfter}
               projectedLabel="Saldo setelah transfer:"
             />
@@ -237,7 +260,7 @@ export function TransferForm({
           {!!toAccountId && !errors.to_account_id && (
             <AccountInfoPanel
               accountLabel={toLabel}
-              balance={toBalance}
+              balance={toBase ?? undefined}
               projectedBalance={toAfter}
               projectedLabel="Saldo setelah transfer:"
             />

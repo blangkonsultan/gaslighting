@@ -257,6 +257,9 @@ export default function TransactionEditPage() {
                 description: pair.description,
                 transaction_date: pair.transactionDate,
               }}
+              originalFromAccountId={pair.fromAccountId}
+              originalToAccountId={pair.toAccountId}
+              editingAmount={pair.amount}
               onSubmit={onSubmitTransfer}
             />
 
@@ -320,6 +323,7 @@ export default function TransactionEditPage() {
               description: tx.description,
               transaction_date: tx.transaction_date,
             }}
+            editingAmount={tx.amount}
             onSubmit={onSubmit}
           />
 
