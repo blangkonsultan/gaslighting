@@ -54,13 +54,22 @@ export default function ReportsPage() {
 
   const trendData: MonthlyTrendPoint[] | undefined = trendQuery.data
 
+  const hasRecords = (targetMonth: string): boolean => {
+    if (targetMonth === monthKey) {
+      return (txQuery.data?.length ?? 0) > 0
+    }
+    if (!trendData) return false
+    const record = trendData.find((d) => d.monthKey === targetMonth)
+    return (record?.income ?? 0) > 0 || (record?.expense ?? 0) > 0
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Laporan</h1>
       </div>
 
-      <PeriodSelector monthKey={monthKey} onMonthChange={setMonthKey} />
+      <PeriodSelector monthKey={monthKey} onMonthChange={setMonthKey} hasRecords={hasRecords} />
 
       {!userId ? (
         <EmptyState
