@@ -23,7 +23,6 @@ export function PeriodSelector({ monthKey, onMonthChange, hasRecords }: PeriodSe
 
   const handlePrev = () => {
     const prevMonth = addMonthsYmd(monthKey, -1)
-    console.log("handlePrev:", { prevMonth, hasRecords: hasRecords(prevMonth) })
     if (hasRecords(prevMonth)) {
       onMonthChange(prevMonth)
     } else {
@@ -33,7 +32,6 @@ export function PeriodSelector({ monthKey, onMonthChange, hasRecords }: PeriodSe
 
   const handleNext = () => {
     const nextMonth = addMonthsYmd(monthKey, 1)
-    console.log("handleNext:", { nextMonth, hasRecords: hasRecords(nextMonth) })
     if (nextMonth > currentMonthKey) return
     if (hasRecords(nextMonth)) {
       onMonthChange(nextMonth)
@@ -47,7 +45,6 @@ export function PeriodSelector({ monthKey, onMonthChange, hasRecords }: PeriodSe
   }
 
   const confirmNav = () => {
-    console.log("confirmNav:", { pendingMonth })
     if (pendingMonth) {
       onMonthChange(pendingMonth)
       setPendingMonth(null)

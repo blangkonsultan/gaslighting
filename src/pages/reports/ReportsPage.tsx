@@ -55,9 +55,6 @@ export default function ReportsPage() {
   const trendData: MonthlyTrendPoint[] | undefined = trendQuery.data
 
   const hasRecords = (targetMonth: string): boolean => {
-    if (targetMonth === monthKey) {
-      return (txQuery.data?.length ?? 0) > 0
-    }
     if (!trendData) return false
     const record = trendData.find((d) => d.monthKey === targetMonth)
     return (record?.income ?? 0) > 0 || (record?.expense ?? 0) > 0
