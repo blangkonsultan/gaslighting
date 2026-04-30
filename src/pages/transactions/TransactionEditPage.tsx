@@ -323,6 +323,7 @@ export default function TransactionEditPage() {
               description: tx.description,
               transaction_date: tx.transaction_date,
             }}
+            originalAccountId={tx.account_id}
             editingAmount={tx.amount}
             onSubmit={onSubmit}
           />

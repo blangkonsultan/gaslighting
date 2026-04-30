@@ -42,6 +42,7 @@ function toFormDefaults(initial?: TransactionFormInitialValues): TransactionInpu
 export function TransactionForm({
   userId,
   initialValues,
+  originalAccountId,
   editingAmount,
   submitLabel,
   onCancel,
@@ -49,6 +50,7 @@ export function TransactionForm({
 }: {
   userId: string
   initialValues?: TransactionFormInitialValues
+  originalAccountId?: string
   editingAmount?: number
   submitLabel: string
   onCancel: () => void
@@ -118,7 +120,7 @@ export function TransactionForm({
     amountNumber,
     accountId: selectedAccountId,
     accountBalance: selectedAccountBalance,
-    editingAmount: txType === "expense" ? editingAmount : undefined,
+    editingAmount: txType === "expense" && selectedAccountId === originalAccountId ? editingAmount : undefined,
     setError: setFieldError,
     clearErrors,
     activeWhen: txType === "expense",
@@ -126,12 +128,12 @@ export function TransactionForm({
 
   const baseBalance = useMemo(() => {
     if (typeof selectedAccountBalance !== "number") return null
-    if (editingAmount != null && Number.isFinite(editingAmount) && editingAmount > 0) {
+    if (editingAmount != null && Number.isFinite(editingAmount) && editingAmount > 0 && selectedAccountId === originalAccountId) {
       if (txType === "expense") return selectedAccountBalance + editingAmount
       if (txType === "income") return selectedAccountBalance - editingAmount
     }
     return selectedAccountBalance
-  }, [selectedAccountBalance, editingAmount, txType])
+  }, [selectedAccountBalance, editingAmount, txType, selectedAccountId, originalAccountId])
 
   const equityAfter =
     baseBalance != null && Number.isFinite(amountNumber) && amountNumber > 0
@@ -215,7 +217,7 @@ export function TransactionForm({
           {!!selectedAccountId && !errors.account_id && (
             <AccountInfoPanel
               accountLabel={selectedAccountLabel}
-              balance={selectedAccountBalance}
+              balance={baseBalance ?? undefined}
               projectedBalance={equityAfter}
               extraRows={
                 selectedCategoryLabel ? (
