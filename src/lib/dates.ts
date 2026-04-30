@@ -33,11 +33,13 @@ export function addMonthsYmd(ymd: string, months: number): string {
   if (!Number.isFinite(year) || !Number.isFinite(month1) || !Number.isFinite(day)) return ymd
 
   const targetMonth0 = month1 - 1 + months
+  console.log("addMonthsYmd:", { ymd, months, targetMonth0 })
   const base = new Date(Date.UTC(year, targetMonth0, 1))
   const targetYear = base.getUTCFullYear()
   const targetMonth1 = base.getUTCMonth() + 1
   const clampedDay = Math.min(day, daysInMonthUtc(targetYear, targetMonth1))
   const result = new Date(Date.UTC(targetYear, targetMonth1 - 1, clampedDay))
+  console.log("addMonthsYmd result:", { ymd, months, result: formatYmdUtc(result) })
 
   return formatYmdUtc(result)
 }
