@@ -23,7 +23,6 @@ export function PeriodSelector({ monthKey, onMonthChange, hasRecords }: PeriodSe
 
   const handlePrev = () => {
     const prevMonth = addMonthsYmd(monthKey, -1)
-    console.log("handlePrev:", { monthKey, prevMonth })
     if (hasRecords(prevMonth)) {
       onMonthChange(prevMonth)
     } else {
