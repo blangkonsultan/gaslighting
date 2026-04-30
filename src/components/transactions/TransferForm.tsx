@@ -265,7 +265,7 @@ export function TransferForm({
         </FormField>
 
         <FormField label="Tanggal" htmlFor="transaction_date" error={errors.transaction_date}>
-          <Input id="transaction_date" type="date" className="touch-target" {...register("transaction_date")} />
+          <Input id="transaction_date" type="date" max={todayYmd()} className="touch-target" {...register("transaction_date")} />
         </FormField>
 
         {!isLoading && allAccounts.length === 0 && (

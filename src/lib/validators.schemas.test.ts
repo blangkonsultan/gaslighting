@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { todayYmd } from "@/lib/dates"
 import {
   loginSchema,
   registerSchema,
@@ -90,7 +91,7 @@ describe("transactionSchema", () => {
 })
 
 describe("billSchema", () => {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayYmd()
 
   const valid = {
     account_id: "11111111-1111-4111-8111-111111111111",

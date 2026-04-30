@@ -54,7 +54,10 @@ export const transactionSchema = z.object({
     .refine((val) => isIdrIntegerString(val), "Format jumlah tidak valid. Contoh: 150.000.000")
     .refine((val) => parseIdrInteger(val) > 0, "Jumlah harus lebih dari 0"),
   description: z.string().min(1, "Deskripsi wajib diisi"),
-  transaction_date: z.string().min(1, "Tanggal wajib diisi"),
+  transaction_date: z
+    .string()
+    .min(1, "Tanggal wajib diisi")
+    .refine((v) => v <= todayYmd(), "Tanggal tidak boleh melebihi hari ini"),
 })
 
 export type TransactionInput = z.infer<typeof transactionSchema>
@@ -68,7 +71,10 @@ export const transferSchema = z.object({
     .refine((val) => isIdrIntegerString(val), "Format jumlah tidak valid. Contoh: 150.000.000")
     .refine((val) => parseIdrInteger(val) > 0, "Jumlah harus lebih dari 0"),
   description: z.string().optional(),
-  transaction_date: z.string().min(1, "Tanggal wajib diisi"),
+  transaction_date: z
+    .string()
+    .min(1, "Tanggal wajib diisi")
+    .refine((v) => v <= todayYmd(), "Tanggal tidak boleh melebihi hari ini"),
 }).refine((v) => v.from_account_id !== v.to_account_id, {
   message: "Rekening asal dan tujuan tidak boleh sama",
   path: ["to_account_id"],

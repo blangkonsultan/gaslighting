@@ -274,7 +274,7 @@ export function TransactionForm({
         </FormField>
 
         <FormField label="Tanggal" htmlFor="transaction_date" error={errors.transaction_date}>
-          <Input id="transaction_date" type="date" className="touch-target" {...register("transaction_date")} />
+          <Input id="transaction_date" type="date" max={todayYmd()} className="touch-target" {...register("transaction_date")} />
         </FormField>
 
         <div className="grid grid-cols-2 gap-2">
