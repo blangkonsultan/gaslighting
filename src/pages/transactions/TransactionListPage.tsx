@@ -2,13 +2,16 @@ import { EmptyState } from "@/components/shared/EmptyState"
 import { Button } from "@/components/ui/button"
 import { AmountDisplay } from "@/components/shared/AmountDisplay"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuthStore } from "@/stores/auth-store"
 import { useTransactionFilters } from "@/stores/transaction-filters"
 import { queryKeys } from "@/lib/query-client"
 import { getTransactionsPage, TRANSACTIONS_PAGE_SIZE_DEFAULT } from "@/services/transactions.service"
+import { getAccounts } from "@/services/accounts.service"
+import { getCategories } from "@/services/admin.service"
 import { formatShortDate } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Pencil } from "lucide-react"
@@ -19,9 +22,26 @@ export default function TransactionListPage() {
   const navigate = useNavigate()
   const { profile } = useAuthStore()
   const userId = profile?.id
-  const { filters, setFilters } = useTransactionFilters()
+  const { filters, setFilters, resetFilters } = useTransactionFilters()
 
   const [searchInput, setSearchInput] = useState(filters.search ?? "")
+
+  const { data: accounts } = useQuery({
+    queryKey: queryKeys.accounts.all,
+    queryFn: () => getAccounts(userId as string),
+    enabled: Boolean(userId),
+  })
+
+  const { data: categories } = useQuery({
+    queryKey: queryKeys.categories.all,
+    queryFn: getCategories,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const accountLabelById = useMemo(() => new Map((accounts ?? []).map((a) => [a.id, a.name])), [accounts])
+  const categoryLabelById = useMemo(() => new Map((categories ?? []).map((c) => [c.id, c.name])), [categories])
+
+  const hasActiveFilters = Boolean(filters.search?.trim() || filters.categoryId || filters.accountId)
 
   useEffect(() => {
     setSearchInput(filters.search ?? "")
@@ -64,24 +84,74 @@ export default function TransactionListPage() {
       </div>
 
       {!!userId && (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2">
           <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Cari deskripsi…"
             aria-label="Cari transaksi berdasarkan deskripsi"
           />
-          {!!filters.search?.trim() && (
+          <div className="grid grid-cols-2 gap-2">
+            <Select value={filters.categoryId ?? ""} onValueChange={(v) => setFilters({ categoryId: v || undefined })}>
+              <SelectTrigger size="sm" className="touch-target w-full">
+                <SelectValue>
+                  {(v) => {
+                    if (!v) return "Semua kategori"
+                    return categoryLabelById.get(v) ?? v
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {(["expense", "income"] as const).map((type) => {
+                  const group = (categories ?? []).filter((c) => c.type === type)
+                  if (group.length === 0) return null
+                  return (
+                    <SelectGroup key={type}>
+                      <SelectLabel>{type === "income" ? "Pemasukan" : "Pengeluaran"}</SelectLabel>
+                      {group.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+
+            <Select value={filters.accountId ?? ""} onValueChange={(v) => setFilters({ accountId: v || undefined })}>
+              <SelectTrigger size="sm" className="touch-target w-full">
+                <SelectValue>
+                  {(v) => {
+                    if (!v) return "Semua rekening"
+                    return accountLabelById.get(v) ?? v
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {(accounts ?? []).map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {hasActiveFilters && (
             <Button
               type="button"
               variant="secondary"
-              className="touch-target"
+              size="sm"
+              className="touch-target self-start"
               onClick={() => {
                 setSearchInput("")
-                setFilters({ search: undefined })
+                resetFilters()
               }}
             >
-              Reset
+              Reset filter
             </Button>
           )}
         </div>
@@ -105,10 +175,10 @@ export default function TransactionListPage() {
         </div>
       ) : rows.length === 0 ? (
         <EmptyState
-          title={filters.search?.trim() ? "Tidak ada hasil" : "Belum ada transaksi"}
+          title={hasActiveFilters ? "Tidak ada hasil" : "Belum ada transaksi"}
           description={
-            filters.search?.trim()
-              ? "Coba kata kunci lain untuk menemukan transaksi."
+            hasActiveFilters
+              ? "Coba ubah filter untuk menemukan transaksi."
               : "Catat pemasukan atau pengeluaran pertamamu"
           }
           action={
