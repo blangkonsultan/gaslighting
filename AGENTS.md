@@ -71,6 +71,7 @@ npm run dev          # Start dev server
 npm run build        # Type-check + production build
 npm run lint         # ESLint
 npm run test         # Run all tests
+npm run preview      # Preview production build
 npx shadcn@latest add <component>  # Add Shadcn UI component
 ```
 

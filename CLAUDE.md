@@ -18,6 +18,12 @@ Copy `.env.example` to `.env`. Required vars:
 - `VITE_SUPABASE_URL` — Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` — Supabase anon/public key
 
+## Key Conventions
+
+- **Mobile-first responsive:** base = mobile, `md:` = tablet (768px), `lg:` = desktop (1024px)
+- **Touch targets:** All interactive elements must have `touch-target` class (min 44px)
+- **Currency:** Always use `formatCurrency()` from `@/lib/formatters` (IDR via `Intl.NumberFormat`)
+
 ## Task Handoff
 
 Read `tasks/current.md` at session start. To resume: read `git log --oneline -10` + `git diff`, then continue from the handoff's next steps. Clear completed tasks — they're already in git history.
