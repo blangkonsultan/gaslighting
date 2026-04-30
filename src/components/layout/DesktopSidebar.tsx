@@ -69,7 +69,16 @@ export function DesktopSidebar() {
         <>
           <nav className="flex flex-1 flex-col gap-1 p-3">
             {userMainNav.map(({ to, icon: Icon, label }) => {
-              const isActive = location.pathname === to || (to !== "/dashboard" && location.pathname.startsWith(to))
+              let isActive = false
+              if (to === "/transactions/new") {
+                isActive = location.pathname === to
+              } else if (to === "/transactions") {
+                isActive = location.pathname === to || location.pathname.startsWith("/transactions/")
+              } else if (to === "/dashboard") {
+                isActive = location.pathname === to
+              } else {
+                isActive = location.pathname.startsWith(to)
+              }
               return (
                 <NavLink
                   key={to}
