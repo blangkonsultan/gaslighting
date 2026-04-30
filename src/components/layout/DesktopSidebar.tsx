@@ -73,7 +73,7 @@ export function DesktopSidebar() {
               if (to === "/transactions/new") {
                 isActive = location.pathname === to
               } else if (to === "/transactions") {
-                isActive = location.pathname === to || location.pathname.startsWith("/transactions/")
+                isActive = location.pathname === to || (location.pathname.startsWith("/transactions/") && location.pathname !== "/transactions/new")
               } else if (to === "/dashboard") {
                 isActive = location.pathname === to
               } else {
