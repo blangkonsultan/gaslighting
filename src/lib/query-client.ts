@@ -25,6 +25,7 @@ export const queryKeys = {
   },
   reports: {
     monthly: (month: string) => ["reports", "monthly", month] as const,
+    trend: (month: string, months: number) => ["reports", "trend", month, months] as const,
   },
 } as const
 

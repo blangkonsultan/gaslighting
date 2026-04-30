@@ -1,19 +1,26 @@
+import { useState } from "react"
 import { EmptyState } from "@/components/shared/EmptyState"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { AmountDisplay } from "@/components/shared/AmountDisplay"
+import { useQuery } from "@tanstack/react-query"
 import { useAuthStore } from "@/stores/auth-store"
 import { queryKeys } from "@/lib/query-client"
-import { useQuery } from "@tanstack/react-query"
 import { getTransactions } from "@/services/transactions.service"
-import { computeMonthlyReport, monthRangeYmdFromMonthKey } from "@/lib/reports/monthly"
-import { formatCurrency } from "@/lib/formatters"
-import { cn } from "@/lib/utils"
+import { computeMonthlyReport, computeTrendData, monthRangeYmdFromMonthKey, type MonthlyTrendPoint } from "@/lib/reports/monthly"
+import { PeriodSelector } from "@/components/reports/PeriodSelector"
+import { SummaryCards } from "@/components/reports/SummaryCards"
+import { ExpenseBreakdown } from "@/components/reports/ExpenseBreakdown"
+import { IncomeBreakdown } from "@/components/reports/IncomeBreakdown"
+import { TrendSection } from "@/components/reports/TrendSection"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { addMonthsYmd } from "@/lib/dates"
+
+const currentMonthKey = new Date().toISOString().slice(0, 7)
 
 export default function ReportsPage() {
   const { profile } = useAuthStore()
   const userId = profile?.id
 
-  const monthKey = new Date().toISOString().slice(0, 7) // YYYY-MM
+  const [monthKey, setMonthKey] = useState(currentMonthKey)
+
   const { start, end } = monthRangeYmdFromMonthKey(monthKey)
 
   const txQuery = useQuery({
@@ -28,9 +35,32 @@ export default function ReportsPage() {
 
   const report = txQuery.data ? computeMonthlyReport(txQuery.data) : null
 
+  const trendQuery = useQuery({
+    queryKey: queryKeys.reports.trend(monthKey, 6),
+    queryFn: async () => {
+      const monthKeys: string[] = []
+      let tempMonth = addMonthsYmd(monthKey, -5)
+      for (let i = 0; i < 6; i++) {
+        monthKeys.push(tempMonth)
+        tempMonth = addMonthsYmd(tempMonth, 1)
+      }
+      const firstMonth = monthKeys[0]
+      const firstRange = monthRangeYmdFromMonthKey(firstMonth)
+      const txs = await getTransactions(userId as string, { dateFrom: firstRange.start, dateTo: end })
+      return computeTrendData(txs, monthKeys)
+    },
+    enabled: Boolean(userId),
+  })
+
+  const trendData: MonthlyTrendPoint[] | undefined = trendQuery.data
+
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Laporan</h1>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Laporan</h1>
+      </div>
+
+      <PeriodSelector monthKey={monthKey} onMonthChange={setMonthKey} />
 
       {!userId ? (
         <EmptyState
@@ -50,66 +80,24 @@ export default function ReportsPage() {
         />
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Pemasukan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold tabular-nums">{formatCurrency(report.incomeTotal)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Pengeluaran</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold tabular-nums">{formatCurrency(report.expenseTotal)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Bersih</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AmountDisplay
-                  amount={report.netTotal}
-                  showSign
-                  className={cn("text-2xl font-bold tabular-nums", report.netTotal >= 0 ? "text-primary" : "text-destructive")}
-                />
-              </CardContent>
-            </Card>
-          </div>
+          <SummaryCards report={report} />
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Pengeluaran per Kategori</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {report.expenseByCategory.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Belum ada pengeluaran bulan ini.</p>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {report.expenseByCategory.map((c) => (
-                    <div key={c.name} className="flex items-center gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-baseline justify-between gap-3">
-                          <p className="truncate font-medium">{c.name}</p>
-                          <p className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                            {Math.round(c.percentage)}%
-                          </p>
-                        </div>
-                        <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
-                          <div className="h-full rounded-full bg-primary" style={{ width: `${c.percentage}%` }} />
-                        </div>
-                      </div>
-                      <p className="shrink-0 text-sm font-medium tabular-nums">{formatCurrency(c.amount)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <Tabs defaultValue="expense">
+            <TabsList className="w-full">
+              <TabsTrigger value="expense" className="flex-1">Pengeluaran</TabsTrigger>
+              <TabsTrigger value="income" className="flex-1">Pemasukan</TabsTrigger>
+              <TabsTrigger value="trend" className="flex-1">Tren</TabsTrigger>
+            </TabsList>
+            <TabsContent value="expense">
+              <ExpenseBreakdown categories={report.expenseByCategory} />
+            </TabsContent>
+            <TabsContent value="income">
+              <IncomeBreakdown categories={report.incomeByCategory} />
+            </TabsContent>
+            <TabsContent value="trend">
+              <TrendSection data={trendData ?? []} isLoading={trendQuery.isLoading} />
+            </TabsContent>
+          </Tabs>
         </>
       )}
     </div>
