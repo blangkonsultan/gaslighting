@@ -102,7 +102,13 @@ export default function DashboardPage() {
           ) : (
             <div className="divide-y divide-border rounded-lg border border-border bg-background/40">
               {recentTxQuery.data!.map((t) => {
-                const amountSigned = t.type === "expense" ? -t.amount : t.amount
+                const isTransferOut = t.type === "transfer" && (t.description ?? "").toLowerCase().includes("transfer keluar")
+                const isTransferIn = t.type === "transfer" && (t.description ?? "").toLowerCase().includes("transfer masuk")
+                const amountSigned = isTransferOut
+                  ? -t.amount
+                  : t.type === "expense"
+                    ? -t.amount
+                    : t.amount
                 return (
                   <div key={t.id} className="flex items-start justify-between gap-4 p-3">
                     <div className="min-w-0">
@@ -116,7 +122,7 @@ export default function DashboardPage() {
                     <AmountDisplay
                       amount={amountSigned}
                       showSign
-                      className={cn("shrink-0 text-sm", t.type === "income" && "text-primary")}
+                      className={cn("shrink-0 text-sm", (t.type === "income" || isTransferIn) && "text-primary")}
                     />
                   </div>
                 )
