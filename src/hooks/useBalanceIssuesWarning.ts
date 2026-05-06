@@ -13,7 +13,7 @@ export function useBalanceIssuesWarning(userId: string | undefined) {
   })
 
   const balanceIssues = balanceIssuesQuery.data ?? []
-  const hasBalanceIssues = balanceIssues.some((p) => p.needsUpdate && p.wouldBeNegative)
+  const hasBalanceIssues = balanceIssues.some((p) => p.needsUpdate)
 
   function handleDismissWarning() {
     if (!userId) return

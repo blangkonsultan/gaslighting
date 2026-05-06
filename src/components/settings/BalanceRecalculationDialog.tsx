@@ -21,6 +21,8 @@ interface Props {
   summary: BalanceRecalcSummary
   isApplying: boolean
   onApply: () => void
+  /** Set when the preview RPC failed (avoids showing “no accounts” for the same empty payload). */
+  loadError?: string | null
 }
 
 export function BalanceRecalculationDialog({
@@ -30,6 +32,7 @@ export function BalanceRecalculationDialog({
   summary,
   isApplying,
   onApply,
+  loadError,
 }: Props) {
   function handleApply() {
     onApply()
@@ -40,9 +43,15 @@ export function BalanceRecalculationDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Tidak Ada Rekening</DialogTitle>
+            <DialogTitle>
+              {loadError ? "Gagal memuat pratinjau" : "Tidak Ada Rekening"}
+            </DialogTitle>
             <DialogDescription>
-              Kamu belum memiliki rekening aktif. Buat rekening terlebih dahulu.
+              {loadError ? (
+                <span className="text-destructive">{loadError}</span>
+              ) : (
+                "Kamu belum memiliki rekening aktif. Buat rekening terlebih dahulu."
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

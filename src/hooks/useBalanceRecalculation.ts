@@ -47,6 +47,7 @@ export function useBalanceRecalculation(userId: string) {
     preview: previewQuery.data ?? [],
     isPreviewLoading: previewQuery.isLoading,
     isPreviewError: previewQuery.isError,
+    previewError: previewQuery.error,
     summary,
     applyRecalculation: applyMutation.mutateAsync,
     isApplying: applyMutation.isPending,

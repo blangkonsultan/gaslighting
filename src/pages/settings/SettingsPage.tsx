@@ -7,6 +7,16 @@ import { LogOut, Calculator } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { BalanceRecalculationDialog } from "@/components/settings/BalanceRecalculationDialog"
 import { useBalanceRecalculation } from "@/hooks/useBalanceRecalculation"
+import type { BalanceRecalcSummary } from "@/types/financial"
+import { formatErrorMessage } from "@/lib/format-error"
+
+const emptyRecalcSummary: BalanceRecalcSummary = {
+  totalCount: 0,
+  updateCount: 0,
+  skipCount: 0,
+  hasIssues: false,
+  totalDifference: 0,
+}
 
 export default function SettingsPage() {
   const { reset, profile } = useAuthStore()
@@ -16,11 +26,26 @@ export default function SettingsPage() {
   const {
     preview,
     isPreviewLoading,
+    isPreviewError,
+    previewError,
     summary,
     applyRecalculation,
     isApplying,
+    applyError,
     refetchPreview,
   } = useBalanceRecalculation(profile?.id ?? "")
+
+  const recalcSummary = summary ?? emptyRecalcSummary
+  const recalcErrorMessage =
+    previewError != null || applyError != null
+      ? formatErrorMessage(previewError ?? applyError)
+      : null
+
+  const rpcMissingFallback =
+    "Pastikan migrasi saldo (RPC) sudah diterapkan di project Supabase yang dipakai aplikasi."
+  const previewLoadError = isPreviewError
+    ? recalcErrorMessage ?? rpcMissingFallback
+    : null
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -66,6 +91,11 @@ export default function SettingsPage() {
           <p className="mb-3 text-sm text-muted-foreground">
             Hitung ulang saldo rekening dari riwayat transaksi jika terjadi ketidaksesuaian.
           </p>
+          {(isPreviewError || applyError) && (
+            <p className="mb-3 text-sm text-destructive" role="alert">
+              {recalcErrorMessage ?? rpcMissingFallback}
+            </p>
+          )}
           <Button
             variant="outline"
             className="touch-target"
@@ -87,16 +117,15 @@ export default function SettingsPage() {
         Keluar
       </Button>
 
-      {summary && (
-        <BalanceRecalculationDialog
-          open={showRecalcDialog}
-          onOpenChange={handleDialogChange}
-          preview={preview}
-          summary={summary}
-          isApplying={isApplying}
-          onApply={handleApplyRecalculation}
-        />
-      )}
+      <BalanceRecalculationDialog
+        open={showRecalcDialog}
+        onOpenChange={handleDialogChange}
+        preview={preview}
+        summary={recalcSummary}
+        isApplying={isApplying}
+        onApply={handleApplyRecalculation}
+        loadError={previewLoadError}
+      />
     </div>
   )
 }
