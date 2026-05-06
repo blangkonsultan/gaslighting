@@ -37,3 +37,40 @@ export interface TransactionFilters {
   type?: string
   search?: string
 }
+
+export interface BalanceRecalcPreview {
+  accountId: string
+  accountName: string
+  currentBalance: number
+  calculatedBalance: number
+  needsUpdate: boolean
+  wouldBeNegative: boolean
+}
+
+export interface BalanceRecalcResult {
+  updated: Record<string, BalanceRecalcResultItem>
+  skipped: Record<string, BalanceRecalcSkippedItem>
+}
+
+export interface BalanceRecalcResultItem {
+  accountId: string
+  accountName: string
+  currentBalance: number
+  calculatedBalance: number
+}
+
+export interface BalanceRecalcSkippedItem {
+  accountId: string
+  accountName: string
+  currentBalance: number
+  calculatedBalance: number
+  skipReason: "negative_balance"
+}
+
+export interface BalanceRecalcSummary {
+  totalCount: number
+  updateCount: number
+  skipCount: number
+  hasIssues: boolean
+  totalDifference: number
+}

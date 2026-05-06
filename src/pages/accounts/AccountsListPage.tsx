@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom"
 
 import { EmptyState } from "@/components/shared/EmptyState"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
+import { BalanceWarningBanner } from "@/components/shared/BalanceWarningBanner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/formatters"
+import { cn } from "@/lib/utils"
 import { queryKeys } from "@/lib/query-client"
 import { getAccounts } from "@/services/accounts.service"
+import { useBalanceIssuesWarning } from "@/hooks/useBalanceIssuesWarning"
 import { useAuthStore } from "@/stores/auth-store"
 import type { Account } from "@/types/financial"
 
@@ -28,9 +31,14 @@ export default function AccountsListPage() {
     enabled: !!profile?.id,
   })
 
-  if (isLoading) return <PageLoading />
+  const { balanceIssues, showWarning, handleDismissWarning } = useBalanceIssuesWarning(profile?.id)
+  const issuesMap = new Map(
+    balanceIssues.filter((p) => p.needsUpdate).map((p) => [p.accountId, p])
+  )
 
   const hasAccounts = (accounts?.length ?? 0) > 0
+
+  if (isLoading) return <PageLoading />
 
   return (
     <div className="flex flex-col gap-4">
@@ -40,6 +48,15 @@ export default function AccountsListPage() {
           + Tambah
         </Button>
       </div>
+
+      {showWarning && (
+        <BalanceWarningBanner
+          message="Beberapa rekening memiliki saldo yang tidak konsisten. Gunakan Hitung Ulang Saldo di Pengaturan untuk memperbaiki."
+          actionLabel="Pengaturan"
+          onActionClick={() => navigate("/settings")}
+          onDismiss={handleDismissWarning}
+        />
+      )}
 
       {isError ? (
         <EmptyState
@@ -64,7 +81,7 @@ export default function AccountsListPage() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {accounts!.map((acc) => (
-            <AccountCard key={acc.id} account={acc} />
+            <AccountCard key={acc.id} account={acc} issue={issuesMap.get(acc.id)} />
           ))}
         </div>
       )}
@@ -81,9 +98,22 @@ const typeLabels: Record<string, string> = {
   other: "Lainnya",
 }
 
-function AccountCard({ account }: { account: Account }) {
+function AccountCard({
+  account,
+  issue,
+}: {
+  account: Account
+  issue?: { accountName: string; calculatedBalance: number; wouldBeNegative: boolean }
+}) {
+  const hasIssue = issue !== undefined
+
   return (
-    <Card className="transition-colors hover:bg-muted/20">
+    <Card
+      className={cn(
+        "transition-colors hover:bg-muted/20",
+        hasIssue && "border-amber-300/50 bg-amber-50/30 dark:border-amber-700/30 dark:bg-amber-950/20"
+      )}
+    >
       <CardHeader className="gap-2">
         <CardTitle className="flex items-start justify-between gap-3">
           <span className="min-w-0 truncate">{account.name}</span>
@@ -92,9 +122,27 @@ function AccountCard({ account }: { account: Account }) {
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex items-baseline justify-between gap-2">
-        <span className="text-xs text-muted-foreground">Saldo</span>
-        <span className="font-semibold tabular-nums">{formatCurrency(account.balance ?? 0)}</span>
+      <CardContent className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-xs text-muted-foreground">Saldo</span>
+          <span
+            className={cn(
+              "font-semibold tabular-nums",
+              hasIssue && "text-amber-700 dark:text-amber-300"
+            )}
+          >
+            {formatCurrency(account.balance ?? 0)}
+          </span>
+        </div>
+        {hasIssue && (
+          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+            <span>
+              {issue.wouldBeNegative
+                ? "Saldo negatif jika dihitung ulang"
+                : `Saldo seharusnya: ${formatCurrency(issue.calculatedBalance)}`}
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
