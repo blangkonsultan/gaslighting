@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/stores/auth-store"
+import { queryKeys } from "@/lib/query-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { Wallet, TrendingUp, TrendingDown } from "lucide-react"
@@ -13,14 +14,14 @@ export default function DashboardPage() {
   const userId = profile?.id
 
   const summaryQuery = useQuery({
-    queryKey: ["dashboard-summary", userId],
+    queryKey: [...queryKeys.dashboard.summary, userId],
     queryFn: () => getDashboardSummary(userId as string),
     enabled: Boolean(userId),
     staleTime: 30_000,
   })
 
   const recentTxQuery = useQuery({
-    queryKey: ["recent-transactions", userId],
+    queryKey: [...queryKeys.dashboard.recent, userId],
     queryFn: () => getRecentTransactions(userId as string, 5),
     enabled: Boolean(userId),
     staleTime: 30_000,

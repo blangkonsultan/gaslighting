@@ -49,6 +49,7 @@ export default function TransactionCreatePage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
     ])
 
     navigate("/transactions")
@@ -80,6 +81,7 @@ export default function TransactionCreatePage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
     ])
 
     navigate("/transactions")

@@ -56,6 +56,7 @@ export default function TransactionEditPage() {
         queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
         queryClient.invalidateQueries({ queryKey: ["transactions", "detail"] }),
       ])
       navigate("/transactions")
@@ -91,6 +92,7 @@ export default function TransactionEditPage() {
         queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
         queryClient.invalidateQueries({ queryKey: ["transactions", "detail"] }),
         queryClient.invalidateQueries({ queryKey: ["transfers", "pair"] }),
       ])
@@ -138,6 +140,7 @@ export default function TransactionEditPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
       queryClient.invalidateQueries({ queryKey: ["transactions", "detail"] }),
     ])
 
@@ -173,6 +176,7 @@ export default function TransactionEditPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
       queryClient.invalidateQueries({ queryKey: ["transactions", "detail"] }),
       queryClient.invalidateQueries({ queryKey: ["transfers", "pair"] }),
     ])

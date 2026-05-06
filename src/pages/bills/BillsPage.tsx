@@ -130,7 +130,13 @@ export default function BillsPage() {
       await setBillActive(userId, billId, isActive)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.bills.all })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.bills.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
+      ])
     },
   })
 
@@ -140,7 +146,13 @@ export default function BillsPage() {
       await deleteBill(userId, billId)
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.bills.all })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.bills.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
+      ])
     },
   })
 

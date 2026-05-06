@@ -16,6 +16,7 @@ export const queryKeys = {
   },
   dashboard: {
     summary: ["dashboard", "summary"] as const,
+    recent: ["dashboard", "recent"] as const,
     cashFlow: (range: { from: string; to: string }) => ["dashboard", "cashFlow", range] as const,
     expenseByCategory: (range: { from: string; to: string }) => ["dashboard", "expenseByCategory", range] as const,
   },
