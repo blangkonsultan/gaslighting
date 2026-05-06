@@ -2,9 +2,11 @@ import { useAuthStore } from "@/stores/auth-store"
 import { queryKeys } from "@/lib/query-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/shared/EmptyState"
+import { BalanceWarningBanner } from "@/components/shared/BalanceWarningBanner"
 import { Wallet, TrendingUp, TrendingDown } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { getDashboardSummary, getRecentTransactions } from "@/services/dashboard.service"
+import { useBalanceIssuesWarning } from "@/hooks/useBalanceIssuesWarning"
 import { formatCurrency, formatShortDate } from "@/lib/formatters"
 import { AmountDisplay } from "@/components/shared/AmountDisplay"
 import { cn } from "@/lib/utils"
@@ -26,6 +28,8 @@ export default function DashboardPage() {
     enabled: Boolean(userId),
     staleTime: 30_000,
   })
+
+  const { showWarning, handleDismissWarning } = useBalanceIssuesWarning(userId)
 
   const totalBalanceText = summaryQuery.data
     ? formatCurrency(summaryQuery.data.totalBalance)
@@ -53,6 +57,15 @@ export default function DashboardPage() {
         </h1>
         <p className="text-sm text-muted-foreground">Ringkasan keuanganmu hari ini</p>
       </div>
+
+      {showWarning && (
+        <BalanceWarningBanner
+          message="Beberapa rekening memiliki saldo yang tidak konsisten. Periksa tab Rekening untuk detail."
+          actionLabel="Lihat Rekening"
+          onActionClick={() => (window.location.href = "/accounts")}
+          onDismiss={handleDismissWarning}
+        />
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>

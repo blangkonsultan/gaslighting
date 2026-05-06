@@ -29,6 +29,9 @@ export const queryKeys = {
     trend: (month: string, months: number) => ["reports", "trend", month, months] as const,
     earliest: ["reports", "earliest"] as const,
   },
+  balanceRecalculation: {
+    preview: (userId: string) => ["balanceRecalculation", "preview", userId] as const,
+  },
 } as const
 
 export const queryClient = new QueryClient({
