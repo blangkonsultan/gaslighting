@@ -29,7 +29,6 @@ const userBottomNav = [
 const adminNav = [
   { to: "/admin/categories", icon: Tag, label: "Kelola Kategori" },
   { to: "/admin/account-presets", icon: ListChecks, label: "Kelola Preset Rekening" },
-  { to: "/settings", icon: Settings, label: "Pengaturan" },
 ]
 
 export function DesktopSidebar() {

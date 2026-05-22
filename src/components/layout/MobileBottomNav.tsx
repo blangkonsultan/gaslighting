@@ -24,6 +24,7 @@ const userNavItems = [
 ]
 
 const adminNavItems = [
+  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/admin/categories", icon: Tag, label: "Kategori" },
   { to: "/admin/account-presets", icon: ListChecks, label: "Preset" },
 ]
@@ -61,59 +62,61 @@ export function MobileBottomNav() {
           )
         })}
 
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger
-            render={
-              <button
-                type="button"
-                className={cn(
-                  "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs transition-colors touch-target",
-                  location.pathname.startsWith("/settings") || location.pathname.startsWith("/bills")
-                    ? "text-primary font-medium"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-                aria-label="Lainnya"
-              >
-                <MoreHorizontal size={22} strokeWidth={2} />
-                <span>Lainnya</span>
-              </button>
-            }
-          />
-
-          <SheetContent side="bottom" className="p-0">
-            <SheetHeader className="px-4 pb-2 pt-4">
-              <SheetTitle>Lainnya</SheetTitle>
-            </SheetHeader>
-
-            <div className="px-4 pb-6">
-              <div className="grid gap-2">
-                <Button
-                  variant="outline"
-                  className="touch-target justify-start"
-                  onClick={() => {
-                    setOpen(false)
-                    navigate("/bills")
-                  }}
+        {!isAdmin && (
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger
+              render={
+                <button
+                  type="button"
+                  className={cn(
+                    "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs transition-colors touch-target",
+                    location.pathname.startsWith("/settings") || location.pathname.startsWith("/bills")
+                      ? "text-primary font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-label="Lainnya"
                 >
-                  <FileText size={18} className="mr-2" />
-                  Tagihan (Auto-Debit)
-                </Button>
+                  <MoreHorizontal size={22} strokeWidth={2} />
+                  <span>Lainnya</span>
+                </button>
+              }
+            />
 
-                <Button
-                  variant="outline"
-                  className="touch-target justify-start"
-                  onClick={() => {
-                    setOpen(false)
-                    navigate("/settings")
-                  }}
-                >
-                  <Settings size={18} className="mr-2" />
-                  Pengaturan
-                </Button>
+            <SheetContent side="bottom" className="p-0">
+              <SheetHeader className="px-4 pb-2 pt-4">
+                <SheetTitle>Lainnya</SheetTitle>
+              </SheetHeader>
+
+              <div className="px-4 pb-6">
+                <div className="grid gap-2">
+                  <Button
+                    variant="outline"
+                    className="touch-target justify-start"
+                    onClick={() => {
+                      setOpen(false)
+                      navigate("/bills")
+                    }}
+                  >
+                    <FileText size={18} className="mr-2" />
+                    Tagihan (Auto-Debit)
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="touch-target justify-start"
+                    onClick={() => {
+                      setOpen(false)
+                      navigate("/settings")
+                    }}
+                  >
+                    <Settings size={18} className="mr-2" />
+                    Pengaturan
+                  </Button>
+                </div>
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
     </nav>
   )
