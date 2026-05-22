@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom"
 export function Header() {
   const { profile, reset } = useAuthStore()
   const navigate = useNavigate()
+  const isAdmin = profile?.role === "admin"
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -39,11 +40,15 @@ export function Header() {
                 <DropdownMenuSeparator />
               </>
             )}
-            <DropdownMenuItem onClick={() => navigate("/settings")}>
-              <Settings size={16} className="mr-2" />
-              Pengaturan
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {!isAdmin && (
+              <>
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <Settings size={16} className="mr-2" />
+                  Pengaturan
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem variant="destructive" onClick={handleLogout}>
               <LogOut size={16} className="mr-2" />
               Keluar

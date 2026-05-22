@@ -4,12 +4,12 @@ import { Toaster } from "@/components/ui/sonner"
 import { useAuth } from "@/hooks/useAuth"
 import { queryClient } from "@/lib/query-client"
 import { AppShell } from "@/components/layout/AppShell"
-import { UserRoute, AdminRoute, DashboardRoute, GuestRoute, ProtectedRoute } from "@/components/auth/RoleRoutes"
+import { UserRoute, AdminRoute, DashboardRoute, GuestRoute } from "@/components/auth/RoleRoutes"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
 import OnboardingPage from "@/pages/onboarding/OnboardingPage"
-import DashboardPage from "@/pages/dashboard/DashboardPage"
+import { RoleDashboard } from "@/components/auth/RoleDashboard"
 import AccountsListPage from "@/pages/accounts/AccountsListPage"
 import AccountCreatePage from "@/pages/accounts/AccountCreatePage"
 import TransactionListPage from "@/pages/transactions/TransactionListPage"
@@ -40,15 +40,14 @@ export default function App() {
             </Route>
             <Route path="/onboarding" element={<OnboardingPage />} />
 
-            {/* Dashboard — shared (admin + user) but user requires onboarding */}
+            {/* Dashboard — shared with role-based content */}
             <Route element={<DashboardRoute />}>
               <Route element={<AppShell />}>
-                <Route path="dashboard" element={<DashboardPage />} />
-                <Route path="bills" element={<BillsPage />} />
+                <Route path="dashboard" element={<RoleDashboard />} />
               </Route>
             </Route>
 
-            {/* User routes — admin redirected to /admin */}
+            {/* User routes — admin redirected to /admin/categories */}
             <Route element={<UserRoute />}>
               <Route element={<AppShell />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
@@ -58,21 +57,17 @@ export default function App() {
                 <Route path="transactions/new" element={<TransactionCreatePage />} />
                 <Route path="transactions/:id/edit" element={<TransactionEditPage />} />
                 <Route path="reports" element={<ReportsPage />} />
+                <Route path="bills" element={<BillsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Route>
 
             {/* Admin routes — regular users redirected to /dashboard */}
             <Route element={<AdminRoute />}>
               <Route element={<AppShell />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="admin/categories" element={<AdminCategoriesPage />} />
                 <Route path="admin/account-presets" element={<AdminAccountPresetsPage />} />
-              </Route>
-            </Route>
-
-            {/* Shared routes (both roles) */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<AppShell />}>
-                <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Route>
 
