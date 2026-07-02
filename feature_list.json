@@ -1,0 +1,52 @@
+{
+  "features": [
+    {
+      "id": "feat-001",
+      "name": "Project Setup",
+      "description": "Install dependencies, configure Supabase env vars, run verification (lint, test, build)",
+      "dependencies": [],
+      "status": "done",
+      "evidence": "Dependencies installable, env vars configured, dev server starts"
+    },
+    {
+      "id": "feat-002",
+      "name": "Admin Dashboard & Role Classification",
+      "description": "Exclusive admin dashboard with user role classification (admin/user)",
+      "dependencies": ["feat-001"],
+      "status": "done",
+      "evidence": "PR #3 merged: admin dashboard with role-based access"
+    },
+    {
+      "id": "feat-003",
+      "name": "Auto-Debit Bill Processing",
+      "description": "Automatic bill execution for recurring bills (auto-debit)",
+      "dependencies": ["feat-001"],
+      "status": "done",
+      "evidence": "PR #2 merged: automatic bill processing implemented"
+    },
+    {
+      "id": "feat-004",
+      "name": "Balance Recalculation",
+      "description": "Enhanced error handling and user feedback in balance recalculation",
+      "dependencies": ["feat-001"],
+      "status": "done",
+      "evidence": "PR #1 merged: balance recalculation with error handling"
+    },
+    {
+      "id": "feat-005",
+      "name": "Reports Month Navigation Bug Fix",
+      "description": "Fix timezone issues in date navigation, 12-month trend, prefetch adjacent months, limit nav by earliest transaction date",
+      "dependencies": ["feat-003"],
+      "status": "done",
+      "evidence": "Tests pass, build succeeds. See progress.md and session-handoff.md for file list and decisions."
+    },
+    {
+      "id": "feat-006",
+      "name": "Active Feature (TBD)",
+      "description": "Next feature to implement — update this entry when a new feature is started",
+      "dependencies": ["feat-005"],
+      "status": "not-started",
+      "evidence": ""
+    }
+  ]
+}
