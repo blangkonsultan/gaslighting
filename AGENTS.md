@@ -34,6 +34,12 @@ Multi-user financial management app (budgeting for couples/shared finance). Mobi
 - `src/test/` — Test setup (setup.ts with jest-dom matchers)
 - `src/assets/` — Static assets
 
+## Scope
+
+- Work on exactly one feature at a time — never mix features in a single session
+- Feature dependencies are tracked in `feature_list.json`
+- Features must be verified (lint, test, build) before marking done
+
 ## Key Conventions
 
 - **Mobile-first responsive:** base = mobile, `md:` = tablet (768px), `lg:` = desktop (1024px)
@@ -114,13 +120,29 @@ npx vitest --watch                     # Watch mode
 npx vitest run src/components/shared/  # Run tests for specific directory
 ```
 
+## Startup Workflow
+
+1. Read `feature_list.json` — pick ONE `not-started` or `in-progress` feature. Work on only one feature at a time.
+2. Read `progress.md` — check current session state
+3. Read `session-handoff.md` — resume from last handoff if present
+4. Run `./init.sh` (or `npm run test && npm run build`) before making changes
+
+## Definition of Done
+
+Before claiming a feature complete, verify with evidence:
+- `npm run lint` passes with no errors
+- `npm run test` passes with no failures
+- `npm run build` succeeds (type-check + production build)
+
+Record evidence in `progress.md` and update `feature_list.json` status.
+
 ## Task Handoff
 
-Read `tasks/current.md` at session start. To resume: read `git log --oneline -10` + `git diff`, then continue from the handoff's next steps. Clear completed tasks — they're already in git history.
+Read `progress.md` and `session-handoff.md` at session start. To resume: read `git log --oneline -10` + `git diff`, then continue from the handoff's next steps.
 
-**During work:** Update `tasks/current.md` after each sub-task so mid-task handoff works. Commit once per completed task.
+Commit once per completed sub-task. Update `progress.md` after each sub-task so mid-task handoff works.
 
-**Before ending or when context is running low,** update `tasks/current.md` with:
+**Before ending or when context is running low,** update `session-handoff.md` with:
 - Status (in-progress / blocked / done)
 - Files modified (what changed in each)
 - Test results (passing/failing, any errors)
