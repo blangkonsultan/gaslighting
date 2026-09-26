@@ -19,6 +19,26 @@ export interface UsePushNotificationsReturn {
   toggleSubscription: (enable: boolean) => Promise<boolean>
 }
 
+async function getActiveRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return null
+  try {
+    if (typeof navigator.serviceWorker.getRegistration === "function") {
+      const reg = await navigator.serviceWorker.getRegistration()
+      if (reg) return reg
+    }
+    if ("ready" in navigator.serviceWorker) {
+      const readyReg = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 1000)),
+      ])
+      if (readyReg) return readyReg
+    }
+    return null
+  } catch (err) {
+    console.error("Error retrieving service worker registration:", err)
+    return null
+  }
+}
 export function usePushNotifications(userId: string): UsePushNotificationsReturn {
   const [isSupported, setIsSupported] = useState(false)
   const [permission, setPermission] = useState<PushPermission>("unsupported")
@@ -63,10 +83,16 @@ export function usePushNotifications(userId: string): UsePushNotificationsReturn
       }
 
       try {
-        const registration = await navigator.serviceWorker.ready
-        const subscription = await registration.pushManager.getSubscription()
-        if (isMounted) {
-          setIsSubscribed(Boolean(subscription))
+        const registration = await getActiveRegistration()
+        if (registration?.pushManager) {
+          const subscription = await registration.pushManager.getSubscription()
+          if (isMounted) {
+            setIsSubscribed(Boolean(subscription))
+          }
+        } else {
+          if (isMounted) {
+            setIsSubscribed(false)
+          }
         }
       } catch (err) {
         console.error("Error checking push subscription:", err)
@@ -117,12 +143,25 @@ export function usePushNotifications(userId: string): UsePushNotificationsReturn
         return false
       }
 
-      const registration = await navigator.serviceWorker.ready
+      let registration = await getActiveRegistration()
+      if (!registration && typeof navigator.serviceWorker.register === "function") {
+        registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" })
+      }
+      if (!registration && "ready" in navigator.serviceWorker) {
+        registration = await Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+        ])
+      }
+
+      if (!registration || !registration.pushManager) {
+        throw new Error("Service worker tidak tersedia untuk notifikasi.")
+      }
+
       const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
       if (!vapidKey) {
         throw new Error("VAPID public key tidak ditemukan dalam konfigurasi.")
       }
-
       let subscription = await registration.pushManager.getSubscription()
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
@@ -150,9 +189,8 @@ export function usePushNotifications(userId: string): UsePushNotificationsReturn
     setError(null)
 
     try {
-      const registration = await navigator.serviceWorker.ready
-      const subscription = await registration.pushManager.getSubscription()
-
+      const registration = await getActiveRegistration()
+      const subscription = await registration?.pushManager?.getSubscription()
       if (subscription) {
         await deletePushSubscription(subscription.endpoint)
         await subscription.unsubscribe()

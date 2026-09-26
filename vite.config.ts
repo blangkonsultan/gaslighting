@@ -11,39 +11,61 @@ function devServiceWorkerUnregisterPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split("?")[0]
-        if (url === "/sw.js" || url === "/registerSW.js" || (url?.startsWith("/assets/index-") && url?.endsWith(".js"))) {
+        if (url === "/sw.js") {
           res.setHeader("Content-Type", "application/javascript")
           res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate")
           res.end(`
-            if (typeof window !== 'undefined') {
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then((regs) => {
-                  Promise.all(regs.map((r) => r.unregister())).then(() => {
-                    if ('caches' in window) {
-                      caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).then(() => {
-                        window.location.reload();
-                      });
-                    } else {
-                      window.location.reload();
-                    }
-                  });
-                });
-              } else if ('caches' in window) {
-                caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).then(() => {
-                  window.location.reload();
-                });
+            self.addEventListener('install', () => { self.skipWaiting(); });
+            self.addEventListener('activate', (event) => { event.waitUntil(self.clients.claim()); });
+            self.addEventListener('push', (event) => {
+              if (!event.data) return;
+              let payload = {
+                title: 'Gaslighting',
+                body: 'Notifikasi baru',
+                icon: '/pwa-192x192.png',
+                badge: '/pwa-192x192.png',
+                url: '/bills',
+              };
+              try {
+                payload = { ...payload, ...event.data.json() };
+              } catch {
+                payload.body = event.data.text();
               }
-            } else {
-              self.addEventListener('install', () => { self.skipWaiting(); });
-              self.addEventListener('activate', (event) => {
-                event.waitUntil(
-                  caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
-                    .then(() => self.registration.unregister())
-                    .then(() => self.clients.matchAll({ type: 'window' }))
-                    .then((clients) => {
-                      for (const client of clients) client.navigate(client.url);
-                    })
-                );
+              event.waitUntil(
+                self.registration.showNotification(payload.title || 'Gaslighting', {
+                  body: payload.body,
+                  icon: payload.icon || '/pwa-192x192.png',
+                  badge: payload.badge || '/pwa-192x192.png',
+                  data: { url: payload.url || '/bills' },
+                })
+              );
+            });
+            self.addEventListener('notificationclick', (event) => {
+              event.notification.close();
+              const targetUrl = event.notification.data?.url || '/bills';
+              event.waitUntil(
+                self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+                  for (const client of clients) {
+                    if ('focus' in client && client.url.includes(targetUrl)) {
+                      return client.focus();
+                    }
+                  }
+                  if (self.clients.openWindow) {
+                    return self.clients.openWindow(targetUrl);
+                  }
+                })
+              );
+            });
+          `)
+          return
+        }
+        if (url === "/registerSW.js") {
+          res.setHeader("Content-Type", "application/javascript")
+          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate")
+          res.end(`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' });
               });
             }
           `)
