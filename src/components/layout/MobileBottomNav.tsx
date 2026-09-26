@@ -39,7 +39,7 @@ export function MobileBottomNav() {
   const [open, setOpen] = useState(false)
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card lg:hidden touch-manipulation select-none">
       <div className="flex items-stretch justify-around"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
