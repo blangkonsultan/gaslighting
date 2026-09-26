@@ -79,9 +79,9 @@ export function useAuth() {
           setLoading(true)
           pendingNullSessionResetIdRef.current = window.setTimeout(() => {
             pendingNullSessionResetIdRef.current = null
-            if (initInFlightRef.current) return
             const state = useAuthStore.getState()
             if (state.sessionUserId === null && state.profile === null) reset()
+            else setLoading(false)
           }, NULL_SESSION_DEBOUNCE_MS)
         }
       }
@@ -118,10 +118,18 @@ export function useAuth() {
             const p = await withTimeout(getProfile(session.user.id), 10_000, `getProfile (${reason})`)
             setAuthenticated(session.user.id, p)
           }
+        } else {
+          const state = useAuthStore.getState()
+          if (state.sessionUserId === null && state.profile === null) {
+            reset()
+          } else {
+            setLoading(false)
+          }
         }
       } catch {
         const state = useAuthStore.getState()
         if (state.profile === null) reset()
+        else setLoading(false)
       } finally {
         window.clearTimeout(hardStopId)
         initInFlightRef.current = false

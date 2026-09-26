@@ -17,7 +17,7 @@ export function LoadingSpinner({ className, size = 24 }: LoadingSpinnerProps) {
 
 export function PageLoading() {
   return (
-    <div className="flex flex-1 items-center justify-center">
+    <div className="flex min-h-dvh flex-1 items-center justify-center bg-background">
       <LoadingSpinner size={32} />
     </div>
   )
