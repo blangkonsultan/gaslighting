@@ -122,4 +122,43 @@ describe("SettingsPage", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("Izin notifikasi diblokir di browser.")
   })
+
+  it("renders test notification button when subscribed and triggers notification", async () => {
+    const mockShowNotification = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, "serviceWorker", {
+      value: {
+        getRegistration: vi.fn().mockResolvedValue({
+          showNotification: mockShowNotification,
+        }),
+      },
+      configurable: true,
+    })
+
+    mockUsePushNotifications.mockReturnValue({
+      isSupported: true,
+      permission: "granted",
+      isSubscribed: true,
+      isLoading: false,
+      isToggling: false,
+      error: null,
+      toggleSubscription: mockToggleSubscription,
+    })
+
+    render(<SettingsPage />)
+
+    const testBtn = screen.getByRole("button", { name: /Kirim Notifikasi Uji Coba/i })
+    expect(testBtn).toBeInTheDocument()
+
+    fireEvent.click(testBtn)
+
+    await waitFor(() => {
+      expect(mockShowNotification).toHaveBeenCalledWith(
+        "Tagihan Auto-Debit Berhasil",
+        expect.objectContaining({
+          body: expect.stringContaining("Tagihan Listrik PLN"),
+        })
+      )
+      expect(toast.success).toHaveBeenCalledWith("Notifikasi uji coba dikirim ke status bar!")
+    })
+  })
 })

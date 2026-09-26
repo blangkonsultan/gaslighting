@@ -4,7 +4,7 @@ import { supabase } from "@/services/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
-import { LogOut, Calculator, Bell } from "lucide-react"
+import { LogOut, Calculator, Bell, BellRing } from "lucide-react"
 import { toast } from "sonner"
 import { usePushNotifications } from "@/hooks/usePushNotifications"
 import { useNavigate } from "react-router-dom"
@@ -25,6 +25,7 @@ export default function SettingsPage() {
   const { reset, profile } = useAuthStore()
   const navigate = useNavigate()
   const [showRecalcDialog, setShowRecalcDialog] = useState(false)
+  const [isSendingTest, setIsSendingTest] = useState(false)
 
   const {
     preview,
@@ -68,6 +69,32 @@ export default function SettingsPage() {
       }
     } else if (pushError) {
       toast.error(pushError)
+    }
+  }
+
+  async function handleSendTestNotification() {
+    setIsSendingTest(true)
+    try {
+      if (!("serviceWorker" in navigator)) {
+        toast.error("Service worker tidak didukung di browser ini.")
+        return
+      }
+      const reg = await navigator.serviceWorker.getRegistration()
+      if (reg) {
+        await reg.showNotification("Tagihan Auto-Debit Berhasil", {
+          body: "Pembayaran Tagihan Listrik PLN sebesar Rp 250.000 berhasil diproses.",
+          icon: "/pwa-192x192.png",
+          badge: "/pwa-192x192.png",
+          data: { url: "/bills" },
+        })
+        toast.success("Notifikasi uji coba dikirim ke status bar!")
+      } else {
+        toast.error("Service worker belum siap. Harap aktifkan notifikasi terlebih dahulu.")
+      }
+    } catch {
+      toast.error("Gagal memunculkan notifikasi.")
+    } finally {
+      setIsSendingTest(false)
     }
   }
   async function handleLogout() {
@@ -128,7 +155,18 @@ export default function SettingsPage() {
               aria-label="Toggle notifikasi push"
             />
           </div>
-
+          {isSubscribed && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="touch-target mt-1 w-full"
+              onClick={handleSendTestNotification}
+              disabled={isSendingTest}
+            >
+              <BellRing size={16} className="mr-2" />
+              {isSendingTest ? "Mengirim Notifikasi…" : "Kirim Notifikasi Uji Coba"}
+            </Button>
+          )}
           {!isSupported && !isPushLoading && (
             <p className="text-xs text-muted-foreground">
               Push notification tidak didukung pada browser atau perangkat ini.
