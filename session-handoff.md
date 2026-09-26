@@ -65,6 +65,7 @@
   - Updated `src/main.tsx` to clear only cache storages (`caches.delete`) instead of unregistering the service worker
   - Updated `vite.config.ts` dev middleware to serve a non-caching push notification service worker for `/sw.js`
   - Fixed `Subscription failed - no active Service Worker`: added immediate `self.skipWaiting()` and `self.clients.claim()` in `src/sw.ts`, registered `/sw.js` on app boot in `src/main.tsx`, and ensured `registration.active` is non-null via statechange/polling before calling `pushManager.subscribe()`
+  - Added "Kirim Notifikasi Uji Coba" button in `SettingsPage.tsx` enabling instant native OS status bar push notification tests
   - Verified toggle activation, subscription creation, database sync, and un-subscription in headless browser
 ## Verification Evidence
 
