@@ -45,6 +45,11 @@
   - Aligned `SummaryCards.tsx` and `DashboardPage.tsx` to use semantic `text-success` for income / positive net flow and `TrendingUp` icons (improving AA contrast)
   - Refactored manual delete modals in `TransactionEditPage.tsx` to standardized `ConfirmDialog`
 
+- [x] Fix mobile navigation auto-zoom and tap-zoom issues:
+  - Updated `index.html` viewport meta tag with `maximum-scale=1.0, user-scalable=no`
+  - Added `touch-action: manipulation;` across `html, body, button, a, nav, .touch-target` in `src/index.css`
+  - Added `touch-manipulation select-none` to `MobileBottomNav.tsx`
+  - Updated `SelectTrigger` in `src/components/ui/select.tsx` from `text-sm` (14px) to `text-base md:text-sm` (16px on mobile), preventing WebKit/Chrome auto-zoom on filter selection
 ### What's In Progress
 
 - None (all 9 steps completed and verified)

@@ -37,6 +37,11 @@
   - Themed `BalanceRecalculationDialog.tsx` with design tokens (removed non-palette `bg-blue-50`, replaced with `bg-primary/10 border-primary/20`, `text-success` for checkmarks and increases, and `text-destructive` for decreases)
   - Aligned `SummaryCards.tsx` and `DashboardPage.tsx` to use semantic `text-success` for income / positive net flow and `TrendingUp` icons (improving AA contrast)
   - Refactored manual delete modals in `TransactionEditPage.tsx` to standardized `ConfirmDialog`
+- [x] Step 17: Mobile Auto-Zoom and Tap-Zoom Prevention:
+  - Updated `index.html` viewport meta tag with `maximum-scale=1.0, user-scalable=no`
+  - Added `touch-action: manipulation;` on `html, body, button, a, nav, .touch-target` in `src/index.css` to eliminate double-tap zoom and 300ms tap delay
+  - Added `touch-manipulation select-none` to `MobileBottomNav.tsx`
+  - Updated `SelectTrigger` in `src/components/ui/select.tsx` from `text-sm` (14px) to `text-base md:text-sm` (16px on mobile), preventing WebKit/Chrome auto-zoom on filter selection
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
