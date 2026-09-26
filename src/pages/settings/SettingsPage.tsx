@@ -3,7 +3,10 @@ import { useAuthStore } from "@/stores/auth-store"
 import { supabase } from "@/services/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { LogOut, Calculator } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { LogOut, Calculator, Bell } from "lucide-react"
+import { toast } from "sonner"
+import { usePushNotifications } from "@/hooks/usePushNotifications"
 import { useNavigate } from "react-router-dom"
 import { BalanceRecalculationDialog } from "@/components/settings/BalanceRecalculationDialog"
 import { useBalanceRecalculation } from "@/hooks/useBalanceRecalculation"
@@ -35,6 +38,14 @@ export default function SettingsPage() {
     refetchPreview,
   } = useBalanceRecalculation(profile?.id ?? "")
 
+  const {
+    isSupported,
+    isSubscribed,
+    isLoading: isPushLoading,
+    isToggling: isPushToggling,
+    error: pushError,
+    toggleSubscription,
+  } = usePushNotifications(profile?.id ?? "")
   const recalcSummary = summary ?? emptyRecalcSummary
   const recalcErrorMessage =
     previewError != null || applyError != null
@@ -47,6 +58,18 @@ export default function SettingsPage() {
     ? recalcErrorMessage ?? rpcMissingFallback
     : null
 
+  async function handleToggleNotification(checked: boolean) {
+    const success = await toggleSubscription(checked)
+    if (success) {
+      if (checked) {
+        toast.success("Notifikasi push berhasil diaktifkan")
+      } else {
+        toast.success("Notifikasi push dinonaktifkan")
+      }
+    } else if (pushError) {
+      toast.error(pushError)
+    }
+  }
   async function handleLogout() {
     await supabase.auth.signOut()
     reset()
@@ -83,6 +106,42 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Bell size={18} />
+            Notifikasi
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">Tagihan Auto-Debit</p>
+              <p className="text-xs text-muted-foreground">
+                Terima pemberitahuan push saat tagihan otomatis berhasil atau gagal diproses.
+              </p>
+            </div>
+            <Switch
+              checked={isSubscribed}
+              disabled={isPushLoading || isPushToggling || (!isSupported && !isPushLoading)}
+              onCheckedChange={handleToggleNotification}
+              aria-label="Toggle notifikasi push"
+            />
+          </div>
+
+          {!isSupported && !isPushLoading && (
+            <p className="text-xs text-muted-foreground">
+              Push notification tidak didukung pada browser atau perangkat ini.
+            </p>
+          )}
+
+          {pushError && (
+            <p className="text-xs text-destructive" role="alert">
+              {pushError}
+            </p>
+          )}
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Data Saldo</CardTitle>
