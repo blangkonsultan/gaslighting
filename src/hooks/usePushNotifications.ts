@@ -127,7 +127,7 @@ export function usePushNotifications(userId: string): UsePushNotificationsReturn
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey),
+          applicationServerKey: urlBase64ToUint8Array(vapidKey) as unknown as BufferSource,
         })
       }
 

@@ -14,7 +14,7 @@ export function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export interface PushSubscriptionData {
-  endpoint: string
+  endpoint?: string | null
   keys?: {
     auth?: string
     p256dh?: string

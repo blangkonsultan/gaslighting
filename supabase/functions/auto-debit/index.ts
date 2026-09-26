@@ -1,5 +1,5 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push'
 
 interface Bill {
@@ -47,7 +47,7 @@ function formatIdr(amount: number): string {
 }
 
 async function sendBillPushNotification(
-  supabase: any,
+  supabase: SupabaseClient,
   userId: string,
   payload: {
     title: string
@@ -89,9 +89,10 @@ async function sendBillPushNotification(
           },
           messageData
         )
-      } catch (pushErr: any) {
-        console.error(`Push notification failed for endpoint ${sub.endpoint}:`, pushErr?.message || pushErr)
-        const statusCode = pushErr?.statusCode || pushErr?.status
+      } catch (pushErr: unknown) {
+        const errObj = pushErr as { statusCode?: number; status?: number; message?: string } | undefined
+        console.error(`Push notification failed for endpoint ${sub.endpoint}:`, errObj?.message || String(pushErr))
+        const statusCode = errObj?.statusCode || errObj?.status
         if (statusCode === 404 || statusCode === 410) {
           console.log(`Removing expired push subscription ${sub.id}`)
           await supabase.from('push_subscriptions').delete().eq('id', sub.id)
