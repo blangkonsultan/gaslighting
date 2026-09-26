@@ -33,7 +33,7 @@ export function Header() {
           >
             <User size={20} />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" sideOffset={10} className="w-56">
             {profile && (
               <>
                 <div className="px-2 py-1.5">
