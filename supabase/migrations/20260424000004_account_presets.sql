@@ -1,4 +1,7 @@
--- Account presets table (bank names, e-wallets, etc.)
+-- ==============================================================================
+-- ACCOUNT PRESETS TABLE & SEED DATA
+-- ==============================================================================
+
 CREATE TABLE IF NOT EXISTS public.account_presets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -6,9 +9,30 @@ CREATE TABLE IF NOT EXISTS public.account_presets (
   icon TEXT DEFAULT 'wallet',
   color TEXT DEFAULT '#9AB17A',
   sort_order INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT account_presets_name_type_key UNIQUE (name, type)
 );
 
+ALTER TABLE public.account_presets ENABLE ROW LEVEL SECURITY;
+
+-- Anyone authenticated can view presets
+CREATE POLICY "Anyone can read presets"
+  ON public.account_presets FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Only admins can modify presets
+CREATE POLICY "Only admins can modify presets"
+  ON public.account_presets FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND role = 'admin')
+  )
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND role = 'admin')
+  );
+
+-- Seed account presets
 INSERT INTO public.account_presets (name, type, icon, color, sort_order) VALUES
   -- Banks
   ('Bank Jatim', 'bank', 'landmark', '#9AB17A', 1),
@@ -56,4 +80,5 @@ INSERT INTO public.account_presets (name, type, icon, color, sort_order) VALUES
   ('Saham', 'investment', 'bar-chart-3', '#00A650', 401),
   ('Obligasi', 'investment', 'file-text', '#00529C', 402),
   ('Emas', 'investment', 'coins', '#F2CC8F', 403),
-  ('Crypto', 'investment', 'bitcoin', '#F7931E', 404);
+  ('Crypto', 'investment', 'bitcoin', '#F7931E', 404)
+ON CONFLICT DO NOTHING;

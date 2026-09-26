@@ -1,8 +1,34 @@
--- Prevent accounts from ever having negative balances and enforce
--- sufficient balance on expense transactions (insert/update).
+-- ==============================================================================
+-- 1. PERFORMANCE INDEXES (16 INDEXES)
+-- ==============================================================================
+
+CREATE INDEX idx_profiles_email ON public.profiles (email);
+CREATE INDEX idx_accounts_user_id ON public.accounts (user_id);
+CREATE INDEX idx_accounts_user_active ON public.accounts (user_id, is_active);
+CREATE INDEX idx_transactions_user_id ON public.transactions (user_id);
+CREATE INDEX idx_transactions_account_id ON public.transactions (account_id);
+CREATE INDEX idx_transactions_category_id ON public.transactions (category_id);
+CREATE INDEX idx_transactions_date ON public.transactions (transaction_date DESC);
+CREATE INDEX idx_transactions_user_date ON public.transactions (user_id, transaction_date DESC);
+CREATE INDEX idx_transactions_user_type ON public.transactions (user_id, type);
+CREATE INDEX idx_transactions_transfer_id ON public.transactions (transfer_id) WHERE transfer_id IS NOT NULL;
+CREATE INDEX idx_transactions_bill_id ON public.transactions (bill_id) WHERE bill_id IS NOT NULL;
+CREATE INDEX idx_categories_user_id ON public.categories (user_id) WHERE user_id IS NOT NULL;
+CREATE INDEX idx_categories_global ON public.categories (is_global) WHERE is_global = TRUE;
+CREATE INDEX idx_bills_user_id ON public.bills (user_id);
+CREATE INDEX idx_bills_next_date ON public.bills (next_date) WHERE is_active = TRUE;
+CREATE INDEX idx_bills_user_active ON public.bills (user_id, is_active);
+
+-- ==============================================================================
+-- 2. NON-NEGATIVE ACCOUNT BALANCE CONSTRAINT
+-- ==============================================================================
 
 ALTER TABLE public.accounts
   ADD CONSTRAINT accounts_balance_non_negative CHECK (balance >= 0);
+
+-- ==============================================================================
+-- 3. SUFFICIENT BALANCE ENFORCEMENT ON EXPENSE WRITES
+-- ==============================================================================
 
 CREATE OR REPLACE FUNCTION public.assert_sufficient_balance_for_transaction()
 RETURNS TRIGGER
@@ -18,7 +44,7 @@ DECLARE
   v_reversal_old NUMERIC := 0;
   v_apply_new NUMERIC := 0;
 BEGIN
-  -- We only care about preventing negative balances caused by expense writes.
+  -- Prevent negative balances caused by expense writes.
   IF TG_OP = 'INSERT' THEN
     IF NEW.type <> 'expense' THEN
       RETURN NEW;
@@ -42,7 +68,6 @@ BEGIN
 
   -- UPDATE: ensure the final balance(s) won't go below 0 after reversing OLD and applying NEW.
   IF TG_OP = 'UPDATE' THEN
-    -- Only validate when expense is involved.
     IF NEW.type <> 'expense' AND OLD.type <> 'expense' THEN
       RETURN NEW;
     END IF;
@@ -88,7 +113,7 @@ BEGIN
     WHERE id = GREATEST(OLD.account_id, NEW.account_id) AND user_id = NEW.user_id
     FOR UPDATE;
 
-    -- Re-read with exact ids (balances fetched above were only for locking order).
+    -- Re-read with exact ids
     SELECT balance INTO v_old_balance
     FROM public.accounts
     WHERE id = OLD.account_id AND user_id = NEW.user_id;
@@ -121,4 +146,3 @@ CREATE TRIGGER trigger_assert_sufficient_balance_for_tx
   BEFORE INSERT OR UPDATE ON public.transactions
   FOR EACH ROW
   EXECUTE FUNCTION public.assert_sufficient_balance_for_transaction();
-

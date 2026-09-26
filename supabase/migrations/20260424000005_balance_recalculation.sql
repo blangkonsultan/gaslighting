@@ -1,4 +1,7 @@
--- Balance recalculation RPC functions
+-- ==============================================================================
+-- BALANCE RECALCULATION RPC FUNCTIONS
+-- ==============================================================================
+
 -- Preview function: read-only calculation of correct balances
 CREATE OR REPLACE FUNCTION public.get_balance_recalculation_preview(
   p_user_id UUID
@@ -17,6 +20,11 @@ DECLARE
   v_transfer_out_sum NUMERIC;
   v_calculated_balance NUMERIC;
 BEGIN
+  -- Authorization guard (prevent IDOR)
+  IF auth.uid() IS NULL OR auth.uid() <> p_user_id THEN
+    RAISE EXCEPTION 'Unauthorized';
+  END IF;
+
   FOR v_account IN
     SELECT id, name, balance, initial_balance
     FROM public.accounts
@@ -87,6 +95,11 @@ DECLARE
   v_transfer_out_sum NUMERIC;
   v_calculated_balance NUMERIC;
 BEGIN
+  -- Authorization guard (prevent IDOR)
+  IF auth.uid() IS NULL OR auth.uid() <> p_user_id THEN
+    RAISE EXCEPTION 'Unauthorized';
+  END IF;
+
   FOR v_account IN
     SELECT id, name, balance, initial_balance
     FROM public.accounts
@@ -156,6 +169,6 @@ BEGIN
 END;
 $$;
 
--- Grant execute permission to authenticated users
+-- Grant execute permissions to authenticated users
 GRANT EXECUTE ON FUNCTION public.get_balance_recalculation_preview(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.recalculate_account_balances(UUID) TO authenticated;
