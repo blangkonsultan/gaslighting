@@ -4,7 +4,7 @@
 
 **Last Updated:** 2026-09-26
 **Branch:** main
-**Active Feature:** feat-007 (Completed)
+**Active Feature:** feat-008 (Completed)
 
 ## Status
 
@@ -55,6 +55,14 @@
   - Added `max-width: 100vw; overflow-x: hidden;` to `html, body` and `#root` in `src/index.css`
   - Added `flex-1 min-w-0` and `truncate` to transaction row description and secondary text in `DashboardPage.tsx` and `TransactionListPage.tsx`
   - Added `shrink-0` to transaction amount/action container
+- [x] Implement Auto-Debit Web Push Notification architecture (feat-008):
+  - Created migration `20260926000003_push_subscriptions.sql` with `public.push_subscriptions` table, indexes, and user-scoped RLS policies; pushed to remote Supabase DB
+  - Generated VAPID keys, configured `VITE_VAPID_PUBLIC_KEY` in `.env` and `.env.example`, and set Supabase secrets (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`)
+  - Switched VitePWA to `strategies: "injectManifest"` with custom `src/sw.ts` implementing workbox precache, NetworkFirst Supabase cache, push event listener, and notification click handler
+  - Implemented `src/services/push-notifications.service.ts` and `src/hooks/usePushNotifications.ts` with permission management, subscription synchronization, and error handling
+  - Added Notifikasi section in `src/pages/settings/SettingsPage.tsx` with toggle switch and status indicators
+  - Updated auto-debit Edge Function `supabase/functions/auto-debit/index.ts` to dispatch web push notifications on bill success and failure with automatic expired endpoint pruning (404/410), deployed to Supabase
+  - Added unit test suites for service, hook, and settings page (17 new tests; total 19 test files, 98 tests passing)
 ### What's In Progress
 
 - None (all 9 steps completed and verified)
@@ -75,13 +83,24 @@
 - Switched auto-debit edge function from raw postgres connection to `@supabase/supabase-js` client with service role key and clamped `addMonths`.
 - Configured PWA with offline caching and maskable icon with safe zone padding on vintage cream background (`#FBE8CE`).
 - Centralized Indonesian strings into flat dictionary `src/lib/i18n.ts` for clean future localization without runtime overhead.
+- Implemented Web Push notifications using standard W3C Push API and `web-push` on Supabase Edge Runtime.
+- Implemented automatic pruning of expired/unregistered push subscriptions on HTTP 404/410 responses from push services.
+- Used `injectManifest` strategy in VitePWA to enable custom service worker logic while retaining automated workbox precaching.
 
 ## Files Modified This Session
 
-- `src/pages/admin/AdminCategoriesPage.tsx`
-- `src/pages/admin/AdminAccountPresetsPage.tsx`
-- `src/pages/admin/AdminCategoriesPage.test.tsx`
-- `src/pages/admin/AdminAccountPresetsPage.test.tsx`
+- `supabase/migrations/20260926000003_push_subscriptions.sql`
+- `src/types/database.ts`
+- `.env.example`
+- `vite.config.ts`
+- `src/sw.ts`
+- `src/services/push-notifications.service.ts`
+- `src/services/push-notifications.service.test.ts`
+- `src/hooks/usePushNotifications.ts`
+- `src/hooks/usePushNotifications.test.tsx`
+- `src/pages/settings/SettingsPage.tsx`
+- `src/pages/settings/SettingsPage.test.tsx`
+- `supabase/functions/auto-debit/index.ts`
 - `feature_list.json`
 - `progress.md`
 - `session-handoff.md`
@@ -89,11 +108,7 @@
 ## Evidence of Completion
 
 - `npm run lint` passes (0 errors, code 0)
-- `npm run test` passes (16/16 test files, 81/81 tests passed)
+- `npm run test` passes (19/19 test files, 98/98 tests passed)
 - `npm run build` succeeds (TypeScript check + Vite production bundle + PWA)
-- Headless browser DOM evaluation confirms:
-  - Card container: `flex-direction: column`
-  - Card content: `grid-template-columns: 485px 485px` (2 columns on desktop)
-  - CardTitle color: neutral `rgb(61, 61, 61)` (#3D3D3D)
-  - SelectTrigger width: 400px (100% of parent modal width)
-  - Color picker swatch: 44px x 44px with 12px border radius
+- Supabase database migration `20260926000003_push_subscriptions.sql` applied
+- Edge Function `auto-debit` deployed and verified (returns 401 when unauthenticated)

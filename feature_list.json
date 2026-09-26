@@ -55,6 +55,14 @@
       "dependencies": ["feat-006"],
       "status": "done",
       "evidence": "16 test suites pass (81 tests, +4 new admin tests), 0 lint errors, build succeeds, headless browser DOM inspection proves flex-direction column, 2-column grid at desktop, neutral color rgb(61, 61, 61), 400px SelectTrigger width, and 44px color swatch."
+    },
+    {
+      "id": "feat-008",
+      "name": "Auto-Debit Push Notifications",
+      "description": "Web Push notification architecture for auto-debit bill processing: push_subscriptions table with RLS, VAPID key configuration, custom PWA service worker with push and notificationclick handlers, usePushNotifications hook and Settings toggle, and auto-debit Edge Function push dispatcher with automatic stale endpoint pruning",
+      "dependencies": ["feat-003", "feat-006"],
+      "status": "done",
+      "evidence": "19 test suites pass (98 tests, +17 new tests), 0 lint errors, build succeeds with injectManifest PWA service worker, migration 20260926000003_push_subscriptions.sql applied, Edge Function deployed and verified."
     }
   ]
 }
