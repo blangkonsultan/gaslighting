@@ -14,6 +14,14 @@ if (import.meta.env.DEV && "caches" in window) {
   })
 }
 
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((err) => {
+      console.error("SW registration error:", err)
+    })
+  })
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AppErrorBoundary>

@@ -147,11 +147,52 @@ export function usePushNotifications(userId: string): UsePushNotificationsReturn
       if (!registration && typeof navigator.serviceWorker.register === "function") {
         registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" })
       }
-      if (!registration && "ready" in navigator.serviceWorker) {
-        registration = await Promise.race([
-          navigator.serviceWorker.ready,
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
-        ])
+
+      // Ensure registration has an active service worker before subscribing
+      if (registration && !registration.active) {
+        const worker = registration.installing || registration.waiting
+        if (worker && worker.state !== "activated") {
+          await new Promise<void>((resolve) => {
+            const handleState = () => {
+              if (worker.state === "activated") {
+                worker.removeEventListener("statechange", handleState)
+                resolve()
+              }
+            }
+            worker.addEventListener("statechange", handleState)
+            setTimeout(() => {
+              worker.removeEventListener("statechange", handleState)
+              resolve()
+            }, 3000)
+          })
+        }
+
+        // Re-check getRegistration to populate active worker reference
+        if (typeof navigator.serviceWorker.getRegistration === "function") {
+          for (let i = 0; i < 15; i++) {
+            const current = await navigator.serviceWorker.getRegistration()
+            if (current?.active) {
+              registration = current
+              break
+            }
+            await new Promise((r) => setTimeout(r, 100))
+          }
+        }
+      }
+
+      // If still not active, fallback to navigator.serviceWorker.ready with timeout
+      if (registration && !registration.active && "ready" in navigator.serviceWorker) {
+        try {
+          const readyReg = await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
+          ])
+          if (readyReg?.active) {
+            registration = readyReg
+          }
+        } catch {
+          // ignore
+        }
       }
 
       if (!registration || !registration.pushManager) {
