@@ -75,11 +75,12 @@
   - Extended auth check in `auto-debit/index.ts` to accept both modern `sb_secret_...` and vault legacy service role key
   - Extended auth check in `auto-debit/index.ts` to accept both modern `sb_secret_...` and vault legacy service role key
   - Successfully executed auto-debit: processed `Tagihan Listrik PLN` (Rp 250.000), created transaction, deducted `BCA Utama` balance from 12.3M to 12.05M, advanced `next_date` to `2026-10-27`, and dispatched push notification
-- [x] Remediate GitGuardian Secret Leak (commit faa04fe):
+- [x] Remediate GitGuardian Secret Leak & Invalidate Legacy Keys:
   - Removed hardcoded fallback service role JWT from `supabase/functions/auto-debit/index.ts`
-  - Moved authorization secret strictly to Supabase Secrets via `Deno.env.get('CRON_SECRET')`
-  - Redeployed Edge Function and pushed sanitized commit to `origin/main`
-### What's In Progress
+  - Disabled legacy API keys on Supabase project via Management API (`PUT /v1/projects/{ref}/api-keys/legacy?enabled=false`), permanently invalidating the leaked legacy service_role key (`HTTP 401 UNAUTHORIZED_DISABLED_LEGACY_KEY`)
+  - Migrated `.env` to modern Supabase publishable key (`sb_publishable_...`)
+  - Configured `service_role_v2` secret key across Supabase Vault and Supabase Secrets (`CRON_SECRET`)
+  - Verified full authentication, dashboard, auto-debit transactions, and settings in live application
 
 - None (all 9 steps completed and verified)
 
