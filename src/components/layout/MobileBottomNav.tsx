@@ -15,18 +15,19 @@ import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/auth-store"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
+import { t } from "@/lib/i18n"
 
 const userNavItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/accounts", icon: Wallet, label: "Rekening" },
+  { to: "/dashboard", icon: LayoutDashboard, label: t.nav_dashboard },
+  { to: "/accounts", icon: Wallet, label: t.nav_accounts },
   { to: "/transactions", icon: ArrowLeftRight, label: "Transaksi" },
-  { to: "/reports", icon: FileBarChart, label: "Laporan" },
+  { to: "/reports", icon: FileBarChart, label: t.nav_reports },
 ]
 
 const adminNavItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/admin/categories", icon: Tag, label: "Kategori" },
-  { to: "/admin/account-presets", icon: ListChecks, label: "Preset" },
+  { to: "/dashboard", icon: LayoutDashboard, label: t.nav_dashboard },
+  { to: "/admin/categories", icon: Tag, label: t.nav_categories_short },
+  { to: "/admin/account-presets", icon: ListChecks, label: t.nav_presets_short },
 ]
 
 export function MobileBottomNav() {
@@ -74,17 +75,17 @@ export function MobileBottomNav() {
                       ? "text-primary font-medium"
                       : "text-muted-foreground hover:text-foreground"
                   )}
-                  aria-label="Lainnya"
+                  aria-label={t.nav_more}
                 >
                   <MoreHorizontal size={22} strokeWidth={2} />
-                  <span>Lainnya</span>
+                  <span>{t.nav_more}</span>
                 </button>
               }
             />
 
             <SheetContent side="bottom" className="p-0">
               <SheetHeader className="px-4 pb-2 pt-4">
-                <SheetTitle>Lainnya</SheetTitle>
+                <SheetTitle>{t.nav_more}</SheetTitle>
               </SheetHeader>
 
               <div className="px-4 pb-6">
@@ -98,7 +99,7 @@ export function MobileBottomNav() {
                     }}
                   >
                     <FileText size={18} className="mr-2" />
-                    Tagihan (Auto-Debit)
+                    {t.nav_bills_auto_debit}
                   </Button>
 
                   <Button
@@ -110,7 +111,7 @@ export function MobileBottomNav() {
                     }}
                   >
                     <Settings size={18} className="mr-2" />
-                    Pengaturan
+                    {t.nav_settings}
                   </Button>
                 </div>
               </div>

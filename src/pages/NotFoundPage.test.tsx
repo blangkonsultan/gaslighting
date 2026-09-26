@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import NotFoundPage from "@/pages/NotFoundPage"
+import { t } from "@/lib/i18n"
 import { useAuthStore } from "@/stores/auth-store"
 import type { Profile } from "@/types/financial"
 
@@ -24,7 +25,7 @@ describe("NotFoundPage", () => {
     )
 
     expect(screen.getByText("404")).toBeInTheDocument()
-    expect(screen.getByRole("heading", { name: "Page not found" })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: t.not_found_title })).toBeInTheDocument()
   })
 
   it("CTA sends guest to /auth/login", () => {
@@ -37,7 +38,7 @@ describe("NotFoundPage", () => {
       </MemoryRouter>
     )
 
-    const link = screen.getByRole("link", { name: "Go to login" })
+    const link = screen.getByRole("link", { name: t.not_found_go_login })
     expect(link).toHaveAttribute("href", "/auth/login")
   })
 
@@ -51,7 +52,7 @@ describe("NotFoundPage", () => {
       </MemoryRouter>
     )
 
-    const link = screen.getByRole("link", { name: "Go to dashboard" })
+    const link = screen.getByRole("link", { name: t.not_found_go_dashboard })
     expect(link).toHaveAttribute("href", "/admin/categories")
   })
 })

@@ -18,6 +18,7 @@ import { billSchema, type BillInput as BillFormInput } from "@/lib/validators"
 import { addDaysYmd, addMonthsYmd, todayYmd } from "@/lib/dates"
 import { formatIdrIntegerInput, parseIdrInteger } from "@/lib/money"
 import { queryKeys } from "@/lib/query-client"
+import { t } from "@/lib/i18n"
 import type { Account, Category } from "@/types/financial"
 
 const frequencyLabels: Record<BillFormInput["frequency"], string> = {
@@ -192,8 +193,8 @@ export function BillForm({
                 projectedBalance={projectedBalance}
                 projectedLabel={
                   isStartToday
-                    ? "Equity setelah debit pertama (hari ini):"
-                    : "Equity setelah debit pertama (pada tanggal mulai):"
+                    ? t.account_info_projected_bill_today
+                    : t.account_info_projected_bill_start_date
                 }
                 extraRows={
                   selectedCategoryLabel ? (

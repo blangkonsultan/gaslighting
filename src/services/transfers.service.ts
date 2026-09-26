@@ -1,4 +1,5 @@
 import { supabase } from "./supabase"
+import { t } from "@/lib/i18n"
 
 export type ExecuteTransferInput = {
   userId: string
@@ -28,21 +29,23 @@ export type TransferPair = {
 function normalizeSupabaseErrorMessage(err: unknown): string {
   if (!err) return ""
   if (typeof err === "string") return err
-  if (typeof err === "object" && "message" in err && typeof (err as any).message === "string") return (err as any).message
+  if (typeof err === "object" && "message" in err) {
+    const msg = err.message
+    if (typeof msg === "string") return msg
+  }
   return ""
 }
 
 function mapTransferErrorToMessage(err: unknown): string {
   const msg = normalizeSupabaseErrorMessage(err)
 
-  if (!msg) return "Gagal memproses transfer."
-  if (msg.includes("Cannot transfer to the same account")) return "Rekening asal dan tujuan tidak boleh sama."
-  if (msg.includes("Insufficient balance")) return "Saldo tidak cukup."
-  if (msg.includes("Insufficient balance to reverse")) return "Saldo rekening tujuan tidak cukup untuk membatalkan/ubah transfer."
-  if (msg.includes("Source account not found")) return "Rekening asal tidak ditemukan."
-  if (msg.includes("Destination account not found")) return "Rekening tujuan tidak ditemukan."
-  if (msg.includes("Transfer not found")) return "Transfer tidak ditemukan."
-
+  if (!msg) return t.err_transfer_failed
+  if (msg.includes("Cannot transfer to the same account")) return t.err_transfer_same_account
+  if (msg.includes("Insufficient balance to reverse")) return t.err_transfer_insufficient_balance_reverse
+  if (msg.includes("Insufficient balance")) return t.err_transfer_insufficient_balance
+  if (msg.includes("Source account not found")) return t.err_transfer_source_not_found
+  if (msg.includes("Destination account not found")) return t.err_transfer_dest_not_found
+  if (msg.includes("Transfer not found")) return t.err_transfer_not_found
   return msg
 }
 

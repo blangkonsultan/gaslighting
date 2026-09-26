@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { formatCurrency } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
+import { t } from "@/lib/i18n"
 
 interface AccountInfoPanelProps {
   accountLabel: string
@@ -14,18 +15,18 @@ export function AccountInfoPanel({
   accountLabel,
   balance,
   projectedBalance,
-  projectedLabel = "Equity setelah transaksi:",
+  projectedLabel = t.account_info_projected_tx,
   extraRows,
 }: AccountInfoPanelProps) {
   return (
     <div className="rounded-lg border bg-muted/30 p-3 text-sm">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="text-muted-foreground">Rekening dipilih:</span>
+        <span className="text-muted-foreground">{t.account_info_selected_account}</span>
         <span className="font-medium">{accountLabel}</span>
       </div>
       {balance != null && (
         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-muted-foreground">Equity saat ini:</span>
+          <span className="text-muted-foreground">{t.account_info_current_balance}</span>
           <span className="font-medium tabular-nums">{formatCurrency(balance)}</span>
         </div>
       )}

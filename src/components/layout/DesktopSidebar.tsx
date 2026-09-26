@@ -12,23 +12,25 @@ import {
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { useAuthStore } from "@/stores/auth-store"
+import { t } from "@/lib/i18n"
 
 const userMainNav = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/accounts", icon: Wallet, label: "Rekening" },
-  { to: "/transactions/new", icon: ArrowLeftRight, label: "Transaksi Baru" },
-  { to: "/transactions", icon: FileBarChart, label: "Riwayat" },
-  { to: "/bills", icon: Receipt, label: "Tagihan" },
+  { to: "/dashboard", icon: LayoutDashboard, label: t.nav_dashboard },
+  { to: "/accounts", icon: Wallet, label: t.nav_accounts },
+  { to: "/transactions/new", icon: ArrowLeftRight, label: t.nav_new_transaction },
+  { to: "/transactions", icon: FileBarChart, label: t.nav_history },
+  { to: "/bills", icon: Receipt, label: t.nav_bills },
 ]
 
 const userBottomNav = [
-  { to: "/reports", icon: FileBarChart, label: "Laporan" },
-  { to: "/settings", icon: Settings, label: "Pengaturan" },
+  { to: "/reports", icon: FileBarChart, label: t.nav_reports },
+  { to: "/settings", icon: Settings, label: t.nav_settings },
 ]
 
 const adminNav = [
-  { to: "/admin/categories", icon: Tag, label: "Kelola Kategori" },
-  { to: "/admin/account-presets", icon: ListChecks, label: "Kelola Preset Rekening" },
+  { to: "/dashboard", icon: LayoutDashboard, label: t.nav_dashboard },
+  { to: "/admin/categories", icon: Tag, label: t.nav_manage_categories },
+  { to: "/admin/account-presets", icon: ListChecks, label: t.nav_manage_account_presets },
 ]
 
 export function DesktopSidebar() {
@@ -68,16 +70,14 @@ export function DesktopSidebar() {
         <>
           <nav className="flex flex-1 flex-col gap-1 p-3">
             {userMainNav.map(({ to, icon: Icon, label }) => {
-              let isActive = false
-              if (to === "/transactions/new") {
-                isActive = location.pathname === to
-              } else if (to === "/transactions") {
-                isActive = location.pathname === to || (location.pathname.startsWith("/transactions/") && location.pathname !== "/transactions/new")
-              } else if (to === "/dashboard") {
-                isActive = location.pathname === to
-              } else {
-                isActive = location.pathname.startsWith(to)
-              }
+              const isActive =
+                to === "/transactions/new"
+                  ? location.pathname === to
+                  : to === "/transactions"
+                    ? location.pathname === to || (location.pathname.startsWith("/transactions/") && location.pathname !== "/transactions/new")
+                    : to === "/dashboard"
+                      ? location.pathname === to
+                      : location.pathname.startsWith(to)
               return (
                 <NavLink
                   key={to}

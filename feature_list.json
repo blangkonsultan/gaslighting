@@ -42,11 +42,11 @@
     },
     {
       "id": "feat-006",
-      "name": "Active Feature (TBD)",
-      "description": "Next feature to implement — update this entry when a new feature is started",
+      "name": "Security Hardening, Bug Fixes, PWA, Migration Consolidation & DX",
+      "description": "Consolidate 18 migrations into 6 canonical files, fix 4 critical security vulnerabilities (privilege escalation, IDOR, unauthenticated auto-debit, account_presets RLS), fix frontend bugs, configure PWA with icons/manifest, clean up dead code, add i18n dictionary",
       "dependencies": ["feat-005"],
-      "status": "not-started",
-      "evidence": ""
+      "status": "done",
+      "evidence": "All 14 test suites pass (77 tests), 0 lint errors, build succeeds with PWA service worker and manifest generated"
     }
   ]
 }
