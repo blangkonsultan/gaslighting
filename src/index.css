@@ -10,6 +10,8 @@
   --color-foreground: #3D3D3D;
   --color-card: #E4DFB5;
   --color-card-foreground: #3D3D3D;
+  --color-popover: #E4DFB5;
+  --color-popover-foreground: #3D3D3D;
   --color-primary: #9AB17A;
   --color-primary-foreground: #1B2E15;
   --color-secondary: #C3CC9B;
@@ -17,6 +19,7 @@
   --color-muted: #D4CFA6;
   --color-muted-foreground: #525252;
   --color-border: #CFC99E;
+  --color-input: #CFC99E;
   --color-ring: #9AB17A;
   --color-destructive: #B91C1C;
   --color-destructive-foreground: #FFFFFF;
