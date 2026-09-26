@@ -31,6 +31,12 @@
   - Aligned native color swatch with touch-target (`h-11 w-11 shrink-0 cursor-pointer rounded-lg border border-border focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none`)
   - Added unit test suites `AdminCategoriesPage.test.tsx` and `AdminAccountPresetsPage.test.tsx` (81 passing tests)
 
+- [x] Step 16: Impeccable Audit & Polish:
+  - Added `touch-target` (min 44px) to transaction search input in `TransactionListPage.tsx`
+  - Added `touch-target` to `BillsPage.tsx` action buttons ("Jeda", "Aktifkan", "Hapus") and integrated `ConfirmDialog` to prevent accidental deletion
+  - Themed `BalanceRecalculationDialog.tsx` with design tokens (removed non-palette `bg-blue-50`, replaced with `bg-primary/10 border-primary/20`, `text-success` for checkmarks and increases, and `text-destructive` for decreases)
+  - Aligned `SummaryCards.tsx` and `DashboardPage.tsx` to use semantic `text-success` for income / positive net flow and `TrendingUp` icons (improving AA contrast)
+  - Refactored manual delete modals in `TransactionEditPage.tsx` to standardized `ConfirmDialog`
 ## Verification Evidence
 
 | Check | Command | Result | Notes |

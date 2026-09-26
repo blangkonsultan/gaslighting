@@ -38,6 +38,12 @@
   - Added `w-full` to SelectTrigger (`touch-target w-full`) so dropdown triggers span full modal width
   - Aligned native color picker input swatch with 44px touch-target (`h-11 w-11 shrink-0 cursor-pointer rounded-lg border border-border focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none`)
 - [x] Added unit and DOM regression test suites `src/pages/admin/AdminCategoriesPage.test.tsx` and `src/pages/admin/AdminAccountPresetsPage.test.tsx` (all 4 tests passing; total test suite 16 files, 81 tests passing)
+- [x] Complete Impeccable UX/UI audit and polish:
+  - Added `touch-target` (min 44px) to transaction search input in `TransactionListPage.tsx`
+  - Added `touch-target` to `BillsPage.tsx` action buttons ("Jeda", "Aktifkan", "Hapus") and integrated `ConfirmDialog` to prevent accidental deletion
+  - Themed `BalanceRecalculationDialog.tsx` with design tokens (removed non-palette `bg-blue-50`, replaced with `bg-primary/10 border-primary/20`, `text-success` for checkmarks and increases, and `text-destructive` for decreases)
+  - Aligned `SummaryCards.tsx` and `DashboardPage.tsx` to use semantic `text-success` for income / positive net flow and `TrendingUp` icons (improving AA contrast)
+  - Refactored manual delete modals in `TransactionEditPage.tsx` to standardized `ConfirmDialog`
 
 ### What's In Progress
 
