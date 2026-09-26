@@ -47,6 +47,14 @@
       "dependencies": ["feat-005"],
       "status": "done",
       "evidence": "All 14 test suites pass (77 tests), 0 lint errors, build succeeds with PWA service worker and manifest generated"
+    },
+    {
+      "id": "feat-007",
+      "name": "Admin Categories and Presets Consistency & Dialog Polish",
+      "description": "Align AdminCategoriesPage layout (vertical stack cards, responsive 2-col items grid, neutral title styling) with AdminAccountPresetsPage, add w-full to SelectTrigger in both admin dialogs, align native color picker swatch with touch-target (44px h-11 w-11, rounded-lg, focus-visible ring)",
+      "dependencies": ["feat-006"],
+      "status": "done",
+      "evidence": "16 test suites pass (81 tests, +4 new admin tests), 0 lint errors, build succeeds, headless browser DOM inspection proves flex-direction column, 2-column grid at desktop, neutral color rgb(61, 61, 61), 400px SelectTrigger width, and 44px color swatch."
     }
   ]
 }

@@ -117,12 +117,12 @@ export default function AdminCategoriesPage() {
       {!categories?.length ? (
         <EmptyState icon={<Tag size={40} />} title="Belum ada kategori" />
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base text-primary">Pemasukan ({incomeCategories.length})</CardTitle>
+              <CardTitle className="text-base">Pemasukan ({incomeCategories.length})</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-1">
+            <CardContent className="grid gap-1 sm:grid-cols-2">
               {incomeCategories.map((cat) => (
                 <CategoryRow
                   key={cat.id}
@@ -135,9 +135,9 @@ export default function AdminCategoriesPage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base text-destructive">Pengeluaran ({expenseCategories.length})</CardTitle>
+              <CardTitle className="text-base">Pengeluaran ({expenseCategories.length})</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-1">
+            <CardContent className="grid gap-1 sm:grid-cols-2">
               {expenseCategories.map((cat) => (
                 <CategoryRow
                   key={cat.id}
@@ -172,7 +172,7 @@ export default function AdminCategoriesPage() {
                   value={formType}
                   onValueChange={(v) => setValue("type", v as "income" | "expense", { shouldValidate: true })}
                 >
-                  <SelectTrigger className="touch-target" aria-invalid={Boolean(errors.type)}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="touch-target w-full" aria-invalid={Boolean(errors.type)}><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="income">Pemasukan</SelectItem>
                     <SelectItem value="expense">Pengeluaran</SelectItem>
@@ -195,7 +195,7 @@ export default function AdminCategoriesPage() {
                     type="color"
                     value={watch("color")}
                     onChange={(e) => setValue("color", e.target.value, { shouldValidate: true })}
-                    className="h-10 w-10 cursor-pointer rounded border border-border"
+                    className="h-11 w-11 shrink-0 cursor-pointer rounded-lg border border-border focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none"
                   />
                   <Input
                     id="cat-color"

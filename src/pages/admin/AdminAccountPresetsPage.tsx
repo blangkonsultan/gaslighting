@@ -202,7 +202,7 @@ export default function AdminAccountPresetsPage() {
 
               <FormField label="Tipe" error={errors.type}>
                 <Select value={formType} onValueChange={(v) => setValue("type", v as AdminAccountPresetInput["type"], { shouldValidate: true })}>
-                  <SelectTrigger className="touch-target" aria-invalid={Boolean(errors.type)}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="touch-target w-full" aria-invalid={Boolean(errors.type)}><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {ACCOUNT_TYPES.map((t) => (
                       <SelectItem key={t} value={t}>{typeLabels[t] || t}</SelectItem>
@@ -226,7 +226,7 @@ export default function AdminAccountPresetsPage() {
                     type="color"
                     value={watch("color")}
                     onChange={(e) => setValue("color", e.target.value, { shouldValidate: true })}
-                    className="h-10 w-10 cursor-pointer rounded border border-border"
+                    className="h-11 w-11 shrink-0 cursor-pointer rounded-lg border border-border focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none"
                   />
                   <Input
                     className="touch-target flex-1"

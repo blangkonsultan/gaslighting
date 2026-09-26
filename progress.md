@@ -4,7 +4,7 @@
 
 **Last Updated:** 2026-09-26
 **Branch:** main
-**Active Feature:** feat-006 (Completed)
+**Active Feature:** feat-007 (Completed)
 
 ## Status
 
@@ -30,6 +30,14 @@
   - Removed `next-themes` dependency and replaced with direct light mode in `sonner.tsx`
 - [x] Regenerated Supabase database types for balance recalculation RPCs and removed all `as any` casts in `balance-recalculation.service.ts`
 - [x] Created `src/lib/i18n.ts` dictionary and replaced hardcoded strings across high-traffic UI components, validators, transfers service, and fixed language inconsistencies in `NotFoundPage.tsx` and `AccountInfoPanel.tsx`
+- [x] Align AdminCategoriesPage card layout and typography with AdminAccountPresetsPage:
+  - Changed card outer container from `grid gap-6 md:grid-cols-2` to `flex flex-col gap-4`
+  - Changed CardContent from `flex flex-col gap-1` to `grid gap-1 sm:grid-cols-2`
+  - Removed semantic coloring (`text-primary` / `text-destructive`) from CardTitle in favor of neutral `text-base`
+- [x] Fix admin dialog forms in AdminCategoriesPage and AdminAccountPresetsPage:
+  - Added `w-full` to SelectTrigger (`touch-target w-full`) so dropdown triggers span full modal width
+  - Aligned native color picker input swatch with 44px touch-target (`h-11 w-11 shrink-0 cursor-pointer rounded-lg border border-border focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none`)
+- [x] Added unit and DOM regression test suites `src/pages/admin/AdminCategoriesPage.test.tsx` and `src/pages/admin/AdminAccountPresetsPage.test.tsx` (all 4 tests passing; total test suite 16 files, 81 tests passing)
 
 ### What's In Progress
 
@@ -54,25 +62,22 @@
 
 ## Files Modified This Session
 
-- `supabase/migrations/*` (deleted 18 old files, created 6 canonical files)
-- `supabase/functions/auto-debit/index.ts`
-- `vercel.json`
-- `vite.config.ts`, `tsconfig.app.json`, `index.html`
-- `public/pwa-192x192.png`, `public/pwa-512x512.png`, `public/pwa-512x512-maskable.png`, `public/apple-touch-icon.png`
-- `src/hooks/useBalanceCheck.ts`, `src/hooks/useBalanceIssuesWarning.ts`
-- `src/pages/dashboard/DashboardPage.tsx`
-- `src/components/layout/DesktopSidebar.tsx`, `src/components/layout/MobileBottomNav.tsx`
-- `src/pages/reports/ReportsPage.tsx`, `src/pages/transactions/TransactionListPage.tsx`
-- `src/lib/validators.schemas.test.ts`, `src/lib/validators.transfer.test.ts`, `src/lib/validators.ts`
-- `src/components/ui/sonner.tsx`, `package.json`, `package-lock.json`
-- `src/services/balance-recalculation.service.ts`, `src/types/database.ts`, `src/services/transfers.service.ts`
-- `src/lib/i18n.ts`, `src/pages/NotFoundPage.tsx`, `src/pages/NotFoundPage.test.tsx`
-- `src/components/shared/AccountInfoPanel.tsx`, `src/components/bills/BillForm.tsx`
-- `eslint.config.js`
+- `src/pages/admin/AdminCategoriesPage.tsx`
+- `src/pages/admin/AdminAccountPresetsPage.tsx`
+- `src/pages/admin/AdminCategoriesPage.test.tsx`
+- `src/pages/admin/AdminAccountPresetsPage.test.tsx`
 - `feature_list.json`
+- `progress.md`
+- `session-handoff.md`
 
 ## Evidence of Completion
 
-- `npm run lint` passes (0 errors)
-- `npm run test -- --run` passes (14/14 files, 77/77 tests passed)
-- `npm run build` succeeds (Vite build + VitePWA service worker and manifest generation)
+- `npm run lint` passes (0 errors, code 0)
+- `npm run test` passes (16/16 test files, 81/81 tests passed)
+- `npm run build` succeeds (TypeScript check + Vite production bundle + PWA)
+- Headless browser DOM evaluation confirms:
+  - Card container: `flex-direction: column`
+  - Card content: `grid-template-columns: 485px 485px` (2 columns on desktop)
+  - CardTitle color: neutral `rgb(61, 61, 61)` (#3D3D3D)
+  - SelectTrigger width: 400px (100% of parent modal width)
+  - Color picker swatch: 44px x 44px with 12px border radius
