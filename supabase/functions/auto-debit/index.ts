@@ -198,6 +198,7 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
   const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY') ?? ''
   const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY') ?? ''
   const vapidSubject = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:admin@gaslighting.com'
@@ -211,16 +212,15 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 1. Authenticate caller (support both sb_secret key and legacy JWT service role key)
+  // 1. Authenticate caller (require service role key or cron secret from env)
   const authHeader = req.headers.get('Authorization')
   const token = authHeader ? authHeader.replace(/^Bearer\s+/i, '') : ''
-  const legacyServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56ZmNiem5zdnF0aHFneHZkaXhrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzAxNzk0MiwiZXhwIjoyMDkyNTkzOTQyfQ.sqO86JA8R7L6PhRgC1ZcgjsDGuxRCqhDUi2OPZQJrbk'
 
-  const isServiceRole = Boolean(
-    token && (token === serviceRoleKey || token === legacyServiceKey)
+  const isAuthorized = Boolean(
+    token && (token === serviceRoleKey || (cronSecret && token === cronSecret))
   )
 
-  if (!isServiceRole) {
+  if (!isAuthorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
