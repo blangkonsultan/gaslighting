@@ -15,7 +15,11 @@ export function AmountDisplay({ amount, className, showSign = false }: AmountDis
     <span
       className={cn(
         "font-semibold tabular-nums",
-        amount < 0 ? "text-destructive" : "text-foreground",
+        amount < 0
+          ? "text-destructive"
+          : showSign && amount > 0
+            ? "text-success"
+            : "text-foreground",
         className
       )}
     >

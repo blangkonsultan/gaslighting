@@ -4,6 +4,7 @@ import {
   Wallet,
   ArrowLeftRight,
   FileBarChart,
+  History,
   Settings,
   Receipt,
   Tag,
@@ -18,7 +19,7 @@ const userMainNav = [
   { to: "/dashboard", icon: LayoutDashboard, label: t.nav_dashboard },
   { to: "/accounts", icon: Wallet, label: t.nav_accounts },
   { to: "/transactions/new", icon: ArrowLeftRight, label: t.nav_new_transaction },
-  { to: "/transactions", icon: FileBarChart, label: t.nav_history },
+  { to: "/transactions", icon: History, label: t.nav_history },
   { to: "/bills", icon: Receipt, label: t.nav_bills },
 ]
 

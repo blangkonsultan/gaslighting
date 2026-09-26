@@ -11,15 +11,17 @@
   --color-card: #E4DFB5;
   --color-card-foreground: #3D3D3D;
   --color-primary: #9AB17A;
-  --color-primary-foreground: #FFFFFF;
+  --color-primary-foreground: #1B2E15;
   --color-secondary: #C3CC9B;
   --color-secondary-foreground: #3D3D3D;
   --color-muted: #D4CFA6;
-  --color-muted-foreground: #6B6B6B;
+  --color-muted-foreground: #525252;
   --color-border: #CFC99E;
   --color-ring: #9AB17A;
-  --color-destructive: #DC2626;
+  --color-destructive: #B91C1C;
   --color-destructive-foreground: #FFFFFF;
+  --color-success: #3D6636;
+  --color-success-foreground: #FFFFFF;
   --color-accent: #C3CC9B;
   --color-accent-foreground: #3D3D3D;
   --radius: 0.75rem;
@@ -32,6 +34,11 @@
     border-color: var(--color-border);
     @apply border-border outline-ring/50;
   }
+  ::selection {
+    background-color: #9AB17A;
+    color: #1B2E15;
+  }
+
 
   body {
     margin: 0;
@@ -102,8 +109,8 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
+  --color-success-foreground: var(--success-foreground);
+  --color-success: var(--success);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   --color-foreground: var(--foreground);
@@ -125,14 +132,16 @@
   --popover: #E4DFB5;
   --popover-foreground: #3D3D3D;
   --primary: #9AB17A;
-  --primary-foreground: #FFFFFF;
+  --primary-foreground: #1B2E15;
   --secondary: #C3CC9B;
   --secondary-foreground: #3D3D3D;
   --muted: #D4CFA6;
-  --muted-foreground: #6B6B6B;
+  --muted-foreground: #525252;
   --accent: #C3CC9B;
   --accent-foreground: #3D3D3D;
-  --destructive: #DC2626;
+  --destructive: #B91C1C;
+  --success: #3D6636;
+  --success-foreground: #FFFFFF;
   --border: #CFC99E;
   --input: #CFC99E;
   --ring: #9AB17A;
@@ -145,7 +154,7 @@
   --sidebar: #E4DFB5;
   --sidebar-foreground: #3D3D3D;
   --sidebar-primary: #9AB17A;
-  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-primary-foreground: #1B2E15;
   --sidebar-accent: #C3CC9B;
   --sidebar-accent-foreground: #3D3D3D;
   --sidebar-border: #CFC99E;

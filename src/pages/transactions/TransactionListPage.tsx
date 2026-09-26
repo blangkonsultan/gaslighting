@@ -235,7 +235,7 @@ export default function TransactionListPage() {
                       showSign
                       className={cn(
                         "shrink-0 text-sm",
-                        (t.type === "income" || (isTransfer && !isTransferOut)) && "text-primary"
+                        (t.type === "income" || (isTransfer && !isTransferOut)) && "text-success"
                       )}
                     />
                     <span className="inline-flex size-8 items-center justify-center rounded-md border border-border bg-background/50 text-muted-foreground">

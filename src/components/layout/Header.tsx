@@ -27,7 +27,10 @@ export function Header() {
 
       <div className="ml-auto">
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center justify-center rounded-full bg-muted p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors touch-target">
+          <DropdownMenuTrigger
+            aria-label="Menu akun"
+            className="flex items-center justify-center rounded-full bg-muted p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors touch-target"
+          >
             <User size={20} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

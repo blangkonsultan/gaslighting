@@ -38,7 +38,7 @@ export default function LoginPage() {
     <div className="flex min-h-dvh items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="page-title text-primary">Masuk</CardTitle>
+          <CardTitle className="page-title text-foreground">Masuk</CardTitle>
           <CardDescription className="section-subtitle">Masuk ke akun Gaslighting kamu</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>

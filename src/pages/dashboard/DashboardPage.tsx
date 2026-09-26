@@ -139,7 +139,7 @@ export default function DashboardPage() {
                     <AmountDisplay
                       amount={amountSigned}
                       showSign
-                      className={cn("shrink-0 text-sm", (t.type === "income" || isTransferIn) && "text-primary")}
+                      className={cn("shrink-0 text-sm", (t.type === "income" || isTransferIn) && "text-success")}
                     />
                   </div>
                 )
