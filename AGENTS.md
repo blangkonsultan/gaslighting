@@ -69,6 +69,8 @@ Copy `.env.example` to `.env`. Required: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANO
 - `profiles.onboarding_completed` gates dashboard access
 - Admin role set manually in DB; new signups default to `user`
 - Migrations stored in `supabase/migrations/`
+- **Zero Direct Edits:** NEVER make manual edits to schema, tables, functions, or policies in Supabase dashboard.
+- **Mandatory Migration/Edge Function:** Any database change (DDL, triggers, RPCs, RLS, seeds, extensions) MUST be authored in a new versioned migration file under `supabase/migrations/` or Edge Function under `supabase/functions/` to prevent drift between the project codebase and Supabase.
 
 ## Common Commands
 
