@@ -319,6 +319,18 @@ export type Database = {
         }
         Returns: string
       }
+      get_balance_recalculation_preview: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      recalculate_account_balances: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: Json
+      }
       reverse_transfer: {
         Args: {
           p_transfer_id: string

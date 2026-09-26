@@ -2,7 +2,7 @@ import { supabase } from "./supabase"
 import type { BalanceRecalcPreview, BalanceRecalcResult } from "@/types/financial"
 
 export async function getBalanceRecalcPreview(userId: string): Promise<BalanceRecalcPreview[]> {
-  const { data, error } = await supabase.rpc("get_balance_recalculation_preview" as any, {
+  const { data, error } = await supabase.rpc("get_balance_recalculation_preview", {
     p_user_id: userId,
   })
 
@@ -13,7 +13,7 @@ export async function getBalanceRecalcPreview(userId: string): Promise<BalanceRe
 }
 
 export async function applyBalanceRecalculation(userId: string): Promise<BalanceRecalcResult> {
-  const { data, error } = await supabase.rpc("recalculate_account_balances" as any, {
+  const { data, error } = await supabase.rpc("recalculate_account_balances", {
     p_user_id: userId,
   })
 
