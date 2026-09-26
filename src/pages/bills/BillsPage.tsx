@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared/EmptyState"
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
 import { BillForm } from "@/components/bills/BillForm"
 import { formatCurrency } from "@/lib/formatters"
@@ -36,7 +37,7 @@ export default function BillsPage() {
   const { profile } = useAuthStore()
   const userId = profile?.id ?? ""
   const [showCreate, setShowCreate] = useState(false)
-
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const {
     data: bills,
     isLoading,
@@ -224,7 +225,7 @@ export default function BillsPage() {
             items={grouped.active}
             onPause={(id) => toggleMutation.mutate({ billId: id, isActive: false })}
             onResume={(id) => toggleMutation.mutate({ billId: id, isActive: true })}
-            onDelete={(id) => deleteMutation.mutate(id)}
+            onDelete={(id, name) => setDeleteTarget({ id, name })}
             busyIds={new Set([
               ...(toggleMutation.variables ? [toggleMutation.variables.billId] : []),
               ...(deleteMutation.variables ? [deleteMutation.variables] : []),
@@ -236,7 +237,7 @@ export default function BillsPage() {
               items={grouped.failed}
               onPause={(id) => toggleMutation.mutate({ billId: id, isActive: false })}
               onResume={(id) => toggleMutation.mutate({ billId: id, isActive: true })}
-              onDelete={(id) => deleteMutation.mutate(id)}
+              onDelete={(id, name) => setDeleteTarget({ id, name })}
               busyIds={new Set([
                 ...(toggleMutation.variables ? [toggleMutation.variables.billId] : []),
                 ...(deleteMutation.variables ? [deleteMutation.variables] : []),
@@ -249,7 +250,7 @@ export default function BillsPage() {
               items={grouped.paused}
               onPause={(id) => toggleMutation.mutate({ billId: id, isActive: false })}
               onResume={(id) => toggleMutation.mutate({ billId: id, isActive: true })}
-              onDelete={(id) => deleteMutation.mutate(id)}
+              onDelete={(id, name) => setDeleteTarget({ id, name })}
               busyIds={new Set([
                 ...(toggleMutation.variables ? [toggleMutation.variables.billId] : []),
                 ...(deleteMutation.variables ? [deleteMutation.variables] : []),
@@ -258,6 +259,22 @@ export default function BillsPage() {
           )}
         </div>
       )}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus Tagihan"
+        description={`Yakin ingin menghapus tagihan "${deleteTarget?.name}"? Riwayat transaksi sebelumnya tetap tersimpan.`}
+        confirmLabel="Hapus"
+        variant="destructive"
+        loading={deleteMutation.isPending}
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteMutation.mutate(deleteTarget.id, {
+              onSettled: () => setDeleteTarget(null),
+            })
+          }
+        }}
+      />
     </div>
   )
 }
@@ -274,7 +291,7 @@ function BillSection({
   items: BillListRow[]
   onPause: (id: string) => void
   onResume: (id: string) => void
-  onDelete: (id: string) => void
+  onDelete: (id: string, name: string) => void
   busyIds: Set<string>
 }) {
   if (items.length === 0) return null
@@ -343,9 +360,8 @@ function BillSection({
                 <div className="grid grid-cols-2 gap-2">
                   {b.is_active && b.status === "active" ? (
                     <Button
-                      size="sm"
                       variant="outline"
-                      className="w-full"
+                      className="w-full touch-target"
                       onClick={() => onPause(b.id)}
                       disabled={isBusy}
                     >
@@ -353,8 +369,7 @@ function BillSection({
                     </Button>
                   ) : (
                     <Button
-                      size="sm"
-                      className="w-full"
+                      className="w-full touch-target"
                       onClick={() => onResume(b.id)}
                       disabled={isBusy}
                     >
@@ -362,10 +377,9 @@ function BillSection({
                     </Button>
                   )}
                   <Button
-                    size="sm"
                     variant="outline"
-                    className="w-full text-destructive hover:text-destructive"
-                    onClick={() => onDelete(b.id)}
+                    className="w-full text-destructive hover:text-destructive touch-target"
+                    onClick={() => onDelete(b.id, b.name)}
                     disabled={isBusy}
                   >
                     Hapus

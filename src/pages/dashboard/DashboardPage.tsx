@@ -83,7 +83,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard_monthly_income}</CardTitle>
-            <TrendingUp size={18} className="text-primary" />
+            <TrendingUp size={18} className="text-success" />
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold tabular-nums">{incomeText}</p>

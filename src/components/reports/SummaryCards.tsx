@@ -15,7 +15,7 @@ export function SummaryCards({ report }: SummaryCardsProps) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <TrendingUp size={16} className="text-primary" />
+            <TrendingUp size={16} className="text-success" />
             Pemasukan
           </CardTitle>
         </CardHeader>
@@ -44,7 +44,7 @@ export function SummaryCards({ report }: SummaryCardsProps) {
           <AmountDisplay
             amount={report.netTotal}
             showSign
-            className={cn("text-2xl font-bold tabular-nums", report.netTotal >= 0 ? "text-primary" : "text-destructive")}
+            className={cn("text-2xl font-bold tabular-nums", report.netTotal >= 0 ? "text-success" : "text-destructive")}
           />
         </CardContent>
       </Card>
@@ -57,7 +57,7 @@ export function SummaryCards({ report }: SummaryCardsProps) {
           <p
             className={cn(
               "text-2xl font-bold tabular-nums",
-              report.savingsRate >= 20 ? "text-primary" : report.savingsRate < 0 ? "text-destructive" : ""
+              report.savingsRate >= 20 ? "text-success" : report.savingsRate < 0 ? "text-destructive" : ""
             )}
           >
             {formatPercentage(report.savingsRate)}

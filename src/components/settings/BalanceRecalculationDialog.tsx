@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { AmountDisplay } from "@/components/shared/AmountDisplay"
 import { formatCurrency } from "@/lib/formatters"
-import { cn } from "@/lib/utils"
 import type { BalanceRecalcPreview, BalanceRecalcSummary } from "@/types/financial"
 
 interface Props {
@@ -80,24 +79,24 @@ export function BalanceRecalculationDialog({
 
         <div className="flex flex-col gap-4 overflow-y-auto py-2">
           {summary.updateCount > 0 && (
-            <div className="flex flex-col gap-3 rounded-lg bg-blue-50 p-4 dark:bg-blue-950/30">
+            <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/10 p-4">
               <div className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <span className="font-medium text-blue-900 dark:text-blue-200">
+                <Check className="h-5 w-5 text-success" />
+                <span className="font-medium text-foreground">
                   {summary.updateCount} rekening akan diperbarui
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-sm text-blue-800 dark:text-blue-300">
-                <div>Selisih total: {formatCurrency(summary.totalDifference)}</div>
+              <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                <div>Selisih total: <span className="font-medium text-foreground">{formatCurrency(summary.totalDifference)}</span></div>
                 <div>{summary.skipCount} rekening dilewati (saldo negatif)</div>
               </div>
             </div>
           )}
 
           {summary.hasIssues && (
-            <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 dark:bg-amber-950/30">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
-              <div className="text-sm text-amber-800 dark:text-amber-200">
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200/50 bg-amber-50 p-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+              <div className="text-sm text-amber-800">
                 <p className="font-medium">Beberapa rekening dilewati</p>
                 <p className="mt-1">
                   Rekening dengan saldo negatif tidak akan diperbarui. Periksa ulang transaksi
@@ -109,10 +108,10 @@ export function BalanceRecalculationDialog({
 
           {accountsWithNegative.length > 0 && (
             <div>
-              <h3 className="mb-2 text-sm font-medium text-amber-700 dark:text-amber-400">
+              <h3 className="mb-2 text-sm font-medium text-amber-800">
                 Dilewati (Saldo Negatif)
               </h3>
-              <div className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/50 dark:bg-amber-950/20">
+              <div className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
                 {accountsWithNegative.map((p) => (
                   <div
                     key={p.accountId}
@@ -120,11 +119,11 @@ export function BalanceRecalculationDialog({
                   >
                     <div className="min-w-0">
                       <div className="font-medium">{p.accountName}</div>
-                      <div className="text-xs text-amber-700 dark:text-amber-400">
+                      <div className="text-xs text-amber-700">
                         Saldo dihitung: {formatCurrency(p.calculatedBalance)}
                       </div>
                     </div>
-                    <X className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
+                    <X className="h-5 w-5 shrink-0 text-amber-600" />
                   </div>
                 ))}
               </div>
@@ -159,16 +158,13 @@ export function BalanceRecalculationDialog({
                         </div>
                         <div className="flex shrink-0 items-center gap-1 text-sm">
                           {isIncrease ? (
-                            <ArrowUp className="h-4 w-4 text-green-600 dark:text-green-500" />
+                            <ArrowUp className="h-4 w-4 text-success" />
                           ) : (
-                            <ArrowDown className="h-4 w-4 text-red-600 dark:text-red-500" />
+                            <ArrowDown className="h-4 w-4 text-destructive" />
                           )}
                           <AmountDisplay
                             amount={difference}
                             showSign
-                            className={cn(
-                              isIncrease ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
-                            )}
                           />
                         </div>
                       </div>

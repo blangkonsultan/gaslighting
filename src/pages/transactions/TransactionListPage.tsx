@@ -92,6 +92,7 @@ export default function TransactionListPage() {
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Cari deskripsi…"
             aria-label="Cari transaksi berdasarkan deskripsi"
+            className="touch-target"
           />
           <div className="grid grid-cols-2 gap-2">
             <Select value={filters.categoryId ?? ""} onValueChange={(v) => setFilters({ categoryId: v || undefined })}>

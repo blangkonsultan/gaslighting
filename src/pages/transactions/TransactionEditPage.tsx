@@ -1,9 +1,11 @@
+import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/shared/EmptyState"
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
 import { Button } from "@/components/ui/button"
 import { TransactionForm } from "@/components/transactions/TransactionForm"
 import { queryKeys } from "@/lib/query-client"
@@ -13,16 +15,6 @@ import { deleteTransaction, getTransactionById, updateTransaction } from "@/serv
 import { TransferForm } from "@/components/transactions/TransferForm"
 import { getTransferPair, reverseTransfer, updateTransfer } from "@/services/transfers.service"
 import { parseIdrInteger } from "@/lib/money"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { Trash2 } from "lucide-react"
 
 export default function TransactionEditPage() {
@@ -31,6 +23,7 @@ export default function TransactionEditPage() {
   const { id } = useParams<{ id: string }>()
   const { profile } = useAuthStore()
   const userId = profile?.id
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
 
   const txQuery = useQuery({
     queryKey: ["transactions", "detail", { userId, id }],
@@ -268,38 +261,25 @@ export default function TransactionEditPage() {
             />
 
             <div className="flex w-full flex-col gap-2">
-              <Dialog>
-                <DialogTrigger
-                  render={
-                    <Button
-                      variant="destructive"
-                      className="touch-target w-full"
-                      disabled={reverseTransferMutation.isPending}
-                    />
-                  }
-                >
-                  <Trash2 aria-hidden="true" />
-                  Hapus Transfer
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Hapus transfer?</DialogTitle>
-                    <DialogDescription>
-                      Tindakan ini tidak bisa dibatalkan. Saldo kedua rekening akan disesuaikan kembali.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose render={<Button variant="outline" />}>Batal</DialogClose>
-                    <Button
-                      variant="destructive"
-                      onClick={() => reverseTransferMutation.mutate()}
-                      disabled={reverseTransferMutation.isPending}
-                    >
-                      {reverseTransferMutation.isPending ? "Menghapus…" : "Hapus"}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <Button
+                variant="destructive"
+                className="touch-target w-full"
+                disabled={reverseTransferMutation.isPending}
+                onClick={() => setConfirmDeleteOpen(true)}
+              >
+                <Trash2 aria-hidden="true" className="mr-2" />
+                Hapus Transfer
+              </Button>
+              <ConfirmDialog
+                open={confirmDeleteOpen}
+                onOpenChange={setConfirmDeleteOpen}
+                title="Hapus transfer?"
+                description="Tindakan ini tidak bisa dibatalkan. Saldo kedua rekening akan disesuaikan kembali."
+                confirmLabel="Hapus"
+                variant="destructive"
+                loading={reverseTransferMutation.isPending}
+                onConfirm={() => reverseTransferMutation.mutate()}
+              />
             </div>
           </CardContent>
         </Card>
@@ -333,38 +313,25 @@ export default function TransactionEditPage() {
           />
 
           <div className="flex w-full flex-col gap-2">
-            <Dialog>
-              <DialogTrigger
-                render={
-                  <Button
-                    variant="destructive"
-                    className="touch-target w-full"
-                    disabled={deleteTxMutation.isPending}
-                  />
-                }
-              >
-                <Trash2 aria-hidden="true" />
-                Hapus Transaksi
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Hapus transaksi?</DialogTitle>
-                  <DialogDescription>
-                    Tindakan ini tidak bisa dibatalkan. Saldo rekening akan disesuaikan otomatis.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <DialogClose render={<Button variant="outline" />}>Batal</DialogClose>
-                  <Button
-                    variant="destructive"
-                    onClick={() => deleteTxMutation.mutate()}
-                    disabled={deleteTxMutation.isPending}
-                  >
-                    {deleteTxMutation.isPending ? "Menghapus…" : "Hapus"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button
+              variant="destructive"
+              className="touch-target w-full"
+              disabled={deleteTxMutation.isPending}
+              onClick={() => setConfirmDeleteOpen(true)}
+            >
+              <Trash2 aria-hidden="true" className="mr-2" />
+              Hapus Transaksi
+            </Button>
+            <ConfirmDialog
+              open={confirmDeleteOpen}
+              onOpenChange={setConfirmDeleteOpen}
+              title="Hapus transaksi?"
+              description="Tindakan ini tidak bisa dibatalkan. Saldo rekening akan disesuaikan otomatis."
+              confirmLabel="Hapus"
+              variant="destructive"
+              loading={deleteTxMutation.isPending}
+              onConfirm={() => deleteTxMutation.mutate()}
+            />
           </div>
         </CardContent>
       </Card>
