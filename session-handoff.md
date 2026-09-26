@@ -58,6 +58,13 @@
   - Added "Notifikasi" section in `src/pages/settings/SettingsPage.tsx` with toggle switch and status messaging with full test suite (4 tests)
   - Updated auto-debit Edge Function `supabase/functions/auto-debit/index.ts` to dispatch web push notifications on bill success and failure with automatic expired endpoint pruning (404/410), deployed to Supabase
   - Tightened TypeScript types (BufferSource, PushSubscriptionData, SupabaseClient)
+- [x] Step 20: Fix Unclickable Notification Toggle:
+  - Identified root cause: `await navigator.serviceWorker.ready` hangs indefinitely when no active service worker exists on page boot, keeping `isPushLoading` permanently `true` and disabling `<Switch disabled={isPushLoading || ...} />`
+  - Diagnosed dev environment conflict: `src/main.tsx` and `vite.config.ts` were actively unregistering `/sw.js` in dev mode to prevent stale production asset caching, destroying any active worker
+  - Patched `src/hooks/usePushNotifications.ts` with `getActiveRegistration()` using `getRegistration()` and 1-second timeout-guarded `.ready` fallback, eliminating infinite loading states
+  - Updated `src/main.tsx` to clear only cache storages (`caches.delete`) instead of unregistering the service worker
+  - Updated `vite.config.ts` dev middleware to serve a non-caching push notification service worker for `/sw.js`
+  - Verified toggle activation, subscription creation, database sync, and un-subscription in headless browser
 ## Verification Evidence
 
 | Check | Command | Result | Notes |

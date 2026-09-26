@@ -63,6 +63,10 @@
   - Added Notifikasi section in `src/pages/settings/SettingsPage.tsx` with toggle switch and status indicators
   - Updated auto-debit Edge Function `supabase/functions/auto-debit/index.ts` to dispatch web push notifications on bill success and failure with automatic expired endpoint pruning (404/410), deployed to Supabase
   - Added unit test suites for service, hook, and settings page (17 new tests; total 19 test files, 98 tests passing)
+- [x] Fix unclickable notification toggle bug:
+  - Replaced unbounded `await navigator.serviceWorker.ready` with safe `getActiveRegistration()` helper (using `getRegistration()` and timeout-guarded `.ready` fallback), preventing indefinite loading hangs (`isPushLoading: true`)
+  - Replaced dev mode brute-force service worker unregistration in `src/main.tsx` with cache-only purge (`caches.delete`)
+  - Updated `vite.config.ts` dev middleware to serve a non-caching push notification service worker for `/sw.js`, allowing full subscription lifecycle in dev/Tailscale environments without stale asset caching
 ### What's In Progress
 
 - None (all 9 steps completed and verified)
@@ -92,6 +96,7 @@
 - `supabase/migrations/20260926000003_push_subscriptions.sql`
 - `src/types/database.ts`
 - `.env.example`
+- `src/main.tsx`
 - `vite.config.ts`
 - `src/sw.ts`
 - `src/services/push-notifications.service.ts`
