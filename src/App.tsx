@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { Toaster } from "@/components/ui/sonner"
@@ -6,21 +7,22 @@ import { queryClient } from "@/lib/query-client"
 import { AppShell } from "@/components/layout/AppShell"
 import { UserRoute, AdminRoute, DashboardRoute, GuestRoute } from "@/components/auth/RoleRoutes"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
-import LoginPage from "@/pages/auth/LoginPage"
-import RegisterPage from "@/pages/auth/RegisterPage"
-import OnboardingPage from "@/pages/onboarding/OnboardingPage"
-import { RoleDashboard } from "@/components/auth/RoleDashboard"
-import AccountsListPage from "@/pages/accounts/AccountsListPage"
-import AccountCreatePage from "@/pages/accounts/AccountCreatePage"
-import TransactionListPage from "@/pages/transactions/TransactionListPage"
-import TransactionCreatePage from "@/pages/transactions/TransactionCreatePage"
-import TransactionEditPage from "@/pages/transactions/TransactionEditPage"
-import ReportsPage from "@/pages/reports/ReportsPage"
-import SettingsPage from "@/pages/settings/SettingsPage"
-import AdminCategoriesPage from "@/pages/admin/AdminCategoriesPage"
-import AdminAccountPresetsPage from "@/pages/admin/AdminAccountPresetsPage"
-import BillsPage from "@/pages/bills/BillsPage"
-import NotFoundPage from "@/pages/NotFoundPage"
+
+const LoginPage = lazy(() => import("@/pages/auth/LoginPage"))
+const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"))
+const OnboardingPage = lazy(() => import("@/pages/onboarding/OnboardingPage"))
+const RoleDashboard = lazy(() => import("@/components/auth/RoleDashboard").then((m) => ({ default: m.RoleDashboard })))
+const AccountsListPage = lazy(() => import("@/pages/accounts/AccountsListPage"))
+const AccountCreatePage = lazy(() => import("@/pages/accounts/AccountCreatePage"))
+const TransactionListPage = lazy(() => import("@/pages/transactions/TransactionListPage"))
+const TransactionCreatePage = lazy(() => import("@/pages/transactions/TransactionCreatePage"))
+const TransactionEditPage = lazy(() => import("@/pages/transactions/TransactionEditPage"))
+const ReportsPage = lazy(() => import("@/pages/reports/ReportsPage"))
+const SettingsPage = lazy(() => import("@/pages/settings/SettingsPage"))
+const AdminCategoriesPage = lazy(() => import("@/pages/admin/AdminCategoriesPage"))
+const AdminAccountPresetsPage = lazy(() => import("@/pages/admin/AdminAccountPresetsPage"))
+const BillsPage = lazy(() => import("@/pages/bills/BillsPage"))
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"))
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const { isLoading } = useAuth()
@@ -33,46 +35,48 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthInitializer>
-          <Routes>
-            <Route element={<GuestRoute />}>
-              <Route path="/auth/login" element={<LoginPage />} />
-              <Route path="/auth/register" element={<RegisterPage />} />
-            </Route>
-            <Route path="/onboarding" element={<OnboardingPage />} />
-
-            {/* Dashboard — shared with role-based content */}
-            <Route element={<DashboardRoute />}>
-              <Route element={<AppShell />}>
-                <Route path="dashboard" element={<RoleDashboard />} />
+          <Suspense fallback={<PageLoading />}>
+            <Routes>
+              <Route element={<GuestRoute />}>
+                <Route path="/auth/login" element={<LoginPage />} />
+                <Route path="/auth/register" element={<RegisterPage />} />
               </Route>
-            </Route>
+              <Route path="/onboarding" element={<OnboardingPage />} />
 
-            {/* User routes — admin redirected to /admin/categories */}
-            <Route element={<UserRoute />}>
-              <Route element={<AppShell />}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="accounts" element={<AccountsListPage />} />
-                <Route path="accounts/new" element={<AccountCreatePage />} />
-                <Route path="transactions" element={<TransactionListPage />} />
-                <Route path="transactions/new" element={<TransactionCreatePage />} />
-                <Route path="transactions/:id/edit" element={<TransactionEditPage />} />
-                <Route path="reports" element={<ReportsPage />} />
-                <Route path="bills" element={<BillsPage />} />
-                <Route path="settings" element={<SettingsPage />} />
+              {/* Dashboard — shared with role-based content */}
+              <Route element={<DashboardRoute />}>
+                <Route element={<AppShell />}>
+                  <Route path="dashboard" element={<RoleDashboard />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Admin routes — regular users redirected to /dashboard */}
-            <Route element={<AdminRoute />}>
-              <Route element={<AppShell />}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="admin/categories" element={<AdminCategoriesPage />} />
-                <Route path="admin/account-presets" element={<AdminAccountPresetsPage />} />
+              {/* User routes — admin redirected to /admin/categories */}
+              <Route element={<UserRoute />}>
+                <Route element={<AppShell />}>
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="accounts" element={<AccountsListPage />} />
+                  <Route path="accounts/new" element={<AccountCreatePage />} />
+                  <Route path="transactions" element={<TransactionListPage />} />
+                  <Route path="transactions/new" element={<TransactionCreatePage />} />
+                  <Route path="transactions/:id/edit" element={<TransactionEditPage />} />
+                  <Route path="reports" element={<ReportsPage />} />
+                  <Route path="bills" element={<BillsPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                </Route>
               </Route>
-            </Route>
 
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+              {/* Admin routes — regular users redirected to /dashboard */}
+              <Route element={<AdminRoute />}>
+                <Route element={<AppShell />}>
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="admin/categories" element={<AdminCategoriesPage />} />
+                  <Route path="admin/account-presets" element={<AdminAccountPresetsPage />} />
+                </Route>
+              </Route>
+
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
         </AuthInitializer>
         <Toaster position="top-center" richColors />
       </BrowserRouter>

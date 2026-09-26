@@ -10,21 +10,42 @@ function devServiceWorkerUnregisterPlugin(): Plugin {
     apply: "serve",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (req.url === "/sw.js" || req.url === "/registerSW.js") {
+        const url = req.url?.split("?")[0]
+        if (url === "/sw.js" || url === "/registerSW.js" || (url?.startsWith("/assets/index-") && url?.endsWith(".js"))) {
           res.setHeader("Content-Type", "application/javascript")
           res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate")
           res.end(`
-            self.addEventListener('install', () => { self.skipWaiting(); });
-            self.addEventListener('activate', (event) => {
-              event.waitUntil(
-                caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
-                  .then(() => self.registration.unregister())
-                  .then(() => self.clients.matchAll({ type: 'window' }))
-                  .then((clients) => {
-                    for (const client of clients) client.navigate(client.url);
-                  })
-              );
-            });
+            if (typeof window !== 'undefined') {
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then((regs) => {
+                  Promise.all(regs.map((r) => r.unregister())).then(() => {
+                    if ('caches' in window) {
+                      caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).then(() => {
+                        window.location.reload();
+                      });
+                    } else {
+                      window.location.reload();
+                    }
+                  });
+                });
+              } else if ('caches' in window) {
+                caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).then(() => {
+                  window.location.reload();
+                });
+              }
+            } else {
+              self.addEventListener('install', () => { self.skipWaiting(); });
+              self.addEventListener('activate', (event) => {
+                event.waitUntil(
+                  caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+                    .then(() => self.registration.unregister())
+                    .then(() => self.clients.matchAll({ type: 'window' }))
+                    .then((clients) => {
+                      for (const client of clients) client.navigate(client.url);
+                    })
+                );
+              });
+            }
           `)
           return
         }
@@ -83,6 +104,9 @@ export default defineConfig({
   server: {
     host: "127.0.0.1",
     allowedHosts: ["it-50.tail4bf5a0.ts.net", ".ts.net"],
+    hmr: {
+      clientPort: 443,
+    },
   },
   preview: {
     host: true,
