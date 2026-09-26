@@ -15,7 +15,7 @@ dist-ssr
 
 # Local agent/skill bundles (tracked under .claude/skills instead)
 .agents/
-skills/
+/skills/
 
 # Editor directories and files
 .vscode/*
