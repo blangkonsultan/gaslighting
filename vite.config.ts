@@ -49,4 +49,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    allowedHosts: ["it-50.tail4bf5a0.ts.net", ".ts.net"],
+  },
 })
