@@ -99,9 +99,11 @@ describe("AdminCategoriesPage", () => {
 
     expect(screen.getByRole("heading", { name: /tambah kategori/i })).toBeInTheDocument()
 
-    // SelectTrigger has touch-target and w-full
+    // SelectTrigger has touch-target and w-full, and displays label "Pengeluaran" (not raw value "expense")
     const selectTrigger = screen.getByRole("combobox")
     expect(selectTrigger).toHaveClass("touch-target", "w-full")
+    expect(selectTrigger).toHaveTextContent("Pengeluaran")
+    expect(selectTrigger).not.toHaveTextContent("expense")
 
     // Color swatch input has 44px (h-11 w-11), rounded-lg, shrink-0, and focus ring
     const colorInput = document.querySelector('input[type="color"]')

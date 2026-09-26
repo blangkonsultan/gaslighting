@@ -202,7 +202,14 @@ export default function AdminAccountPresetsPage() {
 
               <FormField label="Tipe" error={errors.type}>
                 <Select value={formType} onValueChange={(v) => setValue("type", v as AdminAccountPresetInput["type"], { shouldValidate: true })}>
-                  <SelectTrigger className="touch-target w-full" aria-invalid={Boolean(errors.type)}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="touch-target w-full" aria-invalid={Boolean(errors.type)}>
+                    <SelectValue>
+                      {(v) => {
+                        const key = String(v)
+                        return typeLabels[key] ?? (v ? String(v) : "Pilih tipe")
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
                   <SelectContent>
                     {ACCOUNT_TYPES.map((t) => (
                       <SelectItem key={t} value={t}>{typeLabels[t] || t}</SelectItem>

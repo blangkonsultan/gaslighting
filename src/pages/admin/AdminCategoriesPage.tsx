@@ -17,6 +17,11 @@ import { Plus, Pencil, Trash2, Tag } from "lucide-react"
 import { toast } from "sonner"
 import { adminCategorySchema, type AdminCategoryInput } from "@/lib/validators"
 
+const typeLabels: Record<"income" | "expense", string> = {
+  income: "Pemasukan",
+  expense: "Pengeluaran",
+}
+
 export default function AdminCategoriesPage() {
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
@@ -172,7 +177,14 @@ export default function AdminCategoriesPage() {
                   value={formType}
                   onValueChange={(v) => setValue("type", v as "income" | "expense", { shouldValidate: true })}
                 >
-                  <SelectTrigger className="touch-target w-full" aria-invalid={Boolean(errors.type)}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="touch-target w-full" aria-invalid={Boolean(errors.type)}>
+                    <SelectValue>
+                      {(v) => {
+                        const key = v as "income" | "expense"
+                        return typeLabels[key] ?? (v ? String(v) : "Pilih tipe")
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="income">Pemasukan</SelectItem>
                     <SelectItem value="expense">Pengeluaran</SelectItem>

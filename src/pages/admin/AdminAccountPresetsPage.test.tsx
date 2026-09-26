@@ -72,9 +72,10 @@ describe("AdminAccountPresetsPage", () => {
 
     expect(screen.getByRole("heading", { name: /tambah preset/i })).toBeInTheDocument()
 
-    // SelectTrigger has touch-target and w-full
+    // SelectTrigger has touch-target and w-full, and displays label "Bank" (not raw value "bank")
     const selectTrigger = screen.getByRole("combobox")
     expect(selectTrigger).toHaveClass("touch-target", "w-full")
+    expect(selectTrigger).toHaveTextContent("Bank")
 
     // Color swatch input has 44px (h-11 w-11), rounded-lg, shrink-0, and focus ring
     const colorInput = document.querySelector('input[type="color"]')

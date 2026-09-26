@@ -41,6 +41,22 @@
     background-color: #9AB17A;
     color: #1B2E15;
   }
+  input[type="color"] {
+    padding: 0;
+    overflow: hidden;
+    background-color: transparent;
+  }
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+  input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: inherit;
+  }
+  input[type="color"]::-moz-color-swatch {
+    border: none;
+    border-radius: inherit;
+  }
 
 
   body {
