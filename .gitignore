@@ -29,3 +29,6 @@ skills/
 *.sw?
 
 .vercel
+
+# Supabase
+supabase/.temp/
