@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/stores/auth-store"
+import { useNavigate } from "react-router-dom"
 import { queryKeys } from "@/lib/query-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/shared/EmptyState"
@@ -10,9 +11,11 @@ import { useBalanceIssuesWarning } from "@/hooks/useBalanceIssuesWarning"
 import { formatCurrency, formatShortDate } from "@/lib/formatters"
 import { AmountDisplay } from "@/components/shared/AmountDisplay"
 import { cn } from "@/lib/utils"
+import { t } from "@/lib/i18n"
 
 export default function DashboardPage() {
   const { profile } = useAuthStore()
+  const navigate = useNavigate()
   const userId = profile?.id
 
   const summaryQuery = useQuery({
@@ -34,35 +37,35 @@ export default function DashboardPage() {
   const totalBalanceText = summaryQuery.data
     ? formatCurrency(summaryQuery.data.totalBalance)
     : summaryQuery.isLoading
-      ? "Memuat…"
+      ? t.dashboard_loading
       : "-"
 
   const incomeText = summaryQuery.data
     ? formatCurrency(summaryQuery.data.monthlyIncome)
     : summaryQuery.isLoading
-      ? "Memuat…"
+      ? t.dashboard_loading
       : "-"
 
   const expenseText = summaryQuery.data
     ? formatCurrency(summaryQuery.data.monthlyExpense)
     : summaryQuery.isLoading
-      ? "Memuat…"
+      ? t.dashboard_loading
       : "-"
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold">
-          Halo, {profile?.full_name?.split(" ")[0] || "User"}!
+          {t.dashboard_greeting(profile?.full_name?.split(" ")[0] || "User")}
         </h1>
-        <p className="text-sm text-muted-foreground">Ringkasan keuanganmu hari ini</p>
+        <p className="text-sm text-muted-foreground">{t.dashboard_summary_subtitle}</p>
       </div>
 
       {showWarning && (
         <BalanceWarningBanner
-          message="Beberapa rekening memiliki saldo yang tidak konsisten. Periksa tab Rekening untuk detail."
-          actionLabel="Lihat Rekening"
-          onActionClick={() => (window.location.href = "/accounts")}
+          message={t.dashboard_balance_warning_msg}
+          actionLabel={t.dashboard_balance_warning_action}
+          onActionClick={() => navigate("/accounts")}
           onDismiss={handleDismissWarning}
         />
       )}
@@ -70,7 +73,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Saldo</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard_total_balance}</CardTitle>
             <Wallet size={18} className="text-primary" />
           </CardHeader>
           <CardContent>
@@ -79,7 +82,7 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pemasukan Bulan Ini</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard_monthly_income}</CardTitle>
             <TrendingUp size={18} className="text-primary" />
           </CardHeader>
           <CardContent>
@@ -88,7 +91,7 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pengeluaran Bulan Ini</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard_monthly_expense}</CardTitle>
             <TrendingDown size={18} className="text-destructive" />
           </CardHeader>
           <CardContent>
@@ -99,19 +102,19 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Transaksi Terakhir</CardTitle>
+          <CardTitle className="text-lg">{t.dashboard_recent_transactions}</CardTitle>
         </CardHeader>
         <CardContent>
           {recentTxQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Memuat…</p>
+            <p className="text-sm text-muted-foreground">{t.dashboard_loading}</p>
           ) : recentTxQuery.isError ? (
             <p className="text-sm text-destructive">
-              Gagal memuat transaksi.
+              {t.dashboard_error_loading_tx}
             </p>
           ) : (recentTxQuery.data?.length ?? 0) === 0 ? (
             <EmptyState
-              title="Belum ada transaksi"
-              description="Mulai tambahkan pemasukan atau pengeluaran pertamamu"
+              title={t.dashboard_empty_tx_title}
+              description={t.dashboard_empty_tx_desc}
             />
           ) : (
             <div className="divide-y divide-border rounded-lg border border-border bg-background/40">

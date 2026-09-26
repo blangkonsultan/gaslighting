@@ -65,17 +65,5 @@ export function useBalanceCheck({
     }
   }, [amountNumber, accountId, baseBalance, activeWhen, fieldName, message, setError, clearErrors])
 
-  useEffect(() => {
-    if (!activeWhen || !accountId || !Number.isFinite(amountNumber) || amountNumber <= 0) {
-      clearErrors(fieldName)
-      return
-    }
-    if (baseBalance != null && amountNumber > baseBalance) {
-      setError(fieldName, { type: "validate", message })
-    } else {
-      clearErrors(fieldName)
-    }
-  }, [amountNumber, accountId, baseBalance, activeWhen, fieldName, message, setError, clearErrors])
-
   return { isInsufficient, projectedBalance }
 }

@@ -72,7 +72,7 @@ describe("transactionSchema", () => {
     type: "expense",
     amount: "150.000",
     description: "makan siang",
-    transaction_date: "2026-04-25",
+    transaction_date: todayYmd(),
   }
 
   it("accepts valid input", () => {

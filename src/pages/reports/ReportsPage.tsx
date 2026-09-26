@@ -37,10 +37,11 @@ export default function ReportsPage() {
 
   const report = txQuery.data ? computeMonthlyReport(txQuery.data) : null
 
+  const year = monthKey.split("-")[0]
+
   const trendQuery = useQuery({
-    queryKey: queryKeys.reports.trend(monthKey, 12),
+    queryKey: queryKeys.reports.trend(year, 12),
     queryFn: async () => {
-      const year = monthKey.split("-")[0]
       const monthKeys = Array.from({ length: 12 }, (_, i) =>
         `${year}-${String(i + 1).padStart(2, "0")}`
       )
@@ -76,9 +77,9 @@ export default function ReportsPage() {
         queryFn: () => getTransactions(userId, { dateFrom: s, dateTo: e }),
       })
     }
-    fetchAdjacent(prev)
+    if (!minMonthKey || prev >= minMonthKey) fetchAdjacent(prev)
     if (next <= currentMonthKey) fetchAdjacent(next)
-  }, [monthKey, userId, queryClient])
+  }, [monthKey, userId, queryClient, minMonthKey])
 
   return (
     <div className="flex flex-col gap-6">

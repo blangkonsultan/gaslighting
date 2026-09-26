@@ -43,9 +43,11 @@ export default function TransactionListPage() {
 
   const hasActiveFilters = Boolean(filters.search?.trim() || filters.categoryId || filters.accountId)
 
-  useEffect(() => {
+  const [prevSearch, setPrevSearch] = useState(filters.search)
+  if (filters.search !== prevSearch) {
+    setPrevSearch(filters.search)
     setSearchInput(filters.search ?? "")
-  }, [filters.search])
+  }
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
