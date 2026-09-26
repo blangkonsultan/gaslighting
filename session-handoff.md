@@ -67,5 +67,6 @@
 
 ## Next Steps
 
-- Ready for next feature development or production rollout.
-- Server is actively running and tested over `https://it-50.tail4bf5a0.ts.net`.
+- **Tomorrow (2026-09-27):** Verify scheduled auto-debit execution for `Tagihan Listrik PLN` (Rp 250.000,00 on `BCA Utama`).
+- Check `transactions` table for recurring entry created and `bills.next_date` advanced to `2026-10-26`.
+- Dev server remains running in background on port 5173 (`https://it-50.tail4bf5a0.ts.net`).
