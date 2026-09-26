@@ -105,19 +105,40 @@ async function sendBillPushNotification(
 }
 
 function formatDateYmd(date: Date | string): string {
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date
+  }
   const d = date instanceof Date ? date : new Date(date)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(d)
+  } catch {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  }
 }
 
-function todayYmd(): string {
-  const d = new Date()
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+function todayYmd(timeZone = 'Asia/Jakarta'): string {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date())
+  } catch {
+    const d = new Date()
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  }
 }
 
 function daysInMonthUtc(year: number, month1: number): number {
@@ -190,9 +211,16 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 1. Authenticate caller (require service role key)
+  // 1. Authenticate caller (support both sb_secret key and legacy JWT service role key)
   const authHeader = req.headers.get('Authorization')
-  if (!serviceRoleKey || !authHeader || authHeader !== `Bearer ${serviceRoleKey}`) {
+  const token = authHeader ? authHeader.replace(/^Bearer\s+/i, '') : ''
+  const legacyServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56ZmNiem5zdnF0aHFneHZkaXhrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzAxNzk0MiwiZXhwIjoyMDkyNTkzOTQyfQ.sqO86JA8R7L6PhRgC1ZcgjsDGuxRCqhDUi2OPZQJrbk'
+
+  const isServiceRole = Boolean(
+    token && (token === serviceRoleKey || token === legacyServiceKey)
+  )
+
+  if (!isServiceRole) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
