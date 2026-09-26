@@ -128,11 +128,11 @@ export default function DashboardPage() {
                     : t.amount
                 return (
                   <div key={t.id} className="flex items-start justify-between gap-4 p-3">
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">
                         {t.description || (t.categories?.name ?? "Transaksi")}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {formatShortDate(t.transaction_date)} • {t.accounts?.name ?? "Rekening"}
                       </p>
                     </div>

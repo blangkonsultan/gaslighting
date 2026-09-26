@@ -219,9 +219,9 @@ export default function TransactionListPage() {
                     navigate(`/transactions/${t.id}/edit`)
                   }}
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{t.description || (t.categories?.name ?? "Transaksi")}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground truncate">
                       {formatShortDate(t.transaction_date)} • {t.accounts?.name ?? "Rekening"}
                     </p>
                     {isTransfer && (
@@ -230,7 +230,7 @@ export default function TransactionListPage() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <AmountDisplay
                       amount={amountSigned}
                       showSign
