@@ -70,6 +70,10 @@
   - Aligned Edge Function date comparison with Indonesian timezone (`Asia/Jakarta`), resolving UTC date lag where the server evaluated Sept 27 as Sept 26
   - Allowed authorization with both modern project secret key and legacy vault service role key
   - Executed auto-debit: `Tagihan Listrik PLN` processed (Rp 250.000), recurring transaction created in `transactions`, `BCA Utama` balance deducted, and bill `next_date` advanced to `2026-10-27`
+- [x] Step 22: Remediate GitGuardian Secret Leak:
+  - Eliminated hardcoded fallback JWT from `auto-debit/index.ts`
+  - Provisioned `CRON_SECRET` in Supabase Secrets via CLI and referenced via `Deno.env.get('CRON_SECRET')`
+  - Redeployed Edge Function and pushed sanitized commit `faa04fe` to GitHub
   - Verified toggle activation, subscription creation, database sync, and un-subscription in headless browser
 ## Verification Evidence
 
