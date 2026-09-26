@@ -69,6 +69,11 @@
   - Updated `vite.config.ts` dev middleware to serve a non-caching push notification service worker for `/sw.js`, allowing full subscription lifecycle in dev/Tailscale environments without stale asset caching
   - Fixed `Subscription failed - no active Service Worker`: added immediate `self.skipWaiting()` and `self.clients.claim()` in `src/sw.ts`, registered `/sw.js` on app boot in `src/main.tsx`, and ensured `registration.active` is non-null via statechange/polling before calling `pushManager.subscribe()`
   - Added "Kirim Notifikasi Uji Coba" button in `SettingsPage.tsx` with dedicated test in `SettingsPage.test.tsx`, allowing one-click test notification dispatch straight to device status bar
+- [x] Fix Auto-Debit Timezone & Service Role Authentication mismatch:
+  - Diagnosed why auto-debit had not executed `Tagihan Listrik PLN` for Sept 27: server runtime was on UTC date (`2026-09-26`), making `.lte('next_date', today)` ignore Sept 27 bills, and `pg_net` cron ran on 00:00 UTC (07:00 WIB)
+  - Updated `todayYmd()` and `formatDateYmd()` in `auto-debit/index.ts` to strictly format using `Asia/Jakarta` (WIB) timezone
+  - Extended auth check in `auto-debit/index.ts` to accept both modern `sb_secret_...` and vault legacy service role key
+  - Successfully executed auto-debit: processed `Tagihan Listrik PLN` (Rp 250.000), created transaction, deducted `BCA Utama` balance from 12.3M to 12.05M, advanced `next_date` to `2026-10-27`, and dispatched push notification
 ### What's In Progress
 
 - None (all 9 steps completed and verified)

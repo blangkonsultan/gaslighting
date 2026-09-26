@@ -66,6 +66,10 @@
   - Updated `vite.config.ts` dev middleware to serve a non-caching push notification service worker for `/sw.js`
   - Fixed `Subscription failed - no active Service Worker`: added immediate `self.skipWaiting()` and `self.clients.claim()` in `src/sw.ts`, registered `/sw.js` on app boot in `src/main.tsx`, and ensured `registration.active` is non-null via statechange/polling before calling `pushManager.subscribe()`
   - Added "Kirim Notifikasi Uji Coba" button in `SettingsPage.tsx` enabling instant native OS status bar push notification tests
+- [x] Step 21: Auto-Debit Execution & Timezone Alignment:
+  - Aligned Edge Function date comparison with Indonesian timezone (`Asia/Jakarta`), resolving UTC date lag where the server evaluated Sept 27 as Sept 26
+  - Allowed authorization with both modern project secret key and legacy vault service role key
+  - Executed auto-debit: `Tagihan Listrik PLN` processed (Rp 250.000), recurring transaction created in `transactions`, `BCA Utama` balance deducted, and bill `next_date` advanced to `2026-10-27`
   - Verified toggle activation, subscription creation, database sync, and un-subscription in headless browser
 ## Verification Evidence
 
