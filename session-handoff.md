@@ -42,6 +42,12 @@
   - Added `touch-action: manipulation;` on `html, body, button, a, nav, .touch-target` in `src/index.css` to eliminate double-tap zoom and 300ms tap delay
   - Added `touch-manipulation select-none` to `MobileBottomNav.tsx`
   - Updated `SelectTrigger` in `src/components/ui/select.tsx` from `text-sm` (14px) to `text-base md:text-sm` (16px on mobile), preventing WebKit/Chrome auto-zoom on filter selection
+- [x] Step 18: Eliminate Mobile Horizontal Scroll on Dashboard & Transactions:
+  - Added `w-full overflow-x-hidden` on `AppShell.tsx` outer container and `min-w-0` on `flex-col` and `main` to constrain flex children
+  - Added `max-width: 100vw; overflow-x: hidden;` to `html, body` and `#root` in `src/index.css`
+  - Added `flex-1 min-w-0` and `truncate` to transaction row description and secondary text in `DashboardPage.tsx` and `TransactionListPage.tsx`
+  - Added `shrink-0` to transaction amount/action container
+  - Verified `hasHorizontalScroll: false` and `docScrollWidth: 390` in headless mobile browser
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
