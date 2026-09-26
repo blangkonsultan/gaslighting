@@ -67,6 +67,7 @@
   - Replaced unbounded `await navigator.serviceWorker.ready` with safe `getActiveRegistration()` helper (using `getRegistration()` and timeout-guarded `.ready` fallback), preventing indefinite loading hangs (`isPushLoading: true`)
   - Replaced dev mode brute-force service worker unregistration in `src/main.tsx` with cache-only purge (`caches.delete`)
   - Updated `vite.config.ts` dev middleware to serve a non-caching push notification service worker for `/sw.js`, allowing full subscription lifecycle in dev/Tailscale environments without stale asset caching
+  - Fixed `Subscription failed - no active Service Worker`: added immediate `self.skipWaiting()` and `self.clients.claim()` in `src/sw.ts`, registered `/sw.js` on app boot in `src/main.tsx`, and ensured `registration.active` is non-null via statechange/polling before calling `pushManager.subscribe()`
 ### What's In Progress
 
 - None (all 9 steps completed and verified)
