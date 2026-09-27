@@ -83,6 +83,10 @@
   - Created responsive `src/components/reports/PrintPreviewDialog.tsx` with native window.print triggering (2 tests passing)
   - Integrated Export dropdown into `src/pages/reports/ReportsPage.tsx` with CSV and PDF options (3 tests passing)
   - Verified in headless browser: CSV download triggers toast, and PrintPreviewDialog renders formal financial statement
+- [x] Step 24: Fix PDF Nominal Column Truncation:
+  - Wrapped main screen view in `.no-print` so interactive UI elements are cleanly excluded from print output
+  - Configured `table-layout: fixed !important; width: 100% !important;` with `<colgroup>` dividing columns into exact percentages (Tanggal 14%, Tipe 12%, Rekening 16%, Kategori 16%, Deskripsi 24%, Nominal 18%)
+  - Set `@page { margin: 1cm; }` with `tabular-nums` ensuring Nominal amounts fit comfortably inside the right margin without truncation
 ## Verification Evidence
 
 | Check | Command | Result | Notes |

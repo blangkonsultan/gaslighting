@@ -87,6 +87,10 @@
   - Created responsive `src/components/reports/PrintPreviewDialog.tsx` with unit test `PrintPreviewDialog.test.tsx` (2 tests)
   - Integrated Export dropdown in `src/pages/reports/ReportsPage.tsx` with unit test `ReportsPage.test.tsx` (3 tests)
   - Verified in browser: CSV download triggers toast and file download; PrintPreviewDialog renders formal financial statement
+- [x] Fix PDF Nominal Column Truncation:
+  - Identified root causes: (1) Main screen dashboard elements were not wrapped in `.no-print`, colliding with print media, and (2) unconstrained table width (783px) exceeded A4 portrait printable area (680px), pushing the rightmost Nominal column off the page.
+  - Enforced `table-layout: fixed !important; width: 100% !important;` with `<colgroup>` allocating exact proportional percentages (Tanggal 14%, Tipe 12%, Rekening 16%, Kategori 16%, Deskripsi 24%, Nominal 18%).
+  - Wrapped entire interactive UI in `.no-print`, set `@page { margin: 1cm; }`, and added `tabular-nums` for crisp numeric alignment.
 
 - None (all 9 steps completed and verified)
 
