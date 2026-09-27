@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/lib/formatters"
 import type { TemplateListRow } from "@/services/transaction-templates.service"
 import { Bookmark } from "lucide-react"
+import { CategoryIcon } from "@/components/shared/CategoryIcon"
 
 export interface TemplatePickerProps {
   templates: TemplateListRow[]
@@ -36,9 +37,7 @@ export function TemplatePicker({ templates, onSelectTemplate, onManage }: Templa
         tabIndex={0}
       >
         {templates.map((template) => {
-          const catIcon = template.categories?.icon
           const amountText = template.amount != null ? formatCurrency(Number(template.amount)) : "—"
-
           return (
             <button
               key={template.id}
@@ -47,12 +46,13 @@ export function TemplatePicker({ templates, onSelectTemplate, onManage }: Templa
               className="touch-target group flex min-w-[80px] max-w-[120px] shrink-0 flex-col items-center justify-center rounded-xl border border-border bg-card p-2 text-center transition-all hover:border-primary/50 hover:bg-muted/40 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label={`Gunakan template ${template.name}`}
             >
-              <div className="mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                {catIcon ? (
-                  <span className="text-sm leading-none">{catIcon}</span>
-                ) : (
-                  <Bookmark size={14} className="text-primary" />
-                )}
+              <div className="mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <CategoryIcon
+                  iconName={template.categories?.icon}
+                  size={14}
+                  className="text-primary"
+                  fallback={<Bookmark size={14} className="text-primary" />}
+                />
               </div>
               <span className="w-full truncate text-xs font-medium text-foreground group-hover:text-primary">
                 {template.name}

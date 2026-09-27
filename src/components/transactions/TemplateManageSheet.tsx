@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Bookmark, Trash2 } from "lucide-react"
+import { CategoryIcon } from "@/components/shared/CategoryIcon"
 import { toast } from "sonner"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
@@ -73,12 +74,13 @@ export function TemplateManageSheet({
                       className="flex items-center justify-between gap-3 py-3"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                          {tpl.categories?.icon ? (
-                            <span className="leading-none">{tpl.categories.icon}</span>
-                          ) : (
-                            <Bookmark size={16} />
-                          )}
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <CategoryIcon
+                            iconName={tpl.categories?.icon}
+                            size={16}
+                            className="text-primary"
+                            fallback={<Bookmark size={16} className="text-primary" />}
+                          />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold text-foreground">
