@@ -4,7 +4,7 @@
 
 **Last Updated:** 2026-09-27
 **Branch:** main
-**Active Feature:** feat-010 (Completed)
+**Active Feature:** feat-011 (Completed)
 
 ## Status
 
@@ -103,6 +103,14 @@
   - Added filter button with badge counter and active filter chips bar in `TransactionListPage.tsx`
   - Added unit test suites for `TagInput.test.tsx` and `TransactionFilterSheet.test.tsx` (131 tests passing across 25 suites, 0 lint errors, build succeeds)
   - Verified in browser with screenshot evidence: tagged transaction creation and tag-based filtering
+- [x] Implement Smart Receipt Scanner with Client-Side OCR (feat-011):
+  - Installed and pinned `tesseract.js` (6.0.0) for 100% client-side, privacy-preserving OCR (no external API calls or user data leak risks)
+  - Built `src/lib/receipt-parser.ts` extracting total amount, transaction date, merchant name, and category suggestion with unit test suite `receipt-parser.test.ts` (14 tests)
+  - Built `src/lib/ocr.ts` implementing HTML canvas preprocessing (grayscale, contrast boost, resolution clamping to 1800px) with unit test suite `ocr.test.ts` (2 tests)
+  - Created `src/components/transactions/ReceiptScannerModal.tsx` supporting native mobile camera capture (`capture="environment"`), gallery upload, scanning progress bar, and editable detected fields review with unit test suite `ReceiptScannerModal.test.tsx` (2 tests)
+  - Integrated "Scan Struk" button and auto-fill in `src/pages/transactions/TransactionCreatePage.tsx`
+  - Verified via browser test with screenshot: modal opens with camera/gallery options, parses fields, and populates form smoothly
+  - 28 test suites passing (149/149 tests), 0 lint errors, build succeeds
 - None (all 9 steps completed and verified)
 
 ### What's Next

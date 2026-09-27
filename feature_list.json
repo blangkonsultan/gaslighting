@@ -79,6 +79,14 @@
       "dependencies": ["feat-003", "feat-006"],
       "status": "done",
       "evidence": "25 test suites pass (131 tests, +12 new tests), 0 lint errors, build succeeds, migration 20260927000001_transaction_tags.sql applied, browser screenshot verifies tag badges, filter sheet, badge counter, and filtered list."
+    },
+    {
+      "id": "feat-011",
+      "name": "Smart Receipt Scanner (Client-Side OCR)",
+      "description": "Scan shopping receipts with phone camera or gallery upload: image canvas preprocessing with contrast boost, Tesseract.js client-side OCR engine, receipt parser for total amount, transaction date, merchant recognition, category mapping, and auto-fill transaction form",
+      "dependencies": ["feat-001", "feat-010"],
+      "status": "done",
+      "evidence": "28 test suites pass (149 tests, +18 new tests), 0 lint errors, build succeeds, browser screenshot evaluation verifies camera/gallery trigger, modal review, and auto-fill."
     }
   ]
 }
