@@ -15,9 +15,9 @@ import { ReceiptScannerModal } from "@/components/transactions/ReceiptScannerMod
 import { getCategories } from "@/services/admin.service"
 import { Camera } from "lucide-react"
 import { TemplatePicker } from "@/components/transactions/TemplatePicker"
-import { SaveTemplateSheet, type SaveTemplateDefaultValues } from "@/components/transactions/SaveTemplateSheet"
+import { type TemplateSubmitOptions } from "@/components/transactions/TransactionForm"
 import { TemplateManageSheet } from "@/components/transactions/TemplateManageSheet"
-import { useTransactionTemplates } from "@/hooks/useTransactionTemplates"
+import { useTransactionTemplates, useCreateTemplate } from "@/hooks/useTransactionTemplates"
 import { todayYmd } from "@/lib/dates"
 import type { TemplateListRow } from "@/services/transaction-templates.service"
 import { Button } from "@/components/ui/button"
@@ -39,9 +39,8 @@ export default function TransactionCreatePage() {
   })
   const [formKey, setFormKey] = useState(0)
   const [sharedFile, setSharedFile] = useState<File | null>(null)
-  const [isFromTemplate, setIsFromTemplate] = useState(false)
   const [isManageSheetOpen, setIsManageSheetOpen] = useState(false)
-  const [saveTemplateData, setSaveTemplateData] = useState<SaveTemplateDefaultValues | null>(null)
+  const createTemplateMutation = useCreateTemplate()
   const { data: templates } = useTransactionTemplates(profile?.id ?? "")
 
   const appliedTemplateRef = useRef<string | null>(null)
@@ -93,7 +92,6 @@ export default function TransactionCreatePage() {
     suggestedCategory?: string
     tags: string[]
   }) {
-    setIsFromTemplate(false)
     let matchedCatId = ""
     if (data.suggestedCategory && categories) {
       const found = categories.find(
@@ -116,7 +114,6 @@ export default function TransactionCreatePage() {
     setFormKey((k) => k + 1)
   }
   function handleSelectTemplate(template: TemplateListRow) {
-    setIsFromTemplate(true)
     setScannedInitialValues({
       type: template.type as "income" | "expense",
       account_id: template.account_id ?? undefined,
@@ -131,7 +128,7 @@ export default function TransactionCreatePage() {
   }
 
 
-  async function onSubmit(data: TransactionInput) {
+  async function onSubmit(data: TransactionInput, templateOptions?: TemplateSubmitOptions) {
     if (!profile?.id) {
       navigate("/auth/login")
       throw new Error("Sesi login tidak ditemukan. Silakan login ulang.")
@@ -157,13 +154,22 @@ export default function TransactionCreatePage() {
 
     if (insertError) throw insertError
 
-    const lastSubmittedData: SaveTemplateDefaultValues = {
-      type: data.type,
-      account_id: data.account_id,
-      category_id: categoryId,
-      amount: amountNumber,
-      description: data.description.trim(),
-      tags: data.tags ?? [],
+    if (templateOptions?.saveAsTemplate) {
+      try {
+        await createTemplateMutation.mutateAsync({
+          user_id: profile.id,
+          name: templateOptions.templateName,
+          type: data.type,
+          account_id: data.account_id,
+          category_id: categoryId,
+          amount: templateOptions.saveAmount ? amountNumber : null,
+          description: data.description.trim() || null,
+          tags: data.tags ?? [],
+        })
+      } catch (err: unknown) {
+        console.error("Gagal menyimpan template:", err)
+        toast.warning("Transaksi disimpan, tetapi gagal menyimpan template.")
+      }
     }
 
     await Promise.all([
@@ -172,23 +178,16 @@ export default function TransactionCreatePage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.tags(profile.id) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.templates.all(profile.id) }),
     ])
 
-    if (isFromTemplate) {
-      toast.success("Transaksi berhasil ditambahkan.")
-      navigate("/transactions")
+    if (templateOptions?.saveAsTemplate) {
+      toast.success("Transaksi dan template berhasil disimpan.")
     } else {
-      setScannedInitialValues(undefined)
-      setFormKey((k) => k + 1)
-      setIsFromTemplate(false)
-
-      toast.success("Transaksi berhasil disimpan", {
-        action: {
-          label: "Simpan Template →",
-          onClick: () => setSaveTemplateData(lastSubmittedData),
-        },
-      })
+      toast.success("Transaksi berhasil ditambahkan.")
     }
+
+    navigate("/transactions")
   }
   async function onSubmitTransfer(data: TransferInput) {
     if (!profile?.id) {
@@ -255,7 +254,6 @@ export default function TransactionCreatePage() {
               ].join(" ")}
               onClick={() => {
                 setMode("transaction")
-                setIsFromTemplate(false)
               }}
             >
               Pemasukan / Pengeluaran
@@ -270,7 +268,6 @@ export default function TransactionCreatePage() {
               ].join(" ")}
               onClick={() => {
                 setMode("transfer")
-                setIsFromTemplate(false)
               }}
             >
               Transfer
@@ -314,14 +311,6 @@ export default function TransactionCreatePage() {
           initialFile={sharedFile}
           onApplyReceipt={handleApplyReceipt}
         />
-      <SaveTemplateSheet
-        open={Boolean(saveTemplateData)}
-        onOpenChange={(open) => {
-          if (!open) setSaveTemplateData(null)
-        }}
-        defaultValues={saveTemplateData}
-        userId={profile?.id ?? ""}
-      />
       <TemplateManageSheet
         open={isManageSheetOpen}
         onOpenChange={setIsManageSheetOpen}

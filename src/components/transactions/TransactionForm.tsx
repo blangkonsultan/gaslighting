@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
+import { Switch } from "@/components/ui/switch"
+import { Bookmark } from "lucide-react"
+import { formatCurrency } from "@/lib/formatters"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
 
@@ -29,6 +32,11 @@ export type TransactionFormInitialValues = Partial<{
   transaction_date: string
   tags?: string[]
 }>
+export interface TemplateSubmitOptions {
+  saveAsTemplate: boolean
+  templateName: string
+  saveAmount: boolean
+}
 
 function toFormDefaults(initial?: TransactionFormInitialValues): TransactionInput {
   const category = initial?.category_id ?? ""
@@ -58,9 +66,15 @@ export function TransactionForm({
   editingAmount?: number
   submitLabel: string
   onCancel: () => void
-  onSubmit: (data: TransactionInput) => Promise<void>
+  onSubmit: (data: TransactionInput, templateOptions?: TemplateSubmitOptions) => Promise<void>
 }) {
   const [error, setError] = useState("")
+  const [saveAsTemplate, setSaveAsTemplate] = useState(false)
+  const [templateName, setTemplateName] = useState("")
+  const [isTemplateNameTouched, setIsTemplateNameTouched] = useState(false)
+  const [saveAmount, setSaveAmount] = useState(true)
+  const [templateNameError, setTemplateNameError] = useState<string | null>(null)
+
 
   const {
     handleSubmit,
@@ -80,8 +94,17 @@ export function TransactionForm({
   const selectedCategoryId = watch("category_id")
   const amountStr = watch("amount")
 
-  const amountNumber = useMemo(() => parseIdrInteger(amountStr), [amountStr])
+  const amountNumber = parseIdrInteger(amountStr)
   const currentTags = watch("tags") ?? []
+  const currentDescription = watch("description") ?? ""
+
+  function handleToggleSaveAsTemplate(checked: boolean) {
+    setSaveAsTemplate(checked)
+    setTemplateNameError(null)
+    if (checked && !isTemplateNameTouched) {
+      setTemplateName(currentDescription.trim().slice(0, 30))
+    }
+  }
 
   const { data: userTags } = useQuery({
     queryKey: queryKeys.transactions.tags(userId),
@@ -163,7 +186,25 @@ export function TransactionForm({
             setError("Saldo tidak cukup.")
             return
           }
-          await onSubmit(data)
+          if (saveAsTemplate) {
+            const trimmedName = (templateName || data.description).trim()
+            if (!trimmedName) {
+              setTemplateNameError("Nama template wajib diisi.")
+              return
+            }
+            if (trimmedName.length > 30) {
+              setTemplateNameError("Nama template maksimal 30 karakter.")
+              return
+            }
+            setTemplateNameError(null)
+            await onSubmit(data, {
+              saveAsTemplate: true,
+              templateName: trimmedName,
+              saveAmount,
+            })
+          } else {
+            await onSubmit(data)
+          }
         } catch (err) {
           setError(err instanceof Error ? err.message : "Gagal menyimpan transaksi.")
         }
@@ -308,6 +349,79 @@ export function TransactionForm({
             disabled={isSubmitting || isLoading}
           />
         </FormField>
+        {/* Toggle Simpan sebagai Template */}
+        <div className="rounded-xl border border-border bg-card/60 p-3.5 space-y-3 transition-colors">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Bookmark size={18} className="text-primary mt-0.5 shrink-0" />
+              <div className="flex flex-col">
+                <label
+                  htmlFor="toggle-save-template"
+                  className="text-sm font-semibold text-foreground cursor-pointer select-none leading-tight"
+                >
+                  Simpan sebagai template
+                </label>
+                <span className="text-xs text-muted-foreground mt-0.5">
+                  Gunakan kembali transaksi ini dengan cepat di masa depan
+                </span>
+              </div>
+            </div>
+            <Switch
+              id="toggle-save-template"
+              checked={saveAsTemplate}
+              onCheckedChange={handleToggleSaveAsTemplate}
+              aria-label="Simpan sebagai template"
+            />
+          </div>
+
+          {saveAsTemplate && (
+            <div className="space-y-3 pt-2 border-t border-border/60">
+              <FormField
+                label="Nama Template"
+                htmlFor="template-name"
+                error={templateNameError ?? undefined}
+              >
+                <Input
+                  id="template-name"
+                  value={templateName}
+                  onChange={(e) => {
+                    setTemplateName(e.target.value)
+                    setIsTemplateNameTouched(true)
+                    if (templateNameError) setTemplateNameError(null)
+                  }}
+                  placeholder="Contoh: Makan Siang Kantor"
+                  maxLength={30}
+                  className="touch-target"
+                  autoFocus
+                />
+              </FormField>
+
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="toggle-save-amount"
+                    className="text-xs font-medium text-foreground cursor-pointer select-none"
+                  >
+                    Simpan jumlah nominal
+                  </label>
+                  <span className="text-[11px] text-muted-foreground tabular-nums">
+                    {saveAmount
+                      ? amountNumber > 0
+                        ? formatCurrency(amountNumber)
+                        : "Menyimpan nominal saat ini"
+                      : "Tidak disimpan (isi manual tiap kali pakai)"}
+                  </span>
+                </div>
+                <Switch
+                  id="toggle-save-amount"
+                  checked={saveAmount}
+                  onCheckedChange={setSaveAmount}
+                  aria-label="Simpan jumlah nominal"
+                />
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-2">
           <Button

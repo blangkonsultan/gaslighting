@@ -57,7 +57,10 @@ vi.mock("@/components/transactions/TransactionForm", () => ({
     onSubmit,
     initialValues,
   }: {
-    onSubmit: (data: TransactionInput) => Promise<void>
+    onSubmit: (
+      data: TransactionInput,
+      templateOptions?: { saveAsTemplate: boolean; templateName: string; saveAmount: boolean }
+    ) => Promise<void>
     initialValues?: TransactionFormInitialValues
   }) => (
     <div data-testid="transaction-form">
@@ -78,6 +81,29 @@ vi.mock("@/components/transactions/TransactionForm", () => ({
         }
       >
         Simpan
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          onSubmit(
+            {
+              type: "expense",
+              account_id: "11111111-1111-4111-8111-111111111111",
+              category_id: "22222222-2222-4222-8222-222222222222",
+              amount: "35000",
+              description: "Makan Siang",
+              transaction_date: "2026-03-30",
+              tags: ["#makan"],
+            },
+            {
+              saveAsTemplate: true,
+              templateName: "Makan Siang",
+              saveAmount: true,
+            }
+          )
+        }
+      >
+        Simpan dengan Template
       </button>
     </div>
   ),
@@ -185,7 +211,7 @@ describe("TransactionCreatePage", () => {
     expect(screen.getByTestId("transfer-form")).toBeInTheDocument()
   })
 
-  it("submits manual transaction and offers save-as-template in toast action", async () => {
+  it("submits manual transaction and navigates to /transactions", async () => {
     vi.mocked(templatesHook.useTransactionTemplates).mockReturnValue({
       data: [],
       isLoading: false,
@@ -204,14 +230,42 @@ describe("TransactionCreatePage", () => {
       expect(insertMock).toHaveBeenCalled()
     })
 
-    expect(toast.success).toHaveBeenCalledWith(
-      "Transaksi berhasil disimpan",
-      expect.objectContaining({
-        action: expect.objectContaining({
-          label: "Simpan Template →",
-        }),
+    expect(toast.success).toHaveBeenCalledWith("Transaksi berhasil ditambahkan.")
+    expect(mockNavigate).toHaveBeenCalledWith("/transactions")
+  })
+
+  it("submits with saveAsTemplate and creates both transaction and template", async () => {
+    const mockCreateTemplate = vi.fn().mockResolvedValue({ id: "tpl-new" })
+    vi.mocked(templatesHook.useCreateTemplate).mockReturnValue({
+      mutateAsync: mockCreateTemplate,
+      isPending: false,
+    } as never)
+
+    const insertMock = vi.fn().mockResolvedValue({ error: null })
+    vi.mocked(supabase.from).mockReturnValue({
+      insert: insertMock,
+    } as never)
+
+    renderWithProviders()
+
+    fireEvent.click(screen.getByRole("button", { name: "Simpan dengan Template" }))
+
+    await waitFor(() => {
+      expect(insertMock).toHaveBeenCalled()
+      expect(mockCreateTemplate).toHaveBeenCalledWith({
+        user_id: "user-123",
+        name: "Makan Siang",
+        type: "expense",
+        account_id: "11111111-1111-4111-8111-111111111111",
+        category_id: "22222222-2222-4222-8222-222222222222",
+        amount: 35000,
+        description: "Makan Siang",
+        tags: ["#makan"],
       })
-    )
+    })
+
+    expect(toast.success).toHaveBeenCalledWith("Transaksi dan template berhasil disimpan.")
+    expect(mockNavigate).toHaveBeenCalledWith("/transactions")
   })
 
   it("submits template-applied transaction and navigates without offering save-as-template", async () => {
