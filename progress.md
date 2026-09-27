@@ -183,6 +183,11 @@
   - `src/components/transactions/TemplateManageSheet.test.tsx` (5 tests)
   - `src/pages/transactions/TransactionCreatePage.test.tsx` (6 tests)
   - Total test suite: 40 files, 231 tests passing (100%)
+  - `src/components/shared/CategoryIcon.test.tsx` (5 tests)
+  - `src/pages/templates/TemplatesPage.test.tsx` (5 tests)
+  - Total test suite: 42 files, 241 tests passing (100%)
+- [x] Added dedicated Template Management page (`/templates`, `src/pages/templates/TemplatesPage.tsx`) with search, template cards, "Gunakan" direct pre-fill routing, and deletion dialog.
+- [x] Added navigation links: `DesktopSidebar` (user main nav), `MobileBottomNav` (Lainnya sheet), and `TransactionCreatePage` `?template_id=` parameter pre-fill support.
 - [x] Ran Impeccable UI detector across all new and modified components (0 issues found)
 - [x] Verified `npm run lint` (0 errors), `npm run test` (231/231 passing), `npm run build` (production build succeeds)
 ### What's In Progress
