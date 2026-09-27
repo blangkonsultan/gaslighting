@@ -14,7 +14,7 @@ import { queryKeys } from "@/lib/query-client"
 import { getAccounts } from "@/services/accounts.service"
 import { getCategories } from "@/services/admin.service"
 import { getUserTags } from "@/services/transactions.service"
-import { useUpdateTemplate } from "@/hooks/useTransactionTemplates"
+import { useCreateTemplate, useUpdateTemplate } from "@/hooks/useTransactionTemplates"
 import type { TemplateListRow } from "@/services/transaction-templates.service"
 import type { Account, Category } from "@/types/financial"
 
@@ -31,13 +31,13 @@ export function TemplateEditDialog({
   template,
   userId,
 }: TemplateEditDialogProps) {
-  if (!template) return null
+  if (!open) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px] max-h-[90vh] overflow-y-auto p-5">
-        <TemplateEditForm
-          key={template.id}
+        <TemplateFormContent
+          key={template ? template.id : "new-template"}
           template={template}
           userId={userId}
           onClose={() => onOpenChange(false)}
@@ -47,27 +47,33 @@ export function TemplateEditDialog({
   )
 }
 
-function TemplateEditForm({
+function TemplateFormContent({
   template,
   userId,
   onClose,
 }: {
-  template: TemplateListRow
+  template: TemplateListRow | null
   userId: string
   onClose: () => void
 }) {
-  const [name, setName] = useState(() => template.name)
-  const [type, setType] = useState<"income" | "expense">(() => template.type as "income" | "expense")
-  const [accountId, setAccountId] = useState(() => template.account_id ?? "")
-  const [categoryId, setCategoryId] = useState(() => template.category_id ?? "")
-  const [amountStr, setAmountStr] = useState(() =>
-    template.amount != null ? formatIdrIntegerInput(String(template.amount)) : ""
+  const isEdit = Boolean(template)
+
+  const [name, setName] = useState(() => template?.name ?? "")
+  const [type, setType] = useState<"income" | "expense">(
+    () => (template?.type as "income" | "expense") ?? "expense"
   )
-  const [description, setDescription] = useState(() => template.description ?? "")
-  const [tags, setTags] = useState<string[]>(() => template.tags ?? [])
+  const [accountId, setAccountId] = useState(() => template?.account_id ?? "")
+  const [categoryId, setCategoryId] = useState(() => template?.category_id ?? "")
+  const [amountStr, setAmountStr] = useState(() =>
+    template?.amount != null ? formatIdrIntegerInput(String(template.amount)) : ""
+  )
+  const [description, setDescription] = useState(() => template?.description ?? "")
+  const [tags, setTags] = useState<string[]>(() => template?.tags ?? [])
   const [nameError, setNameError] = useState<string | null>(null)
 
+  const createMutation = useCreateTemplate()
   const updateMutation = useUpdateTemplate()
+  const isPending = createMutation.isPending || updateMutation.isPending
 
   const { data: accounts, isLoading: isAccountsLoading } = useQuery({
     queryKey: queryKeys.accounts.all,
@@ -129,19 +135,33 @@ function TemplateEditForm({
     const parsedAmount = amountStr ? parseIdrInteger(amountStr) : null
 
     try {
-      await updateMutation.mutateAsync({
-        id: template.id,
-        user_id: userId,
-        name: trimmedName,
-        type,
-        account_id: accountId || null,
-        category_id: categoryId || null,
-        amount: parsedAmount && parsedAmount > 0 ? parsedAmount : null,
-        description: description.trim() || null,
-        tags,
-      })
+      if (isEdit && template) {
+        await updateMutation.mutateAsync({
+          id: template.id,
+          user_id: userId,
+          name: trimmedName,
+          type,
+          account_id: accountId || null,
+          category_id: categoryId || null,
+          amount: parsedAmount && parsedAmount > 0 ? parsedAmount : null,
+          description: description.trim() || null,
+          tags,
+        })
+        toast.success("Template berhasil diperbarui.")
+      } else {
+        await createMutation.mutateAsync({
+          user_id: userId,
+          name: trimmedName,
+          type,
+          account_id: accountId || null,
+          category_id: categoryId || null,
+          amount: parsedAmount && parsedAmount > 0 ? parsedAmount : null,
+          description: description.trim() || null,
+          tags,
+        })
+        toast.success("Template berhasil ditambahkan.")
+      }
 
-      toast.success("Template berhasil diperbarui.")
       onClose()
     } catch (err: unknown) {
       const errorObj = err as { code?: string; message?: string }
@@ -152,7 +172,7 @@ function TemplateEditForm({
       ) {
         setNameError("Template dengan nama ini sudah ada.")
       } else {
-        toast.error("Gagal memperbarui template.")
+        toast.error(isEdit ? "Gagal memperbarui template." : "Gagal menyimpan template.")
       }
     }
   }
@@ -162,7 +182,9 @@ function TemplateEditForm({
   return (
     <>
       <DialogHeader className="text-left">
-        <DialogTitle className="text-lg font-bold">Edit Template</DialogTitle>
+        <DialogTitle className="text-lg font-bold">
+          {isEdit ? "Edit Template" : "Tambah Template Baru"}
+        </DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col gap-4 py-2">
@@ -211,6 +233,7 @@ function TemplateEditForm({
             maxLength={30}
             placeholder="Contoh: Makan Siang Kantor"
             className="touch-target"
+            autoFocus
           />
         </FormField>
 
@@ -324,7 +347,7 @@ function TemplateEditForm({
           type="button"
           variant="outline"
           onClick={onClose}
-          disabled={updateMutation.isPending}
+          disabled={isPending}
           className="flex-1 touch-target sm:flex-none"
         >
           Batal
@@ -332,16 +355,18 @@ function TemplateEditForm({
         <Button
           type="button"
           onClick={handleSave}
-          disabled={updateMutation.isPending}
+          disabled={isPending}
           className="flex-1 touch-target sm:flex-none"
         >
-          {updateMutation.isPending ? (
+          {isPending ? (
             <>
               <LoadingSpinner className="mr-2 h-4 w-4" />
               Menyimpan...
             </>
-          ) : (
+          ) : isEdit ? (
             "Simpan Perubahan"
+          ) : (
+            "Simpan Template"
           )}
         </Button>
       </DialogFooter>

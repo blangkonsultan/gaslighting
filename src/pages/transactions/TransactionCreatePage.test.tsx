@@ -195,6 +195,18 @@ describe("TransactionCreatePage", () => {
     expect(screen.getByTestId("initial-amount").textContent).toBe("35000")
   })
 
+  it("navigates to /templates when Kelola is clicked", () => {
+    vi.mocked(templatesHook.useTransactionTemplates).mockReturnValue({
+      data: mockTemplates,
+      isLoading: false,
+    } as never)
+
+    renderWithProviders()
+
+    fireEvent.click(screen.getByRole("button", { name: "Kelola template" }))
+    expect(mockNavigate).toHaveBeenCalledWith("/templates")
+  })
+
   it("switches to transfer mode and hides template picker", () => {
     vi.mocked(templatesHook.useTransactionTemplates).mockReturnValue({
       data: mockTemplates,

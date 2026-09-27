@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Bookmark, Plus, Search, Trash2, ArrowRight, Pencil } from "lucide-react"
+import { Bookmark, Plus, Search, Trash2, ArrowRight, Pencil, ArrowLeft } from "lucide-react"
 import { toast } from "sonner"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -24,6 +24,7 @@ export default function TemplatesPage() {
   const [search, setSearch] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<TemplateListRow | null>(null)
   const [editingTemplate, setEditingTemplate] = useState<TemplateListRow | null>(null)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   const { data: templates, isLoading, isError } = useTransactionTemplates(userId)
   const deleteMutation = useDeleteTemplate()
@@ -64,22 +65,36 @@ export default function TemplatesPage() {
     <div className="mx-auto w-full max-w-4xl p-4 lg:p-6 space-y-5">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Template Transaksi
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Gunakan dan kelola template untuk pengisian transaksi lebih cepat.
-          </p>
+        <div className="flex items-center gap-2.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => navigate(-1)}
+            className="touch-target -ml-1 text-muted-foreground hover:text-foreground shrink-0"
+            aria-label="Kembali"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Template Transaksi
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Gunakan dan kelola template untuk pengisian transaksi lebih cepat.
+            </p>
+          </div>
         </div>
-        <Button
-          type="button"
-          onClick={() => navigate("/transactions/new")}
-          className="touch-target gap-1.5 self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          <span>Buat Transaksi</span>
-        </Button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Button
+            type="button"
+            onClick={() => setIsCreateOpen(true)}
+            className="touch-target gap-1.5"
+          >
+            <Plus size={16} />
+            <span>Tambah Template</span>
+          </Button>
+        </div>
       </div>
 
       {isError && (
@@ -108,13 +123,24 @@ export default function TemplatesPage() {
           title="Belum ada template"
           description="Simpan transaksi yang sering Anda gunakan sebagai template untuk mencatat dalam satu sentuhan."
           action={
-            <Button
-              type="button"
-              onClick={() => navigate("/transactions/new")}
-              className="touch-target"
-            >
-              Tambah Transaksi Pertama
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                onClick={() => setIsCreateOpen(true)}
+                className="touch-target gap-1.5"
+              >
+                <Plus size={16} />
+                <span>Tambah Template</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/transactions/new")}
+                className="touch-target"
+              >
+                Buat Transaksi
+              </Button>
+            </div>
           }
         />
       ) : filteredTemplates.length === 0 ? (
@@ -247,11 +273,14 @@ export default function TemplatesPage() {
         loading={deleteMutation.isPending}
         onConfirm={handleDelete}
       />
-      {/* Edit Template Dialog */}
+      {/* Create / Edit Template Dialog */}
       <TemplateEditDialog
-        open={Boolean(editingTemplate)}
+        open={Boolean(editingTemplate) || isCreateOpen}
         onOpenChange={(isOpen) => {
-          if (!isOpen) setEditingTemplate(null)
+          if (!isOpen) {
+            setEditingTemplate(null)
+            setIsCreateOpen(false)
+          }
         }}
         template={editingTemplate}
         userId={userId}

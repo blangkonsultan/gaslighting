@@ -6,6 +6,7 @@ import * as templatesHook from "@/hooks/useTransactionTemplates"
 import type { TemplateListRow } from "@/services/transaction-templates.service"
 
 vi.mock("@/hooks/useTransactionTemplates", () => ({
+  useCreateTemplate: vi.fn(),
   useUpdateTemplate: vi.fn(),
 }))
 
@@ -58,18 +59,36 @@ function renderDialog(template: TemplateListRow | null = mockTemplate, onOpenCha
 }
 
 describe("TemplateEditDialog", () => {
-  const mockMutateAsync = vi.fn()
+  const mockUpdateMutateAsync = vi.fn()
+  const mockCreateMutateAsync = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(templatesHook.useUpdateTemplate).mockReturnValue({
-      mutateAsync: mockMutateAsync,
+      mutateAsync: mockUpdateMutateAsync,
+      isPending: false,
+    } as never)
+    vi.mocked(templatesHook.useCreateTemplate).mockReturnValue({
+      mutateAsync: mockCreateMutateAsync,
       isPending: false,
     } as never)
   })
 
-  it("renders nothing if template is null", () => {
-    const { container } = renderDialog(null)
+  it("renders nothing if open is false", () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    })
+
+    const { container } = render(
+      <QueryClientProvider client={queryClient}>
+        <TemplateEditDialog
+          open={false}
+          onOpenChange={vi.fn()}
+          template={mockTemplate}
+          userId="user-123"
+        />
+      </QueryClientProvider>
+    )
     expect(container.firstChild).toBeNull()
   })
 
@@ -89,7 +108,7 @@ describe("TemplateEditDialog", () => {
   })
 
   it("submits updated values when Simpan Perubahan is clicked", async () => {
-    mockMutateAsync.mockResolvedValue(undefined)
+    mockUpdateMutateAsync.mockResolvedValue(undefined)
     const handleClose = vi.fn()
 
     renderDialog(mockTemplate, handleClose)
@@ -103,7 +122,7 @@ describe("TemplateEditDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Simpan Perubahan" }))
 
     await waitFor(() => {
-      expect(mockMutateAsync).toHaveBeenCalledWith({
+      expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
         id: "tpl-1",
         user_id: "user-123",
         name: "Makan Malam",
@@ -119,6 +138,35 @@ describe("TemplateEditDialog", () => {
     expect(handleClose).toHaveBeenCalledWith(false)
   })
 
+  it("creates a new template when template is null", async () => {
+    mockCreateMutateAsync.mockResolvedValue(undefined)
+    const handleClose = vi.fn()
+
+    renderDialog(null, handleClose)
+
+    expect(screen.getByText("Tambah Template Baru")).toBeInTheDocument()
+
+    const nameInput = screen.getByLabelText("Nama Template")
+    fireEvent.change(nameInput, { target: { value: "Template Baru" } })
+
+    fireEvent.click(screen.getByRole("button", { name: "Simpan Template" }))
+
+    await waitFor(() => {
+      expect(mockCreateMutateAsync).toHaveBeenCalledWith({
+        user_id: "user-123",
+        name: "Template Baru",
+        type: "expense",
+        account_id: null,
+        category_id: null,
+        amount: null,
+        description: null,
+        tags: [],
+      })
+    })
+
+    expect(handleClose).toHaveBeenCalledWith(false)
+  })
+
   it("validates that template name is required", async () => {
     renderDialog()
 
@@ -128,11 +176,11 @@ describe("TemplateEditDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Simpan Perubahan" }))
 
     expect(await screen.findByText("Nama template wajib diisi.")).toBeInTheDocument()
-    expect(mockMutateAsync).not.toHaveBeenCalled()
+    expect(mockUpdateMutateAsync).not.toHaveBeenCalled()
   })
 
   it("displays duplicate name error if database returns duplicate key code", async () => {
-    mockMutateAsync.mockRejectedValue({ code: "23505", message: "duplicate key error" })
+    mockUpdateMutateAsync.mockRejectedValue({ code: "23505", message: "duplicate key error" })
 
     renderDialog()
 

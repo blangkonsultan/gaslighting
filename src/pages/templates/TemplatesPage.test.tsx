@@ -24,6 +24,10 @@ vi.mock("@/stores/auth-store", () => ({
 vi.mock("@/hooks/useTransactionTemplates", () => ({
   useTransactionTemplates: vi.fn(),
   useDeleteTemplate: vi.fn(),
+  useCreateTemplate: vi.fn().mockReturnValue({
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
   useUpdateTemplate: vi.fn().mockReturnValue({
     mutateAsync: vi.fn(),
     isPending: false,
@@ -101,8 +105,32 @@ describe("TemplatesPage", () => {
     expect(screen.getByRole("heading", { name: "Template Transaksi" })).toBeInTheDocument()
     expect(screen.getByText("Belum ada template")).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole("button", { name: "Tambah Transaksi Pertama" }))
+    fireEvent.click(screen.getByRole("button", { name: "Buat Transaksi" }))
     expect(mockNavigate).toHaveBeenCalledWith("/transactions/new")
+  })
+
+  it("navigates back when back button is clicked", () => {
+    vi.mocked(templatesHook.useTransactionTemplates).mockReturnValue({
+      data: [],
+      isLoading: false,
+    } as never)
+
+    renderWithProviders()
+
+    fireEvent.click(screen.getByRole("button", { name: "Kembali" }))
+    expect(mockNavigate).toHaveBeenCalledWith(-1)
+  })
+
+  it("opens create template dialog when Tambah Template is clicked", () => {
+    vi.mocked(templatesHook.useTransactionTemplates).mockReturnValue({
+      data: mockTemplates,
+      isLoading: false,
+    } as never)
+
+    renderWithProviders()
+
+    fireEvent.click(screen.getByRole("button", { name: "Tambah Template" }))
+    expect(screen.getByText("Tambah Template Baru")).toBeInTheDocument()
   })
 
   it("renders template cards with details", () => {

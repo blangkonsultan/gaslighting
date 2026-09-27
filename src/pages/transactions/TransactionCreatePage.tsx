@@ -16,7 +16,6 @@ import { getCategories } from "@/services/admin.service"
 import { Camera } from "lucide-react"
 import { TemplatePicker } from "@/components/transactions/TemplatePicker"
 import { type TemplateSubmitOptions } from "@/components/transactions/TransactionForm"
-import { TemplateManageSheet } from "@/components/transactions/TemplateManageSheet"
 import { useTransactionTemplates, useCreateTemplate } from "@/hooks/useTransactionTemplates"
 import { todayYmd } from "@/lib/dates"
 import type { TemplateListRow } from "@/services/transaction-templates.service"
@@ -39,7 +38,6 @@ export default function TransactionCreatePage() {
   })
   const [formKey, setFormKey] = useState(0)
   const [sharedFile, setSharedFile] = useState<File | null>(null)
-  const [isManageSheetOpen, setIsManageSheetOpen] = useState(false)
   const createTemplateMutation = useCreateTemplate()
   const { data: templates } = useTransactionTemplates(profile?.id ?? "")
 
@@ -277,7 +275,7 @@ export default function TransactionCreatePage() {
             <TemplatePicker
               templates={templates ?? []}
               onSelectTemplate={handleSelectTemplate}
-              onManage={() => setIsManageSheetOpen(true)}
+              onManage={() => navigate("/templates")}
             />
           )}
 
@@ -311,12 +309,6 @@ export default function TransactionCreatePage() {
           initialFile={sharedFile}
           onApplyReceipt={handleApplyReceipt}
         />
-      <TemplateManageSheet
-        open={isManageSheetOpen}
-        onOpenChange={setIsManageSheetOpen}
-        templates={templates ?? []}
-        userId={profile?.id ?? ""}
-      />
     </div>
   )
 }
