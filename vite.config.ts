@@ -10,6 +10,7 @@ function devServiceWorkerUnregisterPlugin(): Plugin {
     apply: "serve",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
+        console.log(`[REQ] ${req.method} ${req.url}`)
         const url = req.url?.split("?")[0]
         if (url === "/sw.js") {
           res.setHeader("Content-Type", "application/javascript")
@@ -67,6 +68,30 @@ function devServiceWorkerUnregisterPlugin(): Plugin {
               window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js', { scope: '/' });
               });
+            }
+          `)
+          return
+        }
+        if (url?.startsWith("/assets/index-") && url?.endsWith(".js")) {
+          res.setHeader("Content-Type", "application/javascript")
+          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate")
+          res.end(`
+            if (typeof window !== 'undefined') {
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then((regs) => {
+                  Promise.all(regs.map((r) => r.unregister())).then(() => {
+                    if ('caches' in window) {
+                      caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).then(() => {
+                        window.location.reload();
+                      });
+                    } else {
+                      window.location.reload();
+                    }
+                  });
+                });
+              } else {
+                window.location.reload();
+              }
             }
           `)
           return
