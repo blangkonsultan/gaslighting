@@ -32,14 +32,14 @@ export function PrintPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-background">
-        <DialogHeader className="px-5 py-3.5 border-b border-border bg-card/50 flex flex-row items-center justify-between no-print gap-3">
+      <DialogContent className="w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-background">
+        <DialogHeader className="px-4 py-3 sm:px-5 sm:py-3.5 border-b border-border bg-card/50 flex flex-row items-center justify-between no-print gap-2">
           <div className="min-w-0 flex-1">
             <DialogTitle className="text-sm font-semibold tracking-tight text-foreground truncate">
               Pratinjau Laporan Keuangan
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground truncate">
-              Periode {monthLabel} • {transactions.length} transaksi
+              Periode {monthLabel} • {transactions.length} mutasi
             </DialogDescription>
           </div>
           <div className="flex items-center gap-2 pr-6 shrink-0">
@@ -54,8 +54,8 @@ export function PrintPreviewDialog({
           </div>
         </DialogHeader>
 
-        <div className="overflow-x-auto overflow-y-auto flex-1 p-3 sm:p-6 bg-neutral-100/60">
-          <div className="min-w-[620px] max-w-4xl shadow-md border border-neutral-200 rounded-lg overflow-hidden bg-white mx-auto print:min-w-0 print:border-none print:shadow-none print:m-0">
+        <div className="overflow-y-auto flex-1 p-2 sm:p-4 bg-muted/20">
+          <div className="w-full shadow-sm rounded-lg overflow-hidden bg-white mx-auto print:shadow-none print:m-0">
             <PrintableReport
               monthLabel={monthLabel}
               report={report}
