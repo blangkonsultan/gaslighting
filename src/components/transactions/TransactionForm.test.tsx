@@ -65,15 +65,14 @@ describe("TransactionForm saveAsTemplate toggle", () => {
     expect(screen.queryByLabelText("Nama Template")).not.toBeInTheDocument()
   })
 
-  it("reveals template name and save amount toggle when switched on", () => {
+  it("reveals auto-derived template name and save amount toggle when switched on", () => {
     renderForm()
     const toggle = screen.getByRole("switch", { name: "Simpan sebagai template" })
     fireEvent.click(toggle)
 
     expect(toggle).toHaveAttribute("aria-checked", "true")
-    const nameInput = screen.getByLabelText("Nama Template") as HTMLInputElement
-    expect(nameInput).toBeInTheDocument()
-    expect(nameInput.value).toBe("Makan Siang")
+    expect(screen.getByText("Nama template:")).toBeInTheDocument()
+    expect(screen.getByText("Makan Siang")).toBeInTheDocument()
 
     const amountToggle = screen.getByRole("switch", { name: "Simpan jumlah nominal" })
     expect(amountToggle).toBeInTheDocument()

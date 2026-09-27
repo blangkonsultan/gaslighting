@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { Switch } from "@/components/ui/switch"
 import { Bookmark } from "lucide-react"
 import { formatCurrency } from "@/lib/formatters"
+import { CategoryIcon } from "@/components/shared/CategoryIcon"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
 
@@ -70,11 +71,7 @@ export function TransactionForm({
 }) {
   const [error, setError] = useState("")
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
-  const [templateName, setTemplateName] = useState("")
-  const [isTemplateNameTouched, setIsTemplateNameTouched] = useState(false)
   const [saveAmount, setSaveAmount] = useState(true)
-  const [templateNameError, setTemplateNameError] = useState<string | null>(null)
-
 
   const {
     handleSubmit,
@@ -98,13 +95,6 @@ export function TransactionForm({
   const currentTags = watch("tags") ?? []
   const currentDescription = watch("description") ?? ""
 
-  function handleToggleSaveAsTemplate(checked: boolean) {
-    setSaveAsTemplate(checked)
-    setTemplateNameError(null)
-    if (checked && !isTemplateNameTouched) {
-      setTemplateName(currentDescription.trim().slice(0, 30))
-    }
-  }
 
   const { data: userTags } = useQuery({
     queryKey: queryKeys.transactions.tags(userId),
@@ -134,6 +124,11 @@ export function TransactionForm({
   const categoryLabelById = useMemo(() => {
     return new Map((categories ?? []).map((c) => [c.id, c.name] as const))
   }, [categories])
+  const categoryById = useMemo(() => {
+    return new Map((categories ?? []).map((c) => [c.id, c] as const))
+  }, [categories])
+
+  const selectedCategoryObj = selectedCategoryId ? categoryById.get(selectedCategoryId) : undefined
 
   const selectedAccountLabel = selectedAccountId ? (accountLabelById.get(selectedAccountId) ?? selectedAccountId) : ""
   const selectedAccountBalance =
@@ -187,16 +182,14 @@ export function TransactionForm({
             return
           }
           if (saveAsTemplate) {
-            const trimmedName = (templateName || data.description).trim()
+            const trimmedName = data.description.trim().slice(0, 30)
             if (!trimmedName) {
-              setTemplateNameError("Nama template wajib diisi.")
+              setFieldError("description", {
+                type: "manual",
+                message: "Deskripsi wajib diisi untuk dijadikan nama template.",
+              })
               return
             }
-            if (trimmedName.length > 30) {
-              setTemplateNameError("Nama template maksimal 30 karakter.")
-              return
-            }
-            setTemplateNameError(null)
             await onSubmit(data, {
               saveAsTemplate: true,
               templateName: trimmedName,
@@ -274,7 +267,12 @@ export function TransactionForm({
                 selectedCategoryLabel ? (
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="text-muted-foreground">Kategori:</span>
-                    <span className="font-medium">{selectedCategoryLabel}</span>
+                    <span className="font-medium flex items-center gap-1.5">
+                      {selectedCategoryObj?.icon && (
+                        <CategoryIcon iconName={selectedCategoryObj.icon} size={13} />
+                      )}
+                      <span>{selectedCategoryLabel}</span>
+                    </span>
                   </div>
                 ) : undefined
               }
@@ -296,7 +294,18 @@ export function TransactionForm({
                 {(v) => {
                   if (!v) return isLoading ? "Memuat kategori..." : "Pilih kategori"
                   const id = String(v)
-                  return categoryLabelById.get(id) ?? id
+                  const cat = categoryById.get(id)
+                  if (!cat) return categoryLabelById.get(id) ?? id
+                  return (
+                    <span className="flex items-center gap-2">
+                      <CategoryIcon
+                        iconName={cat.icon}
+                        size={15}
+                        fallback={<span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: cat.color || "#9AB17A" }} />}
+                      />
+                      <span>{cat.name}</span>
+                    </span>
+                  )
                 }}
               </SelectValue>
             </SelectTrigger>
@@ -304,7 +313,19 @@ export function TransactionForm({
               <SelectGroup>
                 {categoryOptions.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.name}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-foreground"
+                        style={{ backgroundColor: c.color ? `${c.color}25` : undefined, color: c.color || undefined }}
+                      >
+                        <CategoryIcon
+                          iconName={c.icon}
+                          size={13}
+                          fallback={<span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: c.color || "#9AB17A" }} />}
+                        />
+                      </span>
+                      <span>{c.name}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectGroup>
@@ -369,34 +390,14 @@ export function TransactionForm({
             <Switch
               id="toggle-save-template"
               checked={saveAsTemplate}
-              onCheckedChange={handleToggleSaveAsTemplate}
+              onCheckedChange={setSaveAsTemplate}
               aria-label="Simpan sebagai template"
             />
           </div>
 
           {saveAsTemplate && (
-            <div className="space-y-3 pt-2 border-t border-border/60">
-              <FormField
-                label="Nama Template"
-                htmlFor="template-name"
-                error={templateNameError ?? undefined}
-              >
-                <Input
-                  id="template-name"
-                  value={templateName}
-                  onChange={(e) => {
-                    setTemplateName(e.target.value)
-                    setIsTemplateNameTouched(true)
-                    if (templateNameError) setTemplateNameError(null)
-                  }}
-                  placeholder="Contoh: Makan Siang Kantor"
-                  maxLength={30}
-                  className="touch-target"
-                  autoFocus
-                />
-              </FormField>
-
-              <div className="flex items-center justify-between gap-3 pt-1">
+            <div className="space-y-2.5 pt-2 border-t border-border/60">
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col">
                   <label
                     htmlFor="toggle-save-amount"
@@ -418,6 +419,13 @@ export function TransactionForm({
                   onCheckedChange={setSaveAmount}
                   aria-label="Simpan jumlah nominal"
                 />
+              </div>
+
+              <div className="rounded-lg bg-muted/40 px-2.5 py-1.5 text-xs text-muted-foreground flex items-center gap-1.5">
+                <span>Nama template:</span>
+                <span className="font-semibold text-foreground truncate">
+                  {currentDescription.trim() || "(otomatis mengambil deskripsi di atas)"}
+                </span>
               </div>
             </div>
           )}
