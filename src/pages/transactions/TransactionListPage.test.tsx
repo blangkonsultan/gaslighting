@@ -12,7 +12,21 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   return {
     ...actual,
     useInfiniteQuery: () => ({
-      data: { pages: [[{ id: "1", amount: 100000, type: "expense", description: "Makan siang", transaction_date: "2026-01-01", accounts: { name: "BCA" } }]] },
+      data: {
+        pages: [
+          [
+            {
+              id: "1",
+              amount: 100000,
+              type: "expense",
+              description: "Makan siang",
+              transaction_date: "2026-01-01",
+              tags: ["#makan"],
+              accounts: { name: "BCA" },
+            },
+          ],
+        ],
+      },
       isLoading: false,
       isError: false,
       hasNextPage: false,
@@ -22,6 +36,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
     useQuery: ({ queryKey }: { queryKey: string[] }) => {
       if (queryKey[0] === "accounts") return { data: [{ id: "acc-1", name: "BCA" }] }
       if (queryKey[0] === "categories") return { data: [{ id: "cat-1", name: "Makanan", type: "expense" }, { id: "cat-2", name: "Gaji", type: "income" }] }
+      if (queryKey[0] === "transactions" && queryKey[1] === "tags") return { data: ["#makan", "#liburan"] }
       return { data: [] }
     },
   }
@@ -75,38 +90,45 @@ describe("TransactionListPage filters", () => {
     expect(screen.getByPlaceholderText("Cari deskripsi…")).toBeInTheDocument()
   })
 
+  it("renders filter button and tag badges on transaction item", () => {
+    renderPage()
+
+    expect(screen.getByRole("button", { name: /Buka filter lanjutan/i })).toBeInTheDocument()
+    expect(screen.getByText("#makan")).toBeInTheDocument()
+  })
+
   it("does not show reset button when no filters are active", () => {
     renderPage()
 
-    expect(screen.queryByRole("button", { name: "Reset filter" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Reset" })).not.toBeInTheDocument()
   })
 
   it("shows reset button when a category filter is set", () => {
     useTransactionFilters.getState().setFilters({ categoryId: "cat-1" })
     renderPage()
 
-    expect(screen.getByRole("button", { name: "Reset filter" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Reset" })).toBeInTheDocument()
   })
 
   it("shows reset button when an account filter is set", () => {
     useTransactionFilters.getState().setFilters({ accountId: "acc-1" })
     renderPage()
 
-    expect(screen.getByRole("button", { name: "Reset filter" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Reset" })).toBeInTheDocument()
   })
 
   it("shows reset button when search filter is set", () => {
     useTransactionFilters.getState().setFilters({ search: "makan" })
     renderPage()
 
-    expect(screen.getByRole("button", { name: "Reset filter" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Reset" })).toBeInTheDocument()
   })
 
   it("clears all filters when reset is clicked", () => {
     useTransactionFilters.getState().setFilters({ search: "makan", categoryId: "cat-1", accountId: "acc-1" })
     renderPage()
 
-    screen.getByRole("button", { name: "Reset filter" }).click()
+    screen.getByRole("button", { name: "Reset" }).click()
 
     expect(useTransactionFilters.getState().filters).toEqual({})
   })

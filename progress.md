@@ -4,7 +4,7 @@
 
 **Last Updated:** 2026-09-27
 **Branch:** main
-**Active Feature:** feat-009 (Completed)
+**Active Feature:** feat-010 (Completed)
 
 ## Status
 
@@ -95,7 +95,14 @@
   - Identified root cause from Android Print Spooler screenshot: `PrintPreviewDialog` modal rendered via React portal was not hidden in `@media print`, printing both the background document and the open modal dialog floating in the center.
   - Added `display: none !important;` to `[data-slot="dialog-portal"]`, `[data-slot="dialog-overlay"]`, `[data-slot="dialog-content"]`, `[role="dialog"]`, and added `no-print` on `DialogContent`.
   - Verified in print emulation: floating modal is completely eliminated, yielding a single, pristine A4/Letter financial statement.
-
+- [x] Implement Advanced Filters & Transaction Tagging (feat-010):
+  - Created migration `20260927000001_transaction_tags.sql` adding `tags text[] not null default '{}'` with GIN index on `transactions`; pushed to remote Supabase DB
+  - Updated types `financial.ts`, `database.ts`, services `transactions.service.ts` (`getUserTags`, array containment queries, amount range filtering), and validation schema `validators.ts`
+  - Built `TagInput.tsx` component with tag normalization, Enter/comma/space keyboard shortcuts, quick-pick suggested chips, and removable badges
+  - Built `TransactionFilterSheet.tsx` with type selector, account/category selects, date range, min/max IDR amount, interactive tag cloud, and reset/apply actions
+  - Added filter button with badge counter and active filter chips bar in `TransactionListPage.tsx`
+  - Added unit test suites for `TagInput.test.tsx` and `TransactionFilterSheet.test.tsx` (131 tests passing across 25 suites, 0 lint errors, build succeeds)
+  - Verified in browser with screenshot evidence: tagged transaction creation and tag-based filtering
 - None (all 9 steps completed and verified)
 
 ### What's Next

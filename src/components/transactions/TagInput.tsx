@@ -2,7 +2,7 @@ import { useState, type KeyboardEvent } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { X, Hash, Plus } from "lucide-react"
-
+import { normalizeTag } from "@/lib/utils"
 export interface TagInputProps {
   value: string[]
   onChange: (tags: string[]) => void
@@ -11,11 +11,6 @@ export interface TagInputProps {
   placeholder?: string
 }
 
-export function normalizeTag(tag: string): string {
-  const trimmed = tag.trim().replace(/^#+/, "")
-  if (!trimmed) return ""
-  return `#${trimmed.toLowerCase()}`
-}
 
 const DEFAULT_POPULAR_TAGS = [
   "#kebutuhan",

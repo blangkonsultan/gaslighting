@@ -71,6 +71,14 @@
       "dependencies": ["feat-005"],
       "status": "done",
       "evidence": "23 test suites pass (119 tests, +20 new tests), 0 lint errors, build succeeds, browser DOM evaluation verifies CSV download toast and responsive PrintPreviewDialog"
+    },
+    {
+      "id": "feat-010",
+      "name": "Advanced Filters & Transaction Tagging",
+      "description": "Tag transactions with custom hashtags (#kebutuhan, #makan, #liburan) and filter via advanced sheet: multi-tag containment, date range, min/max amount range, transaction type, active filter chips bar with counter and reset",
+      "dependencies": ["feat-003", "feat-006"],
+      "status": "done",
+      "evidence": "25 test suites pass (131 tests, +12 new tests), 0 lint errors, build succeeds, migration 20260927000001_transaction_tags.sql applied, browser screenshot verifies tag badges, filter sheet, badge counter, and filtered list."
     }
   ]
 }

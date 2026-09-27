@@ -63,6 +63,7 @@ export const transactionSchema = z.object({
 })
 
 export type TransactionInput = z.infer<typeof transactionSchema>
+export type TransactionFormValues = z.input<typeof transactionSchema>
 
 export const transferSchema = z.object({
   from_account_id: z.string().uuid(t.val_from_account_required),

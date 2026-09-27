@@ -15,7 +15,7 @@ import { getCategories } from "@/services/admin.service"
 import { getUserTags } from "@/services/transactions.service"
 import { TagInput } from "./TagInput"
 import { queryKeys } from "@/lib/query-client"
-import { transactionSchema, type TransactionInput } from "@/lib/validators"
+import { transactionSchema, type TransactionInput, type TransactionFormValues } from "@/lib/validators"
 import { formatIdrIntegerInput, parseIdrInteger } from "@/lib/money"
 import { todayYmd } from "@/lib/dates"
 import type { Account, Category } from "@/types/financial"
@@ -70,7 +70,7 @@ export function TransactionForm({
     setError: setFieldError,
     clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm<TransactionInput>({
+  } = useForm<TransactionFormValues, unknown, TransactionInput>({
     resolver: zodResolver(transactionSchema),
     defaultValues: toFormDefaults(initialValues),
   })

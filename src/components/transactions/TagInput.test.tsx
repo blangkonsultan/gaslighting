@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 import { render, screen, fireEvent } from "@testing-library/react"
-import { TagInput, normalizeTag } from "./TagInput"
+import { TagInput } from "./TagInput"
+import { normalizeTag } from "@/lib/utils"
 
 describe("TagInput", () => {
   describe("normalizeTag", () => {
