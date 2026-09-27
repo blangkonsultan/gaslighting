@@ -229,6 +229,18 @@ export default function TransactionListPage() {
                         {isTransferOut ? "Transfer keluar" : isTransferIn ? "Transfer masuk" : "Transfer"}
                       </p>
                     )}
+                    {Array.isArray(t.tags) && t.tags.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {t.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium bg-primary/15 text-primary-foreground border border-primary/20"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <AmountDisplay

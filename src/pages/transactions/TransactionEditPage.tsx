@@ -126,6 +126,7 @@ export default function TransactionEditPage() {
       amount: amountNumber,
       description: data.description.trim(),
       transaction_date: data.transaction_date,
+      tags: data.tags ?? [],
     })
 
     toast.success("Transaksi berhasil diperbarui.")
@@ -135,6 +136,7 @@ export default function TransactionEditPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
       queryClient.invalidateQueries({ queryKey: ["transactions", "detail"] }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.transactions.tags(userId) }),
     ])
 
     navigate("/transactions")
@@ -306,6 +308,7 @@ export default function TransactionEditPage() {
               amount: tx.amount,
               description: tx.description,
               transaction_date: tx.transaction_date,
+              tags: tx.tags ?? [],
             }}
             originalAccountId={tx.account_id}
             editingAmount={tx.amount}

@@ -40,6 +40,7 @@ export default function TransactionCreatePage() {
       amount: amountNumber,
       description: data.description.trim(),
       transaction_date: data.transaction_date,
+      tags: data.tags ?? [],
     })
 
     if (insertError) throw insertError
@@ -50,6 +51,7 @@ export default function TransactionCreatePage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.recent }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.transactions.tags(profile.id) }),
     ])
 
     navigate("/transactions")

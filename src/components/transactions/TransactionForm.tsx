@@ -12,6 +12,8 @@ import { FormField } from "@/components/shared/FormField"
 import { useBalanceCheck } from "@/hooks/useBalanceCheck"
 import { getAccounts } from "@/services/accounts.service"
 import { getCategories } from "@/services/admin.service"
+import { getUserTags } from "@/services/transactions.service"
+import { TagInput } from "./TagInput"
 import { queryKeys } from "@/lib/query-client"
 import { transactionSchema, type TransactionInput } from "@/lib/validators"
 import { formatIdrIntegerInput, parseIdrInteger } from "@/lib/money"
@@ -25,6 +27,7 @@ export type TransactionFormInitialValues = Partial<{
   amount: number
   description: string | null
   transaction_date: string
+  tags?: string[]
 }>
 
 function toFormDefaults(initial?: TransactionFormInitialValues): TransactionInput {
@@ -36,6 +39,7 @@ function toFormDefaults(initial?: TransactionFormInitialValues): TransactionInpu
     amount: initial?.amount != null ? formatIdrIntegerInput(String(initial.amount)) : "",
     description: (initial?.description ?? "").trim(),
     transaction_date: initial?.transaction_date ?? todayYmd(),
+    tags: initial?.tags ?? [],
   }
 }
 
@@ -77,7 +81,13 @@ export function TransactionForm({
   const amountStr = watch("amount")
 
   const amountNumber = useMemo(() => parseIdrInteger(amountStr), [amountStr])
+  const currentTags = watch("tags") ?? []
 
+  const { data: userTags } = useQuery({
+    queryKey: queryKeys.transactions.tags(userId),
+    queryFn: () => getUserTags(userId),
+    enabled: Boolean(userId),
+  })
   const { data: accounts, isLoading: isAccountsLoading } = useQuery({
     queryKey: queryKeys.accounts.all,
     queryFn: async () => (await getAccounts(userId)) as Account[],
@@ -288,6 +298,15 @@ export function TransactionForm({
 
         <FormField label="Tanggal" htmlFor="transaction_date" error={errors.transaction_date}>
           <Input id="transaction_date" type="date" max={todayYmd()} className="touch-target" {...register("transaction_date")} />
+        </FormField>
+
+        <FormField label="Tag Transaksi">
+          <TagInput
+            value={currentTags}
+            onChange={(newTags) => setValue("tags", newTags, { shouldValidate: true })}
+            suggestedTags={userTags ?? []}
+            disabled={isSubmitting || isLoading}
+          />
         </FormField>
 
         <div className="grid grid-cols-2 gap-2">
