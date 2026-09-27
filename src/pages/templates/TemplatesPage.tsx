@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Bookmark, Plus, Search, Trash2, ArrowRight, Pencil, ArrowLeft } from "lucide-react"
+import { Bookmark, Plus, Search, Trash2, ArrowRight, Pencil } from "lucide-react"
 import { toast } from "sonner"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -65,25 +65,13 @@ export default function TemplatesPage() {
     <div className="mx-auto w-full max-w-4xl p-4 lg:p-6 space-y-5">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2.5">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => navigate(-1)}
-            className="touch-target -ml-1 text-muted-foreground hover:text-foreground shrink-0"
-            aria-label="Kembali"
-          >
-            <ArrowLeft size={20} />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Template Transaksi
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Gunakan dan kelola template untuk pengisian transaksi lebih cepat.
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Template Transaksi
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Gunakan dan kelola template untuk pengisian transaksi lebih cepat.
+          </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <Button

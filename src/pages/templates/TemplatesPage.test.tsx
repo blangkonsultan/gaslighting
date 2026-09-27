@@ -109,17 +109,6 @@ describe("TemplatesPage", () => {
     expect(screen.getByText("Tambah Template Baru")).toBeInTheDocument()
   })
 
-  it("navigates back when back button is clicked", () => {
-    vi.mocked(templatesHook.useTransactionTemplates).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as never)
-
-    renderWithProviders()
-
-    fireEvent.click(screen.getByRole("button", { name: "Kembali" }))
-    expect(mockNavigate).toHaveBeenCalledWith(-1)
-  })
 
   it("opens create template dialog when Tambah Template is clicked", () => {
     vi.mocked(templatesHook.useTransactionTemplates).mockReturnValue({
