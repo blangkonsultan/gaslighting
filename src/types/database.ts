@@ -278,6 +278,7 @@ export type Database = {
           description: string | null
           id: string
           is_recurring: boolean
+          tags: string[]
           transaction_date: string
           transfer_id: string | null
           type: string
@@ -293,6 +294,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_recurring?: boolean
+          tags?: string[]
           transaction_date?: string
           transfer_id?: string | null
           type: string
@@ -308,6 +310,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_recurring?: boolean
+          tags?: string[]
           transaction_date?: string
           transfer_id?: string | null
           type?: string
