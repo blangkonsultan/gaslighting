@@ -59,7 +59,7 @@ export default function LoginPage() {
 
         {/* Card Form */}
         <Card className="border border-[#D5CF9E] bg-[#E4DFB5]/90 shadow-sm rounded-2xl overflow-hidden">
-          <CardHeader className="text-center pb-2 pt-6">
+          <CardHeader className="text-center pb-2 pt-6 px-6">
             <CardTitle className="text-lg font-bold text-[#2D2A26]">
               Selamat Datang Kembali
             </CardTitle>
@@ -69,7 +69,7 @@ export default function LoginPage() {
           </CardHeader>
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            <CardContent className="flex flex-col gap-4 pt-2">
+            <CardContent className="flex flex-col gap-4 pt-2 px-6">
               {error && (
                 <div
                   role="alert"
