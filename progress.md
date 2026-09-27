@@ -195,9 +195,9 @@
   - Edit template name, type, account, category (with icons), amount, description, and tags.
   - Accessible via "Edit" (Pencil icon) on both `/templates` cards and `TemplateManageSheet.tsx` rows.
 - [x] Routed "Kelola" button in `TemplatePicker.tsx` directly to `/templates` management page, eliminating redundant bottom sheet.
-- [x] Added back button (`ArrowLeft`) and unified "Tambah Template" action on `TemplatesPage.tsx` (both in the header and in the empty state), opening `TemplateEditDialog.tsx` directly in create mode.
+- [x] Streamlined `/templates` navigation (Option 1): removed awkward header back button, keeping clean standalone navigation via shell sidebar / bottom nav and direct "Gunakan →" transaction flow.
 - [x] Ran Impeccable UI detector across all new and modified components (0 issues found)
-- [x] Verified `npm run lint` (0 errors), `npm run test` (255/255 passing), `npm run build` (production build succeeds)
+- [x] Verified `npm run lint` (0 errors), `npm run test` (254/254 passing), `npm run build` (production build succeeds)
 ### What's In Progress
 
 - None (all tasks completed and verified)
