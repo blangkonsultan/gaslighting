@@ -91,6 +91,10 @@
   - Resolved mobile preview dialog cut-off: on 390px mobile screens, the 6-column statement was compressed into 276px causing text collisions and clipping the Nominal column at `-Rp 2.0`.
   - Added `overflow-x-auto` container with `min-w-[660px]` sheet layout inside `PrintPreviewDialog.tsx`, preserving A4 proportions on mobile and allowing smooth horizontal panning with helper hint (`💡 Geser tabel ke samping`).
   - Formally configured `@page { size: A4 portrait; margin: 10mm; }` and `.print-document { width: 190mm !important; }` in `src/index.css`, locking document geometry to A4 dimensions on all printing platforms.
+- [x] Fix Floating Dialog Modal in Print Output:
+  - Identified root cause from Android Print Spooler screenshot: `PrintPreviewDialog` modal rendered via React portal was not hidden in `@media print`, printing both the background document and the open modal dialog floating in the center.
+  - Added `display: none !important;` to `[data-slot="dialog-portal"]`, `[data-slot="dialog-overlay"]`, `[data-slot="dialog-content"]`, `[role="dialog"]`, and added `no-print` on `DialogContent`.
+  - Verified in print emulation: floating modal is completely eliminated, yielding a single, pristine A4/Letter financial statement.
 
 - None (all 9 steps completed and verified)
 

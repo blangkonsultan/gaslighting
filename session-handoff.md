@@ -87,6 +87,10 @@
   - Resolved mobile preview dialog cut-off: on 390px mobile screens, the 6-column statement was compressed into 276px causing text collisions and clipping the Nominal column at `-Rp 2.0`.
   - Added `overflow-x-auto` container with `min-w-[660px]` sheet layout inside `PrintPreviewDialog.tsx`, preserving A4 proportions on mobile and allowing smooth horizontal panning with helper hint (`💡 Geser tabel ke samping`).
   - Formally configured `@page { size: A4 portrait; margin: 10mm; }` and `.print-document { width: 190mm !important; }` in `src/index.css`, locking document geometry to A4 dimensions on all printing platforms.
+- [x] Step 25: Eliminate Floating Dialog Modal from Print Media:
+  - Resolved duplicate document artifact: `[data-slot="dialog-portal"]` and `[data-slot="dialog-content"]` remained visible during `window.print()`, overlaying the printed paper with the preview dialog card.
+  - Marked dialog portal elements `display: none !important;` in `@media print` and tagged `DialogContent` with `no-print`.
+  - Confirmed via print emulation: modal box is 100% removed, producing an immaculate single-sheet document.
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
