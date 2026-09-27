@@ -111,14 +111,18 @@
   - Integrated "Scan Struk" button and auto-fill in `src/pages/transactions/TransactionCreatePage.tsx`
   - Verified via browser test with screenshot: modal opens with camera/gallery options, parses fields, and populates form smoothly
   - 28 test suites passing (149/149 tests), 0 lint errors, build succeeds
-- None (all 9 steps completed and verified)
+- [x] Polish Receipt Scanner Modal Review Footer:
+  - Enhanced bottom padding (`pb-6 sm:pb-4`) with safe-area spacing and `gap-3` between action buttons.
+  - Upgraded "Scan Ulang" and "Gunakan Data" buttons to full 44px touch targets (`h-11 font-semibold`), eliminating the cramped bottom edge feeling on mobile screens.
+
+### What's In Progress
+
+- None (all tasks completed and verified)
 
 ### What's Next
 
-- Deploy to production / run migration on clean Supabase database instance
-- Add any subsequent couple/shared budgeting features as requested
-
-## Blockers / Risks
+- Connect user's real smartphone camera to test physical receipt capture
+- Plan next roadmap features
 
 - None. Fresh database migration ready for `supabase db reset`.
 

@@ -105,6 +105,9 @@
   - Built `src/components/transactions/ReceiptScannerModal.tsx` with mobile camera capture, gallery picker, progress bar, and review form (2 tests passing)
   - Integrated "Scan Struk" button and auto-fill in `src/pages/transactions/TransactionCreatePage.tsx`
   - Verified in mobile browser with screenshot: camera/gallery trigger opens, review state populates form smoothly
+- [x] Step 28: Polish Receipt Scanner Review Footer:
+  - Added generous bottom padding (`px-5 pt-3.5 pb-6 sm:pb-4`) with backdrop blur and subtle border
+  - Upgraded action buttons to 44px touch targets (`h-11 font-semibold`), removing the cramped bottom edge feeling
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
