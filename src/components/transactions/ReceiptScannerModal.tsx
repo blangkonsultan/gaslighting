@@ -307,24 +307,22 @@ export function ReceiptScannerModal({
 
         {/* Footer */}
         {step === "reviewed" && (
-          <DialogFooter className="p-4 border-t border-border bg-card/30 flex flex-row gap-2">
+          <DialogFooter className="px-5 pt-3.5 pb-6 sm:pb-4 border-t border-border bg-card/50 backdrop-blur-xs flex flex-row gap-3 shrink-0">
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              className="flex-1 touch-target text-xs"
+              className="flex-1 h-11 text-xs sm:text-sm font-medium touch-target"
               onClick={resetState}
             >
-              <RotateCcw size={14} className="mr-1.5" />
+              <RotateCcw size={15} className="mr-1.5" />
               Scan Ulang
             </Button>
             <Button
               type="button"
-              size="sm"
-              className="flex-1 touch-target text-xs font-semibold bg-primary text-primary-foreground"
+              className="flex-1 h-11 text-xs sm:text-sm font-semibold touch-target bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
               onClick={handleApply}
             >
-              <Check size={14} className="mr-1.5" />
+              <Check size={16} className="mr-1.5" />
               Gunakan Data
             </Button>
           </DialogFooter>
