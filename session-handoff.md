@@ -1,7 +1,7 @@
 # Session Handoff
 
-- Goal: Implement Smart Receipt Scanner with Client-Side OCR (feat-011)
-- Current status: Done. All 5 plan steps implemented, verified with tests (149/149 pass across 28 suites), lint (0 errors), build, and browser screenshot verification.
+- Goal: Implement PWA Mobile Ergonomics: Quick Shortcuts, Web Share Target & App Lock (feat-012)
+- Current status: Done. All plan steps implemented, verified with tests (187/187 pass across 32 suites), lint (0 errors), build, and browser screenshot evaluation.
 - Branch / commit: main / clean working directory
 ## Completed This Session
 
@@ -108,6 +108,18 @@
 - [x] Step 28: Polish Receipt Scanner Review Footer:
   - Added generous bottom padding (`px-5 pt-3.5 pb-6 sm:pb-4`) with backdrop blur and subtle border
   - Upgraded action buttons to 44px touch targets (`h-11 font-semibold`), removing the cramped bottom edge feeling
+
+- [x] Step 29: Implement PWA Mobile Ergonomics & App Lock (feat-012):
+  - Added Homescreen App Shortcuts in `vite.config.ts` manifest for instant expense, income, and receipt scanning
+  - Added Web Share Target API in `vite.config.ts` manifest with `multipart/form-data` image sharing
+  - Implemented Service Worker `POST /share-target` fetch handler in `src/sw.ts` caching shared images to `CacheStorage`
+  - Updated `ReceiptScannerModal.tsx` and `TransactionCreatePage.tsx` for query params (`?scan=true`, `?type=`, `?shared_receipt=1`)
+  - Implemented cryptographic PIN security in `src/lib/app-lock.ts` with SHA-256 and WebAuthn platform biometrics
+  - Built Zustand store `src/stores/app-lock-store.ts` with visibilitychange auto-lock listeners
+  - Built `AppLockScreen.tsx` with vintage/earthy theme, numeric keypad, biometrics trigger, and logout confirmation
+  - Built `AppLockSettingsCard.tsx` and integrated into `SettingsPage.tsx`
+  - Mounted `AppLockScreen` at top level in `src/App.tsx`
+  - Verified via browser test with screenshots: settings toggle, setup dialog, instant locking, keypad entry, and shortcut navigation
 ## Verification Evidence
 
 | Check | Command | Result | Notes |

@@ -4,7 +4,7 @@
 
 **Last Updated:** 2026-09-27
 **Branch:** main
-**Active Feature:** feat-011 (Completed)
+**Active Feature:** feat-012 (Completed)
 
 ## Status
 
@@ -115,10 +115,32 @@
   - Enhanced bottom padding (`pb-6 sm:pb-4`) with safe-area spacing and `gap-3` between action buttons.
   - Upgraded "Scan Ulang" and "Gunakan Data" buttons to full 44px touch targets (`h-11 font-semibold`), eliminating the cramped bottom edge feeling on mobile screens.
 
+### What's Done (feat-012)
+
+- [x] Configure PWA Homescreen App Shortcuts in `vite.config.ts`:
+  - "Catat Pengeluaran" (`/transactions/new?type=expense`)
+  - "Catat Pemasukan" (`/transactions/new?type=income`)
+  - "Scan Struk Belanja" (`/transactions/new?scan=true`)
+- [x] Configure Web Share Target API in `vite.config.ts` manifest (`POST /share-target` with `multipart/form-data` image file)
+- [x] Implement Service Worker `POST /share-target` interception in `src/sw.ts` and dev middleware, caching shared receipt to `CacheStorage` (`/shared-receipt-latest`) and redirecting to `/transactions/new?shared_receipt=1`
+- [x] Update `ReceiptScannerModal.tsx` to accept `initialFile` prop and auto-trigger OCR scanning
+- [x] Update `TransactionCreatePage.tsx` to read `?type=`, `?scan=true`, and consume `?shared_receipt=1` from `CacheStorage`
+- [x] Implement client-side security in `src/lib/app-lock.ts` (SHA-256 PIN hashing with unique 16-byte random salt, WebAuthn platform biometrics registration & verification, configurable auto-lock timeout, and `localStorage` persistence)
+- [x] Implement Zustand store `src/stores/app-lock-store.ts` with visibilitychange and user activity auto-lock event listeners
+- [x] Build mobile-first vintage-themed `AppLockScreen.tsx` with 6 PIN dots, 3x4 numeric keypad, biometrics trigger button, physical keyboard support, and safe logout confirmation dialog
+- [x] Build `AppLockSettingsCard.tsx` and integrated into `SettingsPage.tsx` with PIN setup dialog, PIN change dialog, auto-lock timeout selector, and instant lock button
+- [x] Mount `AppLockScreen` at top level in `src/App.tsx`
+- [x] Add comprehensive unit test suites:
+  - `src/lib/app-lock.test.ts` (15 tests)
+  - `src/stores/app-lock-store.test.ts` (7 tests)
+  - `src/components/security/AppLockScreen.test.tsx` (8 tests)
+  - `src/components/security/AppLockSettingsCard.test.tsx` (7 tests)
+  - `src/components/transactions/ReceiptScannerModal.test.tsx` (3 tests)
+  - Total test suite: 32 files, 187 passed (100% passing)
+
 ### What's In Progress
 
 - None (all tasks completed and verified)
-
 ### What's Next
 
 - Connect user's real smartphone camera to test physical receipt capture

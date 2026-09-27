@@ -57,6 +57,33 @@ function devServiceWorkerUnregisterPlugin(): Plugin {
                 })
               );
             });
+            self.addEventListener('fetch', (event) => {
+              const url = new URL(event.request.url);
+              if (url.pathname === '/share-target' && event.request.method === 'POST') {
+                event.respondWith(
+                  (async () => {
+                    try {
+                      const formData = await event.request.formData();
+                      const file = formData.get('receipt');
+                      if (file && file instanceof File) {
+                        const cache = await caches.open('shared-receipts');
+                        const response = new Response(file, {
+                          headers: {
+                            'Content-Type': file.type || 'image/jpeg',
+                            'X-Shared-Name': encodeURIComponent(file.name || 'receipt.jpg'),
+                          },
+                        });
+                        await cache.put('/shared-receipt-latest', response);
+                        return Response.redirect('/transactions/new?shared_receipt=1', 303);
+                      }
+                    } catch (err) {
+                      console.error('Failed to handle shared receipt in dev SW:', err);
+                    }
+                    return Response.redirect('/transactions/new', 303);
+                  })()
+                );
+              }
+            });
           `)
           return
         }
@@ -127,6 +154,45 @@ export default defineConfig({
           { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
           { src: "pwa-512x512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
+        shortcuts: [
+          {
+            name: "Catat Pengeluaran",
+            short_name: "Pengeluaran",
+            description: "Catat transaksi pengeluaran baru",
+            url: "/transactions/new?type=expense",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192", type: "image/png" }],
+          },
+          {
+            name: "Catat Pemasukan",
+            short_name: "Pemasukan",
+            description: "Catat transaksi pemasukan baru",
+            url: "/transactions/new?type=income",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192", type: "image/png" }],
+          },
+          {
+            name: "Scan Struk Belanja",
+            short_name: "Scan Struk",
+            description: "Pindai struk belanja dengan kamera atau OCR",
+            url: "/transactions/new?scan=true",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192", type: "image/png" }],
+          },
+        ],
+        share_target: {
+          action: "/share-target",
+          method: "POST",
+          enctype: "multipart/form-data",
+          params: {
+            title: "title",
+            text: "text",
+            url: "url",
+            files: [
+              {
+                name: "receipt",
+                accept: ["image/*"],
+              },
+            ],
+          },
+        },
       },
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],

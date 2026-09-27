@@ -1,4 +1,4 @@
-import { useState, useRef, type ChangeEvent } from "react"
+import { useState, useRef, useEffect, type ChangeEvent } from "react"
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import { toast } from "sonner"
 export interface ReceiptScannerModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialFile?: File | null
   onApplyReceipt: (data: {
     amount: string
     description: string
@@ -35,6 +36,7 @@ type ScanStep = "idle" | "scanning" | "reviewed"
 export function ReceiptScannerModal({
   open,
   onOpenChange,
+  initialFile,
   onApplyReceipt,
 }: ReceiptScannerModalProps) {
   const [step, setStep] = useState<ScanStep>("idle")
@@ -97,6 +99,15 @@ export function ReceiptScannerModal({
       setStep("idle")
     }
   }
+
+  useEffect(() => {
+    if (open && initialFile) {
+      const timer = window.setTimeout(() => {
+        void processImageFile(initialFile)
+      }, 0)
+      return () => window.clearTimeout(timer)
+    }
+  }, [open, initialFile])
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]

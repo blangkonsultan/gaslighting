@@ -75,4 +75,35 @@ describe("ReceiptScannerModal", () => {
       tags: ["#struk"],
     })
   })
+
+  it("automatically processes initialFile when opened with one", async () => {
+    vi.spyOn(ocrModule, "recognizeReceiptText").mockResolvedValue(
+      "ALFAMART TOTAL 20.000 TGL 26/09/2026"
+    )
+
+    vi.spyOn(receiptParserModule, "parseReceiptText").mockReturnValue({
+      merchant: "Alfamart",
+      amount: 20000,
+      date: "2026-09-26",
+      suggestedCategory: "Belanja",
+      rawText: "ALFAMART TOTAL 20.000",
+      confidence: { amount: true, date: true, merchant: true },
+    })
+
+    const dummyFile = new File(["receipt image"], "shared-receipt.jpg", { type: "image/jpeg" })
+
+    render(
+      <ReceiptScannerModal
+        open={true}
+        initialFile={dummyFile}
+        onOpenChange={vi.fn()}
+        onApplyReceipt={vi.fn()}
+      />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Alfamart")).toBeInTheDocument()
+      expect(screen.getByDisplayValue("20.000")).toBeInTheDocument()
+    })
+  })
 })

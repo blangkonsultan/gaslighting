@@ -104,3 +104,32 @@ self.addEventListener("notificationclick", (event) => {
     })
   )
 })
+
+// Handle Web Share Target POST requests with shared receipt image
+self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url)
+  if (url.pathname === "/share-target" && event.request.method === "POST") {
+    event.respondWith(
+      (async () => {
+        try {
+          const formData = await event.request.formData()
+          const file = formData.get("receipt")
+          if (file && file instanceof File) {
+            const cache = await caches.open("shared-receipts")
+            const response = new Response(file, {
+              headers: {
+                "Content-Type": file.type || "image/jpeg",
+                "X-Shared-Name": encodeURIComponent(file.name || "receipt.jpg"),
+              },
+            })
+            await cache.put("/shared-receipt-latest", response)
+            return Response.redirect("/transactions/new?shared_receipt=1", 303)
+          }
+        } catch (err) {
+          console.error("Failed to handle shared receipt in SW:", err)
+        }
+        return Response.redirect("/transactions/new", 303)
+      })()
+    )
+  }
+})

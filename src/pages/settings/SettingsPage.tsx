@@ -13,6 +13,7 @@ import { useBalanceRecalculation } from "@/hooks/useBalanceRecalculation"
 import type { BalanceRecalcSummary } from "@/types/financial"
 import { formatErrorMessage } from "@/lib/format-error"
 
+import { AppLockSettingsCard } from "@/components/security/AppLockSettingsCard"
 const emptyRecalcSummary: BalanceRecalcSummary = {
   totalCount: 0,
   updateCount: 0,
@@ -180,6 +181,7 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+      <AppLockSettingsCard />
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Data Saldo</CardTitle>

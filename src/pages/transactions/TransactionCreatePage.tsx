@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -16,16 +16,48 @@ import { getCategories } from "@/services/admin.service"
 import { Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 export default function TransactionCreatePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { profile } = useAuthStore()
   const [mode, setMode] = useState<"transaction" | "transfer">("transaction")
-  const [isScanModalOpen, setIsScanModalOpen] = useState(false)
-  const [scannedInitialValues, setScannedInitialValues] = useState<TransactionFormInitialValues | undefined>(undefined)
+  const [searchParams] = useSearchParams()
+  const [isScanModalOpen, setIsScanModalOpen] = useState(() => searchParams.get("scan") === "true")
+  const [scannedInitialValues, setScannedInitialValues] = useState<TransactionFormInitialValues | undefined>(() => {
+    const typeParam = searchParams.get("type")
+    if (typeParam === "income" || typeParam === "expense") {
+      return { type: typeParam }
+    }
+    return undefined
+  })
   const [formKey, setFormKey] = useState(0)
+  const [sharedFile, setSharedFile] = useState<File | null>(null)
 
+  useEffect(() => {
+    if (searchParams.get("shared_receipt") === "1") {
+      async function loadSharedReceipt() {
+        try {
+          if ("caches" in window) {
+            const cache = await caches.open("shared-receipts")
+            const response = await cache.match("/shared-receipt-latest")
+            if (response) {
+              const blob = await response.blob()
+              const fileName = decodeURIComponent(response.headers.get("X-Shared-Name") || "shared-receipt.jpg")
+              const file = new File([blob], fileName, { type: blob.type || "image/jpeg" })
+              await cache.delete("/shared-receipt-latest")
+              setSharedFile(file)
+              setIsScanModalOpen(true)
+              toast.info("Struk yang dibagikan berhasil dimuat untuk dipindai.")
+            }
+          }
+        } catch (err) {
+          console.error("Gagal membaca shared receipt dari cache:", err)
+        }
+      }
+      void loadSharedReceipt()
+    }
+  }, [searchParams])
   const { data: categories } = useQuery({
     queryKey: queryKeys.categories.all,
     queryFn: getCategories,
@@ -203,7 +235,11 @@ export default function TransactionCreatePage() {
       </Card>
         <ReceiptScannerModal
           open={isScanModalOpen}
-          onOpenChange={setIsScanModalOpen}
+          onOpenChange={(open) => {
+            setIsScanModalOpen(open)
+            if (!open) setSharedFile(null)
+          }}
+          initialFile={sharedFile}
           onApplyReceipt={handleApplyReceipt}
         />
     </div>

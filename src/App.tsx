@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useEffect } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { Toaster } from "@/components/ui/sonner"
@@ -7,6 +7,8 @@ import { queryClient } from "@/lib/query-client"
 import { AppShell } from "@/components/layout/AppShell"
 import { UserRoute, AdminRoute, DashboardRoute, GuestRoute } from "@/components/auth/RoleRoutes"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
+import { AppLockScreen } from "@/components/security/AppLockScreen"
+import { setupAppLockAutoLockListeners } from "@/stores/app-lock-store"
 
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"))
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"))
@@ -31,6 +33,11 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    const cleanup = setupAppLockAutoLockListeners()
+    return cleanup
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -79,6 +86,7 @@ export default function App() {
           </Suspense>
         </AuthInitializer>
         <Toaster position="top-center" richColors />
+        <AppLockScreen />
       </BrowserRouter>
     </QueryClientProvider>
   )

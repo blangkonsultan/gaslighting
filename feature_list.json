@@ -87,6 +87,14 @@
       "dependencies": ["feat-001", "feat-010"],
       "status": "done",
       "evidence": "28 test suites pass (149 tests, +18 new tests), 0 lint errors, build succeeds, browser screenshot evaluation verifies camera/gallery trigger, modal review, and auto-fill."
+    },
+    {
+      "id": "feat-012",
+      "name": "PWA Mobile Ergonomics: Quick Shortcuts, Web Share Target & App Lock",
+      "description": "PWA homescreen app shortcuts for instant expense/income/receipt scan, Web Share Target API with service worker file interception for one-tap receipt sharing directly from phone gallery, and Biometric/PIN screen lock with WebAuthn, SHA-256 PIN hashing, and configurable auto-lock",
+      "dependencies": ["feat-006", "feat-011"],
+      "status": "done",
+      "evidence": "32 test suites pass (187 tests, +38 new tests), 0 lint errors, build succeeds, browser evaluation verifies manifest shortcuts, share_target service worker interceptor, Settings AppLock toggle, PIN setup dialog, AppLockScreen keypad, keyboard unlock, and ?scan=true / ?type=income shortcuts."
     }
   ]
 }
