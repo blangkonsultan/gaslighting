@@ -147,6 +147,14 @@
   - Added security assurance micro-copy badge: `🛡️ Data finansial terenkripsi & privat`
   - Added test suite `src/pages/auth/LoginPage.test.tsx` (4 tests passing)
   - Total test suite: 33 files, 192 passed (100% passing)
+- [x] Integrate Brand Icon across App Surfaces (AppLogo adoption):
+  - Created reusable `src/components/shared/AppLogo.tsx` with size presets (`sm`, `md`, `lg`, `xl`) rendering the botanical crest SVG
+  - Integrated `AppLogo` into mobile `Header.tsx` (top-left brand presence)
+  - Integrated `AppLogo` into `DesktopSidebar.tsx` (sidebar header)
+  - Integrated `AppLogo` into `LoginPage.tsx` & `RegisterPage.tsx` hero headers
+  - Integrated `AppLogo` into `AppLockScreen.tsx` lock screen header
+  - Added test suite `src/components/shared/AppLogo.test.tsx` (4 tests passing)
+  - Total test suite: 34 files, 196 passed (100% passing)
 ### What's In Progress
 
 - None (all tasks completed and verified)

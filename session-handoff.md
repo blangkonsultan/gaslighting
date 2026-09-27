@@ -1,7 +1,7 @@
 # Session Handoff
 
 - Goal: Implement PWA Mobile Ergonomics: Quick Shortcuts, Web Share Target & App Lock (feat-012)
-- Current status: Done. All plan steps implemented, verified with tests (192/192 pass across 33 suites), lint (0 errors), build, and browser screenshot evaluation.
+- Current status: Done. All plan steps implemented, verified with tests (196/196 pass across 34 suites), lint (0 errors), build, and browser screenshot evaluation.
 - Branch / commit: main / clean working directory
 ## Completed This Session
 
@@ -129,6 +129,12 @@
   - Seamless card layout removing awkward hairlines in `CardFooter`
   - Added `src/pages/auth/LoginPage.test.tsx` (4 tests passing)
   - Passed mechanical defect detector (`impeccable detect`) with 0 defects
+  - Deployed to Vercel production: https://gaslighting-nine.vercel.app
+- [x] Step 31: Integrate Brand Icon across App Surfaces (AppLogo adoption):
+  - Created reusable `src/components/shared/AppLogo.tsx` providing crisp SVG rendering across sizes
+  - Replaced plain text with `AppLogo` in mobile `Header.tsx` and desktop `DesktopSidebar.tsx`
+  - Replaced generic wallet/shield icons in `LoginPage.tsx`, `RegisterPage.tsx`, and `AppLockScreen.tsx` with the official botanical "G" crest
+  - Added `src/components/shared/AppLogo.test.tsx` (4 tests passing)
   - Deployed to Vercel production: https://gaslighting-nine.vercel.app
 ## Verification Evidence
 
