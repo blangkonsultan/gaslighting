@@ -181,14 +181,13 @@
   - `src/components/transactions/TemplatePicker.test.tsx` (4 tests)
   - `src/components/transactions/TemplateManageSheet.test.tsx` (5 tests)
   - `src/pages/transactions/TransactionCreatePage.test.tsx` (7 tests)
-  - `src/components/transactions/TransactionForm.test.tsx` (5 tests)
+  - `src/components/transactions/TransactionForm.test.tsx` (4 tests)
   - `src/components/shared/CategoryIcon.test.tsx` (5 tests)
   - `src/pages/templates/TemplatesPage.test.tsx` (5 tests)
-  - Total test suite: 42 files, 241 tests passing (100%)
+  - Total test suite: 42 files, 240 tests passing (100%)
 - [x] Added dedicated Template Management page (`/templates`, `src/pages/templates/TemplatesPage.tsx`) with search, template cards, "Gunakan" direct pre-fill routing, and deletion dialog.
 - [x] Added navigation links: `DesktopSidebar` (user main nav), `MobileBottomNav` (Lainnya sheet), and `TransactionCreatePage` `?template_id=` parameter pre-fill support.
-- [x] Replaced toast-attached template save sheet with inline progressive disclosure toggles in `TransactionForm.tsx` (using accessible `Switch` components for both template activation and amount inclusion; zero checkboxes).
-- [x] Auto-derived template name directly from the transaction description (eliminating redundant duplicate input) with live preview and validation.
+- [x] Streamlined template save preview inside `TransactionForm.tsx`: removed redundant secondary amount toggle, unified saving with transaction amount, and aligned visual hierarchy: Kategori (with icon), Nama template (from description, on top), and Nominal (formatted amount, below name).
 - [x] Added category icons (`CategoryIcon`) inside the Category `Select` trigger and dropdown items with category background accents for instant visual familiarity.
 - [x] Cleaned up obsolete `SaveTemplateSheet.tsx` and moved template creation directly into atomic form submit.
 - [x] Ran Impeccable UI detector across all new and modified components (0 issues found)
