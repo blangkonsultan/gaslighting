@@ -160,15 +160,15 @@
   - Built `src/components/transactions/TemplatePicker.tsx` with horizontal chip scroll container, category icon fallback, formatted IDR amounts, and "Kelola" action button.
   - Built `src/components/transactions/SaveTemplateSheet.tsx` bottom sheet with auto-filled template name (capped at 30 chars), IDR amount inclusion toggle, name validation, and duplicate name (23505) error handling.
   - Built `src/components/transactions/TemplateManageSheet.tsx` bottom sheet with template list, type/account/amount subtitles, delete confirmation dialog, and empty state.
-  - Wired template picker, save-as-template prompt in success toast action, and management sheet into `src/pages/transactions/TransactionCreatePage.tsx`.
-  - Enhanced `src/components/shared/FormField.tsx` to accept string and custom error objects cleanly without RHF type casting.
-  - Added 6 new unit test suites:
+  - Replaced toast-attached template save sheet with inline progressive disclosure toggles in `TransactionForm.tsx` (using accessible `Switch` components for both template activation and amount inclusion; zero checkboxes).
+  - Cleaned up obsolete `SaveTemplateSheet.tsx` and moved template creation directly into atomic form submit.
+  - Added 6 new/updated unit test suites:
     - `src/services/transaction-templates.service.test.ts` (8 tests)
     - `src/hooks/useTransactionTemplates.test.tsx` (4 tests)
     - `src/components/transactions/TemplatePicker.test.tsx` (4 tests)
-    - `src/components/transactions/SaveTemplateSheet.test.tsx` (6 tests)
     - `src/components/transactions/TemplateManageSheet.test.tsx` (5 tests)
-    - `src/pages/transactions/TransactionCreatePage.test.tsx` (6 tests)
+    - `src/pages/transactions/TransactionCreatePage.test.tsx` (7 tests)
+    - `src/components/transactions/TransactionForm.test.tsx` (5 tests)
     - `src/components/shared/CategoryIcon.test.tsx` (5 tests)
     - `src/pages/templates/TemplatesPage.test.tsx` (5 tests)
     - Total test suite: 42 files, 241 tests passing (100% passing).
