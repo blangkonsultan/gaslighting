@@ -21,7 +21,7 @@ export function PrintableReport({
   const isSurplus = report.netTotal >= 0
 
   return (
-    <div className="print-document bg-white text-slate-800 p-8 max-w-4xl mx-auto font-sans leading-relaxed">
+    <div className="print-document bg-white text-slate-800 p-6 sm:p-8 max-w-4xl mx-auto font-sans leading-relaxed print:p-0 print:max-w-none print:w-full print:m-0">
       {/* Header */}
       <div className="border-b-2 border-slate-300 pb-6 mb-6">
         <div className="flex justify-between items-start">
@@ -164,15 +164,23 @@ export function PrintableReport({
         {transactions.length === 0 ? (
           <p className="text-xs text-slate-400 italic">Tidak ada transaksi pada periode ini.</p>
         ) : (
-          <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
-            <thead className="bg-slate-100 border-b border-slate-200 text-slate-600">
+          <table className="w-full table-fixed text-[11px] border border-slate-200 rounded-lg overflow-hidden">
+            <colgroup>
+              <col className="w-[14%]" />
+              <col className="w-[12%]" />
+              <col className="w-[16%]" />
+              <col className="w-[16%]" />
+              <col className="w-[24%]" />
+              <col className="w-[18%]" />
+            </colgroup>
+            <thead className="bg-slate-100 border-b border-slate-200 text-slate-700">
               <tr>
-                <th className="text-left py-2 px-3 font-semibold">Tanggal</th>
-                <th className="text-left py-2 px-3 font-semibold">Tipe</th>
-                <th className="text-left py-2 px-3 font-semibold">Rekening</th>
-                <th className="text-left py-2 px-3 font-semibold">Kategori</th>
-                <th className="text-left py-2 px-3 font-semibold">Deskripsi</th>
-                <th className="text-right py-2 px-3 font-semibold">Nominal</th>
+                <th className="text-left py-2 px-2.5 font-semibold whitespace-nowrap">Tanggal</th>
+                <th className="text-left py-2 px-2 font-semibold whitespace-nowrap">Tipe</th>
+                <th className="text-left py-2 px-2.5 font-semibold">Rekening</th>
+                <th className="text-left py-2 px-2.5 font-semibold">Kategori</th>
+                <th className="text-left py-2 px-2.5 font-semibold">Deskripsi</th>
+                <th className="text-right py-2 px-2.5 font-semibold whitespace-nowrap">Nominal</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -180,12 +188,12 @@ export function PrintableReport({
                 const isIncome = tx.type === "income"
                 return (
                   <tr key={tx.id} className="hover:bg-slate-50/50 align-top page-break-avoid">
-                    <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap tabular-nums">
+                    <td className="py-2 px-2.5 text-slate-600 whitespace-nowrap tabular-nums">
                       {tx.transaction_date}
                     </td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">
+                    <td className="py-2 px-2 whitespace-nowrap">
                       <span
-                        className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                        className={`inline-block px-1.5 py-0.5 rounded text-[9.5px] font-medium ${
                           isIncome
                             ? "bg-emerald-100 text-emerald-800"
                             : tx.type === "transfer"
@@ -196,17 +204,17 @@ export function PrintableReport({
                         {formatTransactionType(tx.type)}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-700 whitespace-normal break-words max-w-[120px]">
+                    <td className="py-2 px-2.5 text-slate-700 break-words leading-snug">
                       {tx.accounts?.name || "-"}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-700 whitespace-normal break-words max-w-[120px]">
+                    <td className="py-2.5 px-2.5 text-slate-700 break-words leading-snug">
                       {tx.categories?.name || "-"}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-800 whitespace-normal break-words leading-relaxed min-w-[160px]">
+                    <td className="py-2 px-2.5 text-slate-800 break-words leading-relaxed">
                       {tx.description || "-"}
                     </td>
                     <td
-                      className={`py-2.5 px-3 text-right font-medium whitespace-nowrap tabular-nums ${
+                      className={`py-2 px-2.5 text-right font-semibold whitespace-nowrap tabular-nums ${
                         isIncome ? "text-emerald-700" : "text-slate-900"
                       }`}
                     >

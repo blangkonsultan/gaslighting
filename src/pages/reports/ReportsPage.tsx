@@ -112,8 +112,9 @@ export default function ReportsPage() {
     toast.success("Laporan CSV berhasil diunduh!")
   }
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between no-print">
+    <div>
+      <div className="no-print flex flex-col gap-6">
+        <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Laporan</h1>
 
         {report && (
@@ -184,8 +185,8 @@ export default function ReportsPage() {
             </TabsContent>
           </Tabs>
         </>
-      )}
-
+        )}
+      </div>
       <PrintPreviewDialog
         open={showPrintPreview}
         onOpenChange={setShowPrintPreview}
