@@ -104,9 +104,9 @@ describe("TemplatesPage", () => {
 
     expect(screen.getByRole("heading", { name: "Template Transaksi" })).toBeInTheDocument()
     expect(screen.getByText("Belum ada template")).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole("button", { name: "Buat Transaksi" }))
-    expect(mockNavigate).toHaveBeenCalledWith("/transactions/new")
+    const addButtons = screen.getAllByRole("button", { name: "Tambah Template" })
+    fireEvent.click(addButtons[0])
+    expect(screen.getByText("Tambah Template Baru")).toBeInTheDocument()
   })
 
   it("navigates back when back button is clicked", () => {

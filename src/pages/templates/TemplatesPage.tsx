@@ -121,26 +121,16 @@ export default function TemplatesPage() {
         <EmptyState
           icon={<Bookmark size={48} className="text-muted-foreground/60" />}
           title="Belum ada template"
-          description="Simpan transaksi yang sering Anda gunakan sebagai template untuk mencatat dalam satu sentuhan."
+          description="Buat template untuk mempermudah dan mempercepat pencatatan transaksi Anda."
           action={
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                onClick={() => setIsCreateOpen(true)}
-                className="touch-target gap-1.5"
-              >
-                <Plus size={16} />
-                <span>Tambah Template</span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/transactions/new")}
-                className="touch-target"
-              >
-                Buat Transaksi
-              </Button>
-            </div>
+            <Button
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              className="touch-target gap-1.5"
+            >
+              <Plus size={16} />
+              <span>Tambah Template</span>
+            </Button>
           }
         />
       ) : filteredTemplates.length === 0 ? (
