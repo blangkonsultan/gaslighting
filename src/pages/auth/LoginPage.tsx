@@ -21,9 +21,18 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   const searchParams = new URLSearchParams(location.search)
+  let safeNext = ""
   const nextParam = searchParams.get("next")
-  const next = nextParam ? decodeURIComponent(nextParam) : ""
-  const safeNext = next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : ""
+  if (nextParam) {
+    try {
+      const decoded = decodeURIComponent(nextParam)
+      if (decoded.startsWith("/") && !decoded.startsWith("//") && !decoded.startsWith("/\\")) {
+        safeNext = decoded
+      }
+    } catch {
+      safeNext = ""
+    }
+  }
   const isVerified = searchParams.get("verified") === "true" || location.hash.includes("type=signup")
 
   useEffect(() => {

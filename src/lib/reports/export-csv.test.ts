@@ -30,6 +30,14 @@ describe("export-csv", () => {
     it("wraps fields with newlines in quotes", () => {
       expect(escapeCsvField("Baris 1\nBaris 2")).toBe('"Baris 1\nBaris 2"')
     })
+
+    it("neutralizes formula triggers to prevent CSV injection", () => {
+      expect(escapeCsvField("=cmd|' /C calc'!A0")).toBe("'=cmd|' /C calc'!A0")
+      expect(escapeCsvField("@SUM(1,2)")).toBe('"\'@SUM(1,2)"')
+      expect(escapeCsvField("+alert(1)")).toBe("'+alert(1)")
+      expect(escapeCsvField("-250000")).toBe("-250000")
+      expect(escapeCsvField("+1500000")).toBe("+1500000")
+    })
   })
 
   describe("formatTransactionType", () => {

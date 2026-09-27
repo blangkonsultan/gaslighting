@@ -3,7 +3,14 @@ import { formatCurrency } from "@/lib/formatters"
 
 export function escapeCsvField(field: unknown): string {
   if (field === null || field === undefined) return ""
-  const str = String(field)
+  let str = String(field)
+
+  // Prevent CSV Formula Injection (CWE-1236)
+  // If text starts with formula triggers and is not a pure number, prepend single quote
+  if (/^[=+\-@\t\r]/.test(str) && !/^[-+]?\d+(\.\d+)?$/.test(str.trim())) {
+    str = `'${str}`
+  }
+
   if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
     return `"${str.replace(/"/g, '""')}"`
   }

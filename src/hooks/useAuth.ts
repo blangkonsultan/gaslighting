@@ -40,10 +40,8 @@ export function useAuth() {
           if (needsProfileFetch) {
             // If we have a cached profile, use it immediately and revalidate in background.
             const state = useAuthStore.getState()
-            if (state.hydrated && state.profile) {
-              if (state.sessionUserId !== session.user.id) {
-                setAuthenticated(session.user.id, state.profile)
-              } else if (state.isLoading) {
+            if (state.hydrated && state.profile && state.sessionUserId === session.user.id) {
+              if (state.isLoading) {
                 // Cached profile is present — clear the loading state.
                 setLoading(false)
               }
@@ -65,8 +63,8 @@ export function useAuth() {
             }
           } else {
             const state = useAuthStore.getState()
-            if (state.sessionUserId !== session.user.id || state.isLoading) {
-              setAuthenticated(session.user.id, state.profile!)
+            if (state.profile && state.sessionUserId === session.user.id && state.isLoading) {
+              setLoading(false)
             }
           }
         } else {

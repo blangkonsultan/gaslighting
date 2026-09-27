@@ -26,6 +26,18 @@ export async function registerUser({ email, password, full_name }: RegisterInput
 }
 
 export async function logout() {
+  try {
+    if (typeof window !== "undefined" && "caches" in window) {
+      const keys = await caches.keys()
+      await Promise.all(
+        keys
+          .filter((k) => k.includes("supabase-api") || k.includes("shared-receipts"))
+          .map((k) => caches.delete(k))
+      )
+    }
+  } catch (cacheErr) {
+    console.warn("Failed to clear service worker caches on logout:", cacheErr)
+  }
   const { error } = await supabase.auth.signOut()
   if (error) throw error
 }
