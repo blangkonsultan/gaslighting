@@ -63,6 +63,14 @@
       "dependencies": ["feat-003", "feat-006"],
       "status": "done",
       "evidence": "19 test suites pass (98 tests, +17 new tests), 0 lint errors, build succeeds with injectManifest PWA service worker, migration 20260926000003_push_subscriptions.sql applied, Edge Function deployed and verified."
+    },
+    {
+      "id": "feat-009",
+      "name": "Report Exporting (CSV & Printable PDF)",
+      "description": "Export monthly financial reports: RFC 4180 CSV with UTF-8 BOM for spreadsheet compatibility, formal printable financial statement with executive cash flow summary and category breakdown, PrintPreviewDialog with native PDF printing, and export dropdown in ReportsPage",
+      "dependencies": ["feat-005"],
+      "status": "done",
+      "evidence": "23 test suites pass (119 tests, +20 new tests), 0 lint errors, build succeeds, browser DOM evaluation verifies CSV download toast and responsive PrintPreviewDialog"
     }
   ]
 }

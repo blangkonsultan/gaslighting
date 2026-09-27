@@ -11,18 +11,35 @@ import { ExpenseBreakdown } from "@/components/reports/ExpenseBreakdown"
 import { IncomeBreakdown } from "@/components/reports/IncomeBreakdown"
 import { TrendSection } from "@/components/reports/TrendSection"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
+import { Download, FileSpreadsheet, Printer } from "lucide-react"
+import { toast } from "sonner"
+import { generateTransactionsCsv, downloadCsvFile } from "@/lib/reports/export-csv"
+import { PrintPreviewDialog } from "@/components/reports/PrintPreviewDialog"
+import { PrintableReport } from "@/components/reports/PrintableReport"
 import { addMonthsYmd, todayYmd } from "@/lib/dates"
 import { getEarliestTransactionDate } from "@/services/transactions.service"
-
 const currentMonthKey = todayYmd().slice(0, 7)
 
+function formatMonthKeyLabel(monthKey: string): string {
+  const [year, month] = monthKey.split("-").map(Number)
+  return new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(
+    new Date(year, month - 1, 1)
+  )
+}
 export default function ReportsPage() {
   const { profile } = useAuthStore()
   const userId = profile?.id
   const queryClient = useQueryClient()
 
   const [monthKey, setMonthKey] = useState(currentMonthKey)
-
+  const [showPrintPreview, setShowPrintPreview] = useState(false)
+  const monthLabel = formatMonthKeyLabel(monthKey)
   const { start, end } = monthRangeYmdFromMonthKey(monthKey)
 
   const txQuery = useQuery({
@@ -81,10 +98,51 @@ export default function ReportsPage() {
     if (next <= currentMonthKey) fetchAdjacent(next)
   }, [monthKey, userId, queryClient, minMonthKey])
 
+  function handleExportCsv() {
+    if (!txQuery.data || txQuery.data.length === 0) {
+      toast.error("Tidak ada transaksi untuk diekspor pada periode ini.")
+      return
+    }
+    const csv = generateTransactionsCsv(txQuery.data, {
+      monthKey,
+      includeSummary: true,
+    })
+    const filename = `gaslighting-laporan-${monthKey}.csv`
+    downloadCsvFile(filename, csv)
+    toast.success("Laporan CSV berhasil diunduh!")
+  }
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between no-print">
         <h1 className="text-2xl font-bold">Laporan</h1>
+
+        {report && (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card/80 px-3 py-1.5 text-sm font-medium hover:bg-card transition-colors touch-target"
+              aria-label="Menu Ekspor Laporan"
+            >
+              <Download size={16} />
+              <span>Ekspor</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={6} className="w-48">
+              <DropdownMenuItem
+                className="cursor-pointer text-xs"
+                onClick={handleExportCsv}
+              >
+                <FileSpreadsheet size={15} className="mr-2 text-emerald-600" />
+                Unduh CSV (.csv)
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-xs"
+                onClick={() => setShowPrintPreview(true)}
+              >
+                <Printer size={15} className="mr-2 text-primary" />
+                Cetak / Simpan PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       <PeriodSelector monthKey={monthKey} onMonthChange={setMonthKey} minMonthKey={minMonthKey} />
@@ -126,6 +184,26 @@ export default function ReportsPage() {
             </TabsContent>
           </Tabs>
         </>
+      )}
+
+      <PrintPreviewDialog
+        open={showPrintPreview}
+        onOpenChange={setShowPrintPreview}
+        monthLabel={monthLabel}
+        report={report}
+        transactions={txQuery.data ?? []}
+        userName={profile?.full_name || profile?.email || "Pengguna"}
+      />
+
+      {report && (
+        <div className="print-only">
+          <PrintableReport
+            monthLabel={monthLabel}
+            report={report}
+            transactions={txQuery.data ?? []}
+            userName={profile?.full_name || profile?.email || "Pengguna"}
+          />
+        </div>
       )}
     </div>
   )

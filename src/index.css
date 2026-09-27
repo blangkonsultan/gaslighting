@@ -198,3 +198,36 @@
   --sidebar-border: #CFC99E;
   --sidebar-ring: #9AB17A;
 }
+
+@media print {
+  @page {
+    margin: 1.5cm;
+    size: auto;
+  }
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+  header,
+  nav,
+  aside,
+  .no-print,
+  button,
+  [data-slot="switch"],
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .page-break-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}

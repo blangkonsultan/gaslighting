@@ -2,9 +2,9 @@
 
 ## Current State
 
-**Last Updated:** 2026-09-26
+**Last Updated:** 2026-09-27
 **Branch:** main
-**Active Feature:** feat-008 (Completed)
+**Active Feature:** feat-009 (Completed)
 
 ## Status
 
@@ -80,7 +80,13 @@
   - Disabled legacy API keys on Supabase project via Management API (`PUT /v1/projects/{ref}/api-keys/legacy?enabled=false`), permanently invalidating the leaked legacy service_role key (`HTTP 401 UNAUTHORIZED_DISABLED_LEGACY_KEY`)
   - Migrated `.env` to modern Supabase publishable key (`sb_publishable_...`)
   - Configured `service_role_v2` secret key across Supabase Vault and Supabase Secrets (`CRON_SECRET`)
-  - Verified full authentication, dashboard, auto-debit transactions, and settings in live application
+- [x] Implement Report Exporting for CSV & Printable PDF (feat-009):
+  - Created CSV generator `src/lib/reports/export-csv.ts` with RFC 4180 escaping, UTF-8 BOM for Excel compatibility, and unit test suite `export-csv.test.ts` (11 tests)
+  - Created formal financial statement component `src/components/reports/PrintableReport.tsx` with executive cash flow summary, category breakdowns, and transaction ledger with unit test `PrintableReport.test.tsx` (4 tests)
+  - Added `@media print` rules in `src/index.css` for clean document printing
+  - Created responsive `src/components/reports/PrintPreviewDialog.tsx` with unit test `PrintPreviewDialog.test.tsx` (2 tests)
+  - Integrated Export dropdown in `src/pages/reports/ReportsPage.tsx` with unit test `ReportsPage.test.tsx` (3 tests)
+  - Verified in browser: CSV download triggers toast and file download; PrintPreviewDialog renders formal financial statement
 
 - None (all 9 steps completed and verified)
 
