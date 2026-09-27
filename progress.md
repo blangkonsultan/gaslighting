@@ -87,10 +87,10 @@
   - Created responsive `src/components/reports/PrintPreviewDialog.tsx` with unit test `PrintPreviewDialog.test.tsx` (2 tests)
   - Integrated Export dropdown in `src/pages/reports/ReportsPage.tsx` with unit test `ReportsPage.test.tsx` (3 tests)
   - Verified in browser: CSV download triggers toast and file download; PrintPreviewDialog renders formal financial statement
-- [x] Fix PDF Nominal Column Truncation:
-  - Identified root causes: (1) Main screen dashboard elements were not wrapped in `.no-print`, colliding with print media, and (2) unconstrained table width (783px) exceeded A4 portrait printable area (680px), pushing the rightmost Nominal column off the page.
-  - Enforced `table-layout: fixed !important; width: 100% !important;` with `<colgroup>` allocating exact proportional percentages (Tanggal 14%, Tipe 12%, Rekening 16%, Kategori 16%, Deskripsi 24%, Nominal 18%).
-  - Wrapped entire interactive UI in `.no-print`, set `@page { margin: 1cm; }`, and added `tabular-nums` for crisp numeric alignment.
+- [x] Fix Mobile Preview & A4 Print Paper Layout:
+  - Resolved mobile preview dialog cut-off: on 390px mobile screens, the 6-column statement was compressed into 276px causing text collisions and clipping the Nominal column at `-Rp 2.0`.
+  - Added `overflow-x-auto` container with `min-w-[660px]` sheet layout inside `PrintPreviewDialog.tsx`, preserving A4 proportions on mobile and allowing smooth horizontal panning with helper hint (`💡 Geser tabel ke samping`).
+  - Formally configured `@page { size: A4 portrait; margin: 10mm; }` and `.print-document { width: 190mm !important; }` in `src/index.css`, locking document geometry to A4 dimensions on all printing platforms.
 
 - None (all 9 steps completed and verified)
 

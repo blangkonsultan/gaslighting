@@ -83,10 +83,10 @@
   - Created responsive `src/components/reports/PrintPreviewDialog.tsx` with native window.print triggering (2 tests passing)
   - Integrated Export dropdown into `src/pages/reports/ReportsPage.tsx` with CSV and PDF options (3 tests passing)
   - Verified in headless browser: CSV download triggers toast, and PrintPreviewDialog renders formal financial statement
-- [x] Step 24: Fix PDF Nominal Column Truncation:
-  - Wrapped main screen view in `.no-print` so interactive UI elements are cleanly excluded from print output
-  - Configured `table-layout: fixed !important; width: 100% !important;` with `<colgroup>` dividing columns into exact percentages (Tanggal 14%, Tipe 12%, Rekening 16%, Kategori 16%, Deskripsi 24%, Nominal 18%)
-  - Set `@page { margin: 1cm; }` with `tabular-nums` ensuring Nominal amounts fit comfortably inside the right margin without truncation
+- [x] Step 24: Fix Mobile Preview & A4 Print Paper Layout:
+  - Resolved mobile preview dialog cut-off: on 390px mobile screens, the 6-column statement was compressed into 276px causing text collisions and clipping the Nominal column at `-Rp 2.0`.
+  - Added `overflow-x-auto` container with `min-w-[660px]` sheet layout inside `PrintPreviewDialog.tsx`, preserving A4 proportions on mobile and allowing smooth horizontal panning with helper hint (`💡 Geser tabel ke samping`).
+  - Formally configured `@page { size: A4 portrait; margin: 10mm; }` and `.print-document { width: 190mm !important; }` in `src/index.css`, locking document geometry to A4 dimensions on all printing platforms.
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
