@@ -24,6 +24,10 @@ vi.mock("@/stores/auth-store", () => ({
 vi.mock("@/hooks/useTransactionTemplates", () => ({
   useTransactionTemplates: vi.fn(),
   useDeleteTemplate: vi.fn(),
+  useUpdateTemplate: vi.fn().mockReturnValue({
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
 }))
 
 const mockTemplates: TemplateListRow[] = [
@@ -146,6 +150,18 @@ describe("TemplatesPage", () => {
     fireEvent.click(useButtons[0])
 
     expect(mockNavigate).toHaveBeenCalledWith("/transactions/new?template_id=tpl-1")
+  })
+
+  it("opens edit dialog when edit button is clicked", () => {
+    vi.mocked(templatesHook.useTransactionTemplates).mockReturnValue({
+      data: mockTemplates,
+      isLoading: false,
+    } as never)
+
+    renderWithProviders()
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit template Makan Siang Kantor" }))
+    expect(screen.getByText("Edit Template")).toBeInTheDocument()
   })
 
   it("opens confirm dialog and deletes template on confirm", async () => {

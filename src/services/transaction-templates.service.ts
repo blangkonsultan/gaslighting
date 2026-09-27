@@ -27,6 +27,18 @@ export type CreateTemplateInput = {
   description?: string | null
   tags?: string[]
 }
+export type UpdateTemplateInput = {
+  id: string
+  user_id: string
+  name?: string
+  type?: "income" | "expense"
+  account_id?: string | null
+  category_id?: string | null
+  amount?: number | null
+  description?: string | null
+  tags?: string[]
+}
+
 
 export async function getTemplates(userId: string): Promise<TemplateListRow[]> {
   const { data, error } = await supabase
@@ -60,6 +72,17 @@ export async function deleteTemplate(userId: string, templateId: string): Promis
     .delete()
     .eq("user_id", userId)
     .eq("id", templateId)
+
+  if (error) throw error
+}
+
+export async function updateTemplate(input: UpdateTemplateInput): Promise<void> {
+  const { id, user_id, ...updates } = input
+  const { error } = await supabase
+    .from("transaction_templates")
+    .update(updates)
+    .eq("user_id", user_id)
+    .eq("id", id)
 
   if (error) throw error
 }

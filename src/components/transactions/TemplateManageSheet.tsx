@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Bookmark, Trash2 } from "lucide-react"
+import { Bookmark, Trash2, Pencil } from "lucide-react"
 import { CategoryIcon } from "@/components/shared/CategoryIcon"
 import { toast } from "sonner"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { formatCurrency } from "@/lib/formatters"
 import { useDeleteTemplate } from "@/hooks/useTransactionTemplates"
+import { TemplateEditDialog } from "@/components/transactions/TemplateEditDialog"
 import type { TemplateListRow } from "@/services/transaction-templates.service"
 
 export interface TemplateManageSheetProps {
@@ -24,6 +25,7 @@ export function TemplateManageSheet({
   userId,
 }: TemplateManageSheetProps) {
   const [deleteTarget, setDeleteTarget] = useState<TemplateListRow | null>(null)
+  const [editingTemplate, setEditingTemplate] = useState<TemplateListRow | null>(null)
   const deleteMutation = useDeleteTemplate()
 
   async function handleDelete() {
@@ -91,15 +93,26 @@ export function TemplateManageSheet({
                           </p>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setDeleteTarget(tpl)}
-                        className="touch-target shrink-0 text-destructive hover:bg-destructive/10"
-                        aria-label={`Hapus template ${tpl.name}`}
-                      >
-                        <Trash2 size={16} />
-                      </Button>
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => setEditingTemplate(tpl)}
+                          className="touch-target text-muted-foreground hover:text-foreground"
+                          aria-label={`Edit template ${tpl.name}`}
+                        >
+                          <Pencil size={15} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => setDeleteTarget(tpl)}
+                          className="touch-target text-destructive hover:bg-destructive/10"
+                          aria-label={`Hapus template ${tpl.name}`}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
                     </div>
                   )
                 })}
@@ -131,6 +144,15 @@ export function TemplateManageSheet({
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={handleDelete}
+      />
+
+      <TemplateEditDialog
+        open={Boolean(editingTemplate)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setEditingTemplate(null)
+        }}
+        template={editingTemplate}
+        userId={userId}
       />
     </>
   )

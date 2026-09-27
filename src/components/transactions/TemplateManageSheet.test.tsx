@@ -7,6 +7,11 @@ import type { TemplateListRow } from "@/services/transaction-templates.service"
 vi.mock("@/hooks/useTransactionTemplates", () => ({
   useDeleteTemplate: vi.fn(),
 }))
+vi.mock("@/components/transactions/TemplateEditDialog", () => ({
+  TemplateEditDialog: ({ open, template }: { open: boolean; template: TemplateListRow | null }) =>
+    open && template ? <div data-testid="edit-dialog">Edit Template {template.name}</div> : null,
+}))
+
 
 const mockTemplates: TemplateListRow[] = [
   {
@@ -81,6 +86,20 @@ describe("TemplateManageSheet", () => {
 
     expect(screen.getByText("Gaji")).toBeInTheDocument()
     expect(screen.getByText("Pemasukan · Mandiri · Rp 8.500.000")).toBeInTheDocument()
+  })
+
+  it("opens edit dialog when edit button is clicked", () => {
+    render(
+      <TemplateManageSheet
+        open={true}
+        onOpenChange={vi.fn()}
+        templates={mockTemplates}
+        userId="user-123"
+      />
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit template Makan Siang" }))
+    expect(screen.getByTestId("edit-dialog")).toHaveTextContent("Edit Template Makan Siang")
   })
 
   it("opens confirm dialog and deletes template on confirmation", async () => {

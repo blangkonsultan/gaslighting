@@ -6,6 +6,7 @@ import {
   useTransactionTemplates,
   useCreateTemplate,
   useDeleteTemplate,
+  useUpdateTemplate,
 } from "./useTransactionTemplates"
 import * as templatesService from "@/services/transaction-templates.service"
 import { queryClient } from "@/lib/query-client"
@@ -14,6 +15,7 @@ vi.mock("@/services/transaction-templates.service", () => ({
   getTemplates: vi.fn(),
   createTemplate: vi.fn(),
   deleteTemplate: vi.fn(),
+  updateTemplate: vi.fn(),
 }))
 
 function createWrapper() {
@@ -112,6 +114,32 @@ describe("useTransactionTemplates", () => {
     })
 
     expect(templatesService.deleteTemplate).toHaveBeenCalledWith("user-123", "tpl-1")
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: ["templates", "user-123"],
+    })
+  })
+
+  it("updates template and invalidates templates query cache", async () => {
+    vi.mocked(templatesService.updateTemplate).mockResolvedValue()
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries")
+
+    const { result } = renderHook(() => useUpdateTemplate(), {
+      wrapper: createWrapper(),
+    })
+
+    await result.current.mutateAsync({
+      id: "tpl-1",
+      user_id: "user-123",
+      name: "Bensin Pertamax",
+      amount: 60000,
+    })
+
+    expect(templatesService.updateTemplate).toHaveBeenCalledWith({
+      id: "tpl-1",
+      user_id: "user-123",
+      name: "Bensin Pertamax",
+      amount: 60000,
+    })
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: ["templates", "user-123"],
     })

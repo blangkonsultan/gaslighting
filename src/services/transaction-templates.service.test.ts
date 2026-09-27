@@ -3,7 +3,9 @@ import {
   getTemplates,
   createTemplate,
   deleteTemplate,
+  updateTemplate,
   type CreateTemplateInput,
+  type UpdateTemplateInput,
 } from "./transaction-templates.service"
 import { supabase } from "./supabase"
 
@@ -180,6 +182,53 @@ describe("transaction-templates.service", () => {
       } as never)
 
       await expect(deleteTemplate("user-123", "tpl-1")).rejects.toThrow("Delete failed")
+    })
+  })
+
+  describe("updateTemplate", () => {
+    it("updates template with matching user_id and id", async () => {
+      const input: UpdateTemplateInput = {
+        id: "tpl-1",
+        user_id: "user-123",
+        name: "Makan Malam",
+        amount: 45000,
+      }
+
+      const eqSecond = vi.fn().mockResolvedValue({ error: null })
+      const eqFirst = vi.fn().mockReturnValue({ eq: eqSecond })
+      const updateMock = vi.fn().mockReturnValue({ eq: eqFirst })
+
+      vi.mocked(supabase.from).mockReturnValue({
+        update: updateMock,
+      } as never)
+
+      await updateTemplate(input)
+
+      expect(supabase.from).toHaveBeenCalledWith("transaction_templates")
+      expect(updateMock).toHaveBeenCalledWith({
+        name: "Makan Malam",
+        amount: 45000,
+      })
+      expect(eqFirst).toHaveBeenCalledWith("user_id", "user-123")
+      expect(eqSecond).toHaveBeenCalledWith("id", "tpl-1")
+    })
+
+    it("throws error if update fails", async () => {
+      const input: UpdateTemplateInput = {
+        id: "tpl-1",
+        user_id: "user-123",
+        name: "Makan Malam",
+      }
+
+      const eqSecond = vi.fn().mockResolvedValue({ error: new Error("Update failed") })
+      const eqFirst = vi.fn().mockReturnValue({ eq: eqSecond })
+      const updateMock = vi.fn().mockReturnValue({ eq: eqFirst })
+
+      vi.mocked(supabase.from).mockReturnValue({
+        update: updateMock,
+      } as never)
+
+      await expect(updateTemplate(input)).rejects.toThrow("Update failed")
     })
   })
 })

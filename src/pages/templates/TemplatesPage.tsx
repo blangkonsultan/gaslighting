@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Bookmark, Plus, Search, Trash2, ArrowRight } from "lucide-react"
+import { Bookmark, Plus, Search, Trash2, ArrowRight, Pencil } from "lucide-react"
 import { toast } from "sonner"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
 import { PageLoading } from "@/components/shared/LoadingSpinner"
 import { CategoryIcon } from "@/components/shared/CategoryIcon"
 import { formatCurrency } from "@/lib/formatters"
+import { TemplateEditDialog } from "@/components/transactions/TemplateEditDialog"
 import { useAuthStore } from "@/stores/auth-store"
 import { useTransactionTemplates, useDeleteTemplate } from "@/hooks/useTransactionTemplates"
 import type { TemplateListRow } from "@/services/transaction-templates.service"
@@ -22,6 +23,7 @@ export default function TemplatesPage() {
   const userId = profile?.id ?? ""
   const [search, setSearch] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<TemplateListRow | null>(null)
+  const [editingTemplate, setEditingTemplate] = useState<TemplateListRow | null>(null)
 
   const { data: templates, isLoading, isError } = useTransactionTemplates(userId)
   const deleteMutation = useDeleteTemplate()
@@ -192,22 +194,34 @@ export default function TemplatesPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/60">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => setDeleteTarget(tpl)}
-                      className="touch-target text-destructive hover:bg-destructive/10"
-                      aria-label={`Hapus template ${tpl.name}`}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
+                  <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-border/60">
+                    <div className="flex items-center gap-0.5">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setEditingTemplate(tpl)}
+                        className="touch-target text-muted-foreground hover:text-foreground"
+                        aria-label={`Edit template ${tpl.name}`}
+                      >
+                        <Pencil size={15} />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setDeleteTarget(tpl)}
+                        className="touch-target text-destructive hover:bg-destructive/10"
+                        aria-label={`Hapus template ${tpl.name}`}
+                      >
+                        <Trash2 size={15} />
+                      </Button>
+                    </div>
                     <Button
                       type="button"
                       size="sm"
                       onClick={() => navigate(`/transactions/new?template_id=${tpl.id}`)}
-                      className="touch-target gap-1 text-xs font-semibold flex-1 justify-center"
+                      className="touch-target gap-1 text-xs font-semibold flex-1 justify-center ml-1"
                     >
                       <span>Gunakan</span>
                       <ArrowRight size={14} />
@@ -232,6 +246,15 @@ export default function TemplatesPage() {
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={handleDelete}
+      />
+      {/* Edit Template Dialog */}
+      <TemplateEditDialog
+        open={Boolean(editingTemplate)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setEditingTemplate(null)
+        }}
+        template={editingTemplate}
+        userId={userId}
       />
     </div>
   )

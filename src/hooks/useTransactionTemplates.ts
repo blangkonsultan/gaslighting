@@ -5,6 +5,8 @@ import {
   deleteTemplate,
   getTemplates,
   type CreateTemplateInput,
+  updateTemplate,
+  type UpdateTemplateInput,
 } from "@/services/transaction-templates.service"
 
 export function useTransactionTemplates(userId: string) {
@@ -33,6 +35,17 @@ export function useDeleteTemplate() {
     onSuccess: async (_data, variables) => {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.templates.all(variables.userId),
+      })
+    },
+  })
+}
+
+export function useUpdateTemplate() {
+  return useMutation({
+    mutationFn: (input: UpdateTemplateInput) => updateTemplate(input),
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.templates.all(variables.user_id),
       })
     },
   })
