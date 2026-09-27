@@ -8,6 +8,7 @@ import { supabase } from "@/services/supabase"
 describe("AppLockScreen", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    useAuthStore.setState({ sessionUserId: "user-123" })
     useAppLockStore.setState({
       isLocked: true,
       isEnabled: true,
@@ -19,6 +20,12 @@ describe("AppLockScreen", () => {
 
   it("renders nothing when isLocked is false", () => {
     useAppLockStore.setState({ isLocked: false })
+    const { container } = render(<AppLockScreen />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it("renders nothing when sessionUserId is null even if isLocked is true", () => {
+    useAuthStore.setState({ sessionUserId: null })
     const { container } = render(<AppLockScreen />)
     expect(container).toBeEmptyDOMElement()
   })

@@ -16,7 +16,7 @@ export function AppLockScreen() {
     unlockWithBiometrics,
     disableLock,
   } = useAppLockStore()
-  const { reset } = useAuthStore()
+  const { reset, sessionUserId } = useAuthStore()
 
   const [pin, setPin] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
@@ -106,7 +106,7 @@ export function AppLockScreen() {
     }
   }
 
-  if (!isLocked) return null
+  if (!isLocked || !sessionUserId) return null
 
   return (
     <div
