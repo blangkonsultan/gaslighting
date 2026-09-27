@@ -5,10 +5,12 @@ export type Account = Tables<"accounts">
 export type Category = Tables<"categories">
 export type Transaction = Tables<"transactions">
 export type Bill = Tables<"bills">
+export type TransactionTemplate = Tables<"transaction_templates">
 
 export type AccountInput = Omit<TablesInsert<"accounts">, "user_id" | "balance" | "created_at" | "updated_at">
 export type TransactionInput = Omit<TablesInsert<"transactions">, "user_id" | "created_at" | "updated_at">
 export type BillInput = Omit<TablesInsert<"bills">, "user_id" | "created_at" | "updated_at" | "status" | "last_processed_at">
+export type TransactionTemplateInput = Omit<TablesInsert<"transaction_templates">, "user_id" | "created_at" | "updated_at" | "sort_order">
 
 export interface DashboardSummary {
   totalBalance: number

@@ -14,6 +14,12 @@ import { executeTransfer } from "@/services/transfers.service"
 import { ReceiptScannerModal } from "@/components/transactions/ReceiptScannerModal"
 import { getCategories } from "@/services/admin.service"
 import { Camera } from "lucide-react"
+import { TemplatePicker } from "@/components/transactions/TemplatePicker"
+import { SaveTemplateSheet, type SaveTemplateDefaultValues } from "@/components/transactions/SaveTemplateSheet"
+import { TemplateManageSheet } from "@/components/transactions/TemplateManageSheet"
+import { useTransactionTemplates } from "@/hooks/useTransactionTemplates"
+import { todayYmd } from "@/lib/dates"
+import type { TemplateListRow } from "@/services/transaction-templates.service"
 import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
 import { useState, useEffect } from "react"
@@ -33,6 +39,10 @@ export default function TransactionCreatePage() {
   })
   const [formKey, setFormKey] = useState(0)
   const [sharedFile, setSharedFile] = useState<File | null>(null)
+  const [isFromTemplate, setIsFromTemplate] = useState(false)
+  const [isManageSheetOpen, setIsManageSheetOpen] = useState(false)
+  const [saveTemplateData, setSaveTemplateData] = useState<SaveTemplateDefaultValues | null>(null)
+  const { data: templates } = useTransactionTemplates(profile?.id ?? "")
 
   useEffect(() => {
     if (searchParams.get("shared_receipt") === "1") {
@@ -71,6 +81,7 @@ export default function TransactionCreatePage() {
     suggestedCategory?: string
     tags: string[]
   }) {
+    setIsFromTemplate(false)
     let matchedCatId = ""
     if (data.suggestedCategory && categories) {
       const found = categories.find(
@@ -92,6 +103,21 @@ export default function TransactionCreatePage() {
     })
     setFormKey((k) => k + 1)
   }
+  function handleSelectTemplate(template: TemplateListRow) {
+    setIsFromTemplate(true)
+    setScannedInitialValues({
+      type: template.type as "income" | "expense",
+      account_id: template.account_id ?? undefined,
+      category_id: template.category_id,
+      amount: template.amount != null ? Number(template.amount) : undefined,
+      description: template.description ?? "",
+      tags: template.tags ?? [],
+      transaction_date: todayYmd(),
+    })
+    setFormKey((k) => k + 1)
+    toast.success("Template diterapkan.")
+  }
+
 
   async function onSubmit(data: TransactionInput) {
     if (!profile?.id) {
@@ -119,7 +145,15 @@ export default function TransactionCreatePage() {
 
     if (insertError) throw insertError
 
-    toast.success("Transaksi berhasil ditambahkan.")
+    const lastSubmittedData: SaveTemplateDefaultValues = {
+      type: data.type,
+      account_id: data.account_id,
+      category_id: categoryId,
+      amount: amountNumber,
+      description: data.description.trim(),
+      tags: data.tags ?? [],
+    }
+
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
@@ -128,9 +162,22 @@ export default function TransactionCreatePage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.tags(profile.id) }),
     ])
 
-    navigate("/transactions")
-  }
+    if (isFromTemplate) {
+      toast.success("Transaksi berhasil ditambahkan.")
+      navigate("/transactions")
+    } else {
+      setScannedInitialValues(undefined)
+      setFormKey((k) => k + 1)
+      setIsFromTemplate(false)
 
+      toast.success("Transaksi berhasil disimpan", {
+        action: {
+          label: "Simpan Template →",
+          onClick: () => setSaveTemplateData(lastSubmittedData),
+        },
+      })
+    }
+  }
   async function onSubmitTransfer(data: TransferInput) {
     if (!profile?.id) {
       navigate("/auth/login")
@@ -194,7 +241,10 @@ export default function TransactionCreatePage() {
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border text-muted-foreground hover:border-primary/50",
               ].join(" ")}
-              onClick={() => setMode("transaction")}
+              onClick={() => {
+                setMode("transaction")
+                setIsFromTemplate(false)
+              }}
             >
               Pemasukan / Pengeluaran
             </button>
@@ -206,11 +256,21 @@ export default function TransactionCreatePage() {
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border text-muted-foreground hover:border-primary/50",
               ].join(" ")}
-              onClick={() => setMode("transfer")}
+              onClick={() => {
+                setMode("transfer")
+                setIsFromTemplate(false)
+              }}
             >
               Transfer
             </button>
           </div>
+          {mode === "transaction" && (templates?.length ?? 0) > 0 && (
+            <TemplatePicker
+              templates={templates ?? []}
+              onSelectTemplate={handleSelectTemplate}
+              onManage={() => setIsManageSheetOpen(true)}
+            />
+          )}
 
           {profile?.id ? (
             mode === "transfer" ? (
@@ -242,6 +302,20 @@ export default function TransactionCreatePage() {
           initialFile={sharedFile}
           onApplyReceipt={handleApplyReceipt}
         />
+      <SaveTemplateSheet
+        open={Boolean(saveTemplateData)}
+        onOpenChange={(open) => {
+          if (!open) setSaveTemplateData(null)
+        }}
+        defaultValues={saveTemplateData}
+        userId={profile?.id ?? ""}
+      />
+      <TemplateManageSheet
+        open={isManageSheetOpen}
+        onOpenChange={setIsManageSheetOpen}
+        templates={templates ?? []}
+        userId={profile?.id ?? ""}
+      />
     </div>
   )
 }

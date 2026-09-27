@@ -4,7 +4,7 @@
 
 **Last Updated:** 2026-09-27
 **Branch:** main
-**Active Feature:** feat-012 (Completed)
+**Active Feature:** feat-013 (Completed)
 
 ## Status
 
@@ -161,6 +161,30 @@
   - Configured Supabase Auth `site_url` to `https://gaslighting-nine.vercel.app/auth/login` and added production/tunnel wildcards to `uri_allow_list` via Management API
   - Updated `registerUser` in `src/services/auth.service.ts` to specify `emailRedirectTo: <origin>/auth/login?verified=true`
   - Added verification success alert banner to `src/pages/auth/LoginPage.tsx` with unit test in `LoginPage.test.tsx` (197 tests passing)
+
+### What's Done (feat-013: Transaction Templates)
+
+- [x] Created database migration `supabase/migrations/20260927000003_transaction_templates.sql`:
+  - `transaction_templates` table with user foreign key, cascade delete, unique constraint per user, updated_at trigger
+  - RLS policies (SELECT, INSERT, UPDATE, DELETE) with user-scoped isolation and account ownership validation
+  - Pushed to remote Supabase database via `npx supabase db push`
+- [x] Updated TypeScript database schema definitions in `src/types/database.ts` and exported `TransactionTemplate`, `TransactionTemplateInput` in `src/types/financial.ts`
+- [x] Built `src/services/transaction-templates.service.ts` (`getTemplates`, `createTemplate`, `deleteTemplate`) with joins on accounts and categories
+- [x] Added `templates` query keys to `src/lib/query-client.ts` and created TanStack Query hook `src/hooks/useTransactionTemplates.ts` (`useTransactionTemplates`, `useCreateTemplate`, `useDeleteTemplate`)
+- [x] Built `src/components/transactions/TemplatePicker.tsx` with horizontal scrollable chip row, category icon fallback, amount display, and "Kelola" action
+- [x] Built `src/components/transactions/SaveTemplateSheet.tsx` bottom sheet modal with prefilled title, IDR amount toggle, name validation, and duplicate name error handling
+- [x] Built `src/components/transactions/TemplateManageSheet.tsx` bottom sheet modal with template list, details, delete confirm dialog, and empty state
+- [x] Wired template picker, save-as-template prompt toast action, and management sheet into `src/pages/transactions/TransactionCreatePage.tsx`
+- [x] Added comprehensive unit test suites:
+  - `src/services/transaction-templates.service.test.ts` (8 tests)
+  - `src/hooks/useTransactionTemplates.test.tsx` (4 tests)
+  - `src/components/transactions/TemplatePicker.test.tsx` (4 tests)
+  - `src/components/transactions/SaveTemplateSheet.test.tsx` (6 tests)
+  - `src/components/transactions/TemplateManageSheet.test.tsx` (5 tests)
+  - `src/pages/transactions/TransactionCreatePage.test.tsx` (6 tests)
+  - Total test suite: 40 files, 231 tests passing (100%)
+- [x] Ran Impeccable UI detector across all new and modified components (0 issues found)
+- [x] Verified `npm run lint` (0 errors), `npm run test` (231/231 passing), `npm run build` (production build succeeds)
 ### What's In Progress
 
 - None (all tasks completed and verified)

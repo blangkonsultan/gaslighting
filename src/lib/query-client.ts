@@ -25,6 +25,9 @@ export const queryKeys = {
     all: ["bills"] as const,
     active: ["bills", "active"] as const,
   },
+  templates: {
+    all: (userId: string) => ["templates", userId] as const,
+  },
   reports: {
     monthly: (month: string) => ["reports", "monthly", month] as const,
     trend: (month: string, months: number) => ["reports", "trend", month, months] as const,

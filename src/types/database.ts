@@ -341,6 +341,66 @@ export type Database = {
           },
         ]
       }
+      transaction_templates: {
+        Row: {
+          account_id: string | null
+          amount: number | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          sort_order: number
+          tags: string[]
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount?: number | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          tags?: string[]
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          tags?: string[]
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_templates_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_templates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -8,13 +8,13 @@ type FieldErrorValue = Merge<FieldError, (Merge<FieldError, FieldError> | undefi
 interface FormFieldProps {
   label?: ReactNode
   htmlFor?: string
-  error?: FieldErrorValue
+  error?: FieldErrorValue | { message?: string } | string
   children: ReactNode
   className?: string
 }
 
 export function FormField({ label, htmlFor, error, children, className }: FormFieldProps) {
-  const message = error?.message
+  const message = typeof error === "string" ? error : error?.message
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       {label && <Label htmlFor={htmlFor}>{label}</Label>}

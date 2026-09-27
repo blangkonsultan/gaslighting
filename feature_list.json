@@ -95,6 +95,14 @@
       "dependencies": ["feat-006", "feat-011"],
       "status": "done",
       "evidence": "32 test suites pass (187 tests, +38 new tests), 0 lint errors, build succeeds, browser evaluation verifies manifest shortcuts, share_target service worker interceptor, Settings AppLock toggle, PIN setup dialog, AppLockScreen keypad, keyboard unlock, and ?scan=true / ?type=income shortcuts."
+    },
+    {
+      "id": "feat-013",
+      "name": "Transaction Templates",
+      "description": "Reusable transaction templates for fast recurring expense and income entry: horizontal quick-pick template chips on TransactionCreatePage, one-tap pre-fill, save-as-template prompt after transaction submission, and template management bottom sheet with deletion",
+      "dependencies": ["feat-001", "feat-006", "feat-010"],
+      "status": "done",
+      "evidence": "40 test suites pass (231 tests, +35 new tests across 6 suites), 0 lint errors, build succeeds, migration 20260927000003_transaction_templates.sql applied to Supabase, 0 impeccable detect findings."
     }
   ]
 }
