@@ -65,18 +65,21 @@ describe("TransactionForm saveAsTemplate toggle", () => {
     expect(screen.queryByLabelText("Nama Template")).not.toBeInTheDocument()
   })
 
-  it("reveals auto-derived template name and save amount toggle when switched on", () => {
+  it("reveals template preview with category, name on top, and nominal below when switched on", async () => {
     renderForm()
     const toggle = screen.getByRole("switch", { name: "Simpan sebagai template" })
     fireEvent.click(toggle)
 
     expect(toggle).toHaveAttribute("aria-checked", "true")
-    expect(screen.getByText("Nama template:")).toBeInTheDocument()
+    expect(screen.getByText("Template")).toBeInTheDocument()
+    expect(screen.getByText("Nama:")).toBeInTheDocument()
     expect(screen.getByText("Makan Siang")).toBeInTheDocument()
+    expect(screen.getByText("Nominal:")).toBeInTheDocument()
+    expect(screen.getByText("Rp 35.000")).toBeInTheDocument()
 
-    const amountToggle = screen.getByRole("switch", { name: "Simpan jumlah nominal" })
-    expect(amountToggle).toBeInTheDocument()
-    expect(amountToggle).toHaveAttribute("aria-checked", "true")
+    await waitFor(() => {
+      expect(screen.getAllByText("Makanan").length).toBeGreaterThanOrEqual(1)
+    })
   })
 
   it("submits with templateOptions when toggle is on", async () => {
@@ -107,32 +110,6 @@ describe("TransactionForm saveAsTemplate toggle", () => {
     })
   })
 
-  it("allows turning off save amount toggle", async () => {
-    const handleSubmit = vi.fn().mockResolvedValue(undefined)
-    renderForm(handleSubmit)
-
-    const saveBtn = screen.getByRole("button", { name: "Simpan" })
-    await waitFor(() => expect(saveBtn).not.toBeDisabled())
-
-    const toggle = screen.getByRole("switch", { name: "Simpan sebagai template" })
-    fireEvent.click(toggle)
-
-    const amountToggle = screen.getByRole("switch", { name: "Simpan jumlah nominal" })
-    fireEvent.click(amountToggle)
-    expect(amountToggle).toHaveAttribute("aria-checked", "false")
-
-    fireEvent.click(saveBtn)
-
-    await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          saveAsTemplate: true,
-          saveAmount: false,
-        })
-      )
-    })
-  })
 
   it("submits without templateOptions when toggle is off", async () => {
     const handleSubmit = vi.fn().mockResolvedValue(undefined)

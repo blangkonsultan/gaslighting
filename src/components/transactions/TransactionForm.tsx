@@ -71,8 +71,6 @@ export function TransactionForm({
 }) {
   const [error, setError] = useState("")
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
-  const [saveAmount, setSaveAmount] = useState(true)
-
   const {
     handleSubmit,
     register,
@@ -193,7 +191,7 @@ export function TransactionForm({
             await onSubmit(data, {
               saveAsTemplate: true,
               templateName: trimmedName,
-              saveAmount,
+              saveAmount: true,
             })
           } else {
             await onSubmit(data)
@@ -396,36 +394,60 @@ export function TransactionForm({
           </div>
 
           {saveAsTemplate && (
-            <div className="space-y-2.5 pt-2 border-t border-border/60">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="toggle-save-amount"
-                    className="text-xs font-medium text-foreground cursor-pointer select-none"
-                  >
-                    Simpan jumlah nominal
-                  </label>
-                  <span className="text-[11px] text-muted-foreground tabular-nums">
-                    {saveAmount
-                      ? amountNumber > 0
-                        ? formatCurrency(amountNumber)
-                        : "Menyimpan nominal saat ini"
-                      : "Tidak disimpan (isi manual tiap kali pakai)"}
+            <div className="pt-2.5 border-t border-border/60">
+              <div className="rounded-lg border border-border/80 bg-background/70 p-3 space-y-2.5">
+                {/* Kategori with icon */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {selectedCategoryObj ? (
+                      <span
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
+                        style={{
+                          backgroundColor: selectedCategoryObj.color
+                            ? `${selectedCategoryObj.color}25`
+                            : undefined,
+                          color: selectedCategoryObj.color || undefined,
+                        }}
+                      >
+                        <CategoryIcon iconName={selectedCategoryObj.icon} size={13} />
+                      </span>
+                    ) : (
+                      <Bookmark size={14} className="text-muted-foreground" />
+                    )}
+                    <span className="text-xs font-medium text-foreground">
+                      {selectedCategoryObj?.name ?? "Kategori belum dipilih"}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-semibold tracking-wider uppercase text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                    Template
                   </span>
                 </div>
-                <Switch
-                  id="toggle-save-amount"
-                  checked={saveAmount}
-                  onCheckedChange={setSaveAmount}
-                  aria-label="Simpan jumlah nominal"
-                />
-              </div>
 
-              <div className="rounded-lg bg-muted/40 px-2.5 py-1.5 text-xs text-muted-foreground flex items-center gap-1.5">
-                <span>Nama template:</span>
-                <span className="font-semibold text-foreground truncate">
-                  {currentDescription.trim() || "(otomatis mengambil deskripsi di atas)"}
-                </span>
+                {/* Nama Template (above Nominal) */}
+                <div className="space-y-0.5 pt-0.5">
+                  <div className="text-[11px] font-medium text-muted-foreground">Nama:</div>
+                  <div className="text-sm font-semibold text-foreground truncate">
+                    {currentDescription.trim() || (
+                      <span className="text-muted-foreground font-normal italic">
+                        (mengambil dari deskripsi di atas)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Nominal (below Name) */}
+                <div className="space-y-0.5">
+                  <div className="text-[11px] font-medium text-muted-foreground">Nominal:</div>
+                  <div className="text-base font-bold text-foreground tabular-nums">
+                    {amountNumber > 0 ? (
+                      formatCurrency(amountNumber)
+                    ) : (
+                      <span className="text-xs font-normal text-muted-foreground">
+                        Rp 0
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
