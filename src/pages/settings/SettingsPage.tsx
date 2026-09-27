@@ -86,7 +86,7 @@ export default function SettingsPage() {
           body: "Pembayaran Tagihan Listrik PLN sebesar Rp 250.000 berhasil diproses.",
           icon: "/pwa-192x192.png",
           badge: "/pwa-192x192.png",
-          data: { url: "/bills" },
+          data: { url: "/transactions" },
         })
         toast.success("Notifikasi uji coba dikirim ke status bar!")
       } else {

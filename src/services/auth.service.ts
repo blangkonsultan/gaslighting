@@ -8,10 +8,18 @@ export async function login({ email, password }: LoginInput) {
 }
 
 export async function registerUser({ email, password, full_name }: RegisterInput) {
+  const emailRedirectTo =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth/login?verified=true`
+      : "https://gaslighting-nine.vercel.app/auth/login?verified=true"
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name } },
+    options: {
+      data: { full_name },
+      emailRedirectTo,
+    },
   })
   if (error) throw error
   return data

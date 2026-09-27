@@ -74,7 +74,7 @@ async function sendBillPushNotification(
       body: payload.body,
       icon: '/pwa-192x192.png',
       badge: '/pwa-192x192.png',
-      url: payload.url || '/bills',
+      url: payload.url || '/transactions',
     })
 
     for (const sub of list) {
@@ -345,6 +345,7 @@ Deno.serve(async (req) => {
           {
             title: 'Tagihan Auto-Debit Berhasil',
             body: `Pembayaran ${bill.name} sebesar ${formatIdr(bill.amount)} berhasil diproses.`,
+            url: '/transactions',
           },
           hasVapid
         )

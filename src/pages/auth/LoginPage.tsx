@@ -10,7 +10,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
 import { FormField } from "@/components/shared/FormField"
 import { AppLogo } from "@/components/shared/AppLogo"
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle, CheckCircle2 } from "lucide-react"
+import { supabase } from "@/services/supabase"
+import { useEffect } from "react"
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -22,7 +24,13 @@ export default function LoginPage() {
   const nextParam = searchParams.get("next")
   const next = nextParam ? decodeURIComponent(nextParam) : ""
   const safeNext = next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : ""
+  const isVerified = searchParams.get("verified") === "true" || location.hash.includes("type=signup")
 
+  useEffect(() => {
+    if (isVerified) {
+      void supabase.auth.signOut()
+    }
+  }, [isVerified])
   const {
     register,
     handleSubmit,
@@ -70,6 +78,15 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="flex flex-col gap-4 pt-2 px-6">
+              {isVerified && !error && (
+                <div
+                  role="status"
+                  className="rounded-xl border border-success/30 bg-success/15 p-3 text-xs font-semibold text-success flex items-start gap-2 animate-fade-in"
+                >
+                  <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+                  <span>Akun Anda telah berhasil diverifikasi! Silakan masuk dengan email dan password.</span>
+                </div>
+              )}
               {error && (
                 <div
                   role="alert"

@@ -98,4 +98,16 @@ describe("LoginPage", () => {
       expect(screen.getByRole("alert")).toHaveTextContent("Email atau password salah.")
     })
   })
+
+  it("displays success banner when verified=true is in search query", () => {
+    render(
+      <MemoryRouter initialEntries={["/auth/login?verified=true"]}>
+        <LoginPage />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Akun Anda telah berhasil diverifikasi! Silakan masuk dengan email dan password."
+    )
+  })
 })

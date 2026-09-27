@@ -25,7 +25,7 @@ function devServiceWorkerUnregisterPlugin(): Plugin {
                 body: 'Notifikasi baru',
                 icon: '/pwa-192x192.png',
                 badge: '/pwa-192x192.png',
-                url: '/bills',
+                url: '/transactions',
               };
               try {
                 payload = { ...payload, ...event.data.json() };
@@ -37,13 +37,13 @@ function devServiceWorkerUnregisterPlugin(): Plugin {
                   body: payload.body,
                   icon: payload.icon || '/pwa-192x192.png',
                   badge: payload.badge || '/pwa-192x192.png',
-                  data: { url: payload.url || '/bills' },
+                  data: { url: payload.url || '/transactions' },
                 })
               );
             });
             self.addEventListener('notificationclick', (event) => {
               event.notification.close();
-              const targetUrl = event.notification.data?.url || '/bills';
+              const targetUrl = event.notification.data?.url || '/transactions';
               event.waitUntil(
                 self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
                   for (const client of clients) {
