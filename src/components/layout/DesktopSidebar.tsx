@@ -9,6 +9,7 @@ import {
   Receipt,
   Tag,
   ListChecks,
+  Bookmark,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
@@ -22,6 +23,7 @@ const userMainNav = [
   { to: "/transactions/new", icon: ArrowLeftRight, label: t.nav_new_transaction },
   { to: "/transactions", icon: History, label: t.nav_history },
   { to: "/bills", icon: Receipt, label: t.nav_bills },
+  { to: "/templates", icon: Bookmark, label: t.nav_templates },
 ]
 
 const userBottomNav = [

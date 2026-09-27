@@ -22,7 +22,7 @@ import { todayYmd } from "@/lib/dates"
 import type { TemplateListRow } from "@/services/transaction-templates.service"
 import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 export default function TransactionCreatePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -44,6 +44,7 @@ export default function TransactionCreatePage() {
   const [saveTemplateData, setSaveTemplateData] = useState<SaveTemplateDefaultValues | null>(null)
   const { data: templates } = useTransactionTemplates(profile?.id ?? "")
 
+  const appliedTemplateRef = useRef<string | null>(null)
   useEffect(() => {
     if (searchParams.get("shared_receipt") === "1") {
       async function loadSharedReceipt() {
@@ -68,6 +69,17 @@ export default function TransactionCreatePage() {
       void loadSharedReceipt()
     }
   }, [searchParams])
+  useEffect(() => {
+    const templateId = searchParams.get("template_id")
+    if (templateId && templateId !== appliedTemplateRef.current && templates && templates.length > 0) {
+      const found = templates.find((t) => t.id === templateId)
+      if (found) {
+        appliedTemplateRef.current = templateId
+        handleSelectTemplate(found)
+      }
+    }
+  }, [searchParams, templates])
+
   const { data: categories } = useQuery({
     queryKey: queryKeys.categories.all,
     queryFn: getCategories,

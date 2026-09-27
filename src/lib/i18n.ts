@@ -17,6 +17,7 @@ export const t = {
   nav_presets_short: "Preset",
   nav_more: "Lainnya",
   nav_bills_auto_debit: "Tagihan (Auto-Debit)",
+  nav_templates: "Template Transaksi",
 
   // Dashboard
   dashboard_greeting: (name: string) => `Halo, ${name}!`,

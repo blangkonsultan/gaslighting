@@ -10,6 +10,7 @@ import {
   ListChecks,
   FileText,
   Settings,
+  Bookmark,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/auth-store"
@@ -71,7 +72,7 @@ export function MobileBottomNav() {
                   type="button"
                   className={cn(
                     "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs transition-colors touch-target",
-                    location.pathname.startsWith("/settings") || location.pathname.startsWith("/bills")
+                    location.pathname.startsWith("/settings") || location.pathname.startsWith("/bills") || location.pathname.startsWith("/templates")
                       ? "text-primary font-medium"
                       : "text-muted-foreground hover:text-foreground"
                   )}
@@ -101,6 +102,18 @@ export function MobileBottomNav() {
                     <FileText size={18} className="mr-2" />
                     {t.nav_bills_auto_debit}
                   </Button>
+                  <Button
+                    variant="outline"
+                    className="touch-target justify-start"
+                    onClick={() => {
+                      setOpen(false)
+                      navigate("/templates")
+                    }}
+                  >
+                    <Bookmark size={18} className="mr-2" />
+                    {t.nav_templates}
+                  </Button>
+
 
                   <Button
                     variant="outline"

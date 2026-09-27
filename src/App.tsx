@@ -24,6 +24,7 @@ const SettingsPage = lazy(() => import("@/pages/settings/SettingsPage"))
 const AdminCategoriesPage = lazy(() => import("@/pages/admin/AdminCategoriesPage"))
 const AdminAccountPresetsPage = lazy(() => import("@/pages/admin/AdminAccountPresetsPage"))
 const BillsPage = lazy(() => import("@/pages/bills/BillsPage"))
+const TemplatesPage = lazy(() => import("@/pages/templates/TemplatesPage"))
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"))
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
@@ -68,6 +69,7 @@ export default function App() {
                   <Route path="transactions/:id/edit" element={<TransactionEditPage />} />
                   <Route path="reports" element={<ReportsPage />} />
                   <Route path="bills" element={<BillsPage />} />
+                  <Route path="templates" element={<TemplatesPage />} />
                   <Route path="settings" element={<SettingsPage />} />
                 </Route>
               </Route>
