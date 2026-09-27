@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { useAuthStore } from "@/stores/auth-store"
+import { AppLogo } from "@/components/shared/AppLogo"
 import { t } from "@/lib/i18n"
 
 const userMainNav = [
@@ -42,7 +43,7 @@ export function DesktopSidebar() {
   return (
     <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-border lg:bg-card">
       <div className="flex h-14 items-center px-6">
-        <h1 className="text-lg font-bold text-primary">Gaslighting</h1>
+        <AppLogo size="md" showText />
       </div>
       <Separator />
 

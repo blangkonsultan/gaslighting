@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
-import { ShieldCheck, Delete, Fingerprint, LogOut } from "lucide-react"
+import { Delete, Fingerprint, LogOut } from "lucide-react"
+import { AppLogo } from "@/components/shared/AppLogo"
 import { useAppLockStore } from "@/stores/app-lock-store"
 import { useAuthStore } from "@/stores/auth-store"
 import { supabase } from "@/services/supabase"
@@ -117,9 +118,7 @@ export function AppLockScreen() {
     >
       {/* Header */}
       <div className="flex flex-col items-center gap-3 pt-6 sm:pt-10">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#9AB17A]/20 border border-[#9AB17A]/40 text-[#607447] shadow-inner">
-          <ShieldCheck size={36} />
-        </div>
+        <AppLogo size={64} className="drop-shadow-xs" />
         <div className="text-center">
           <h1 className="text-xl font-bold tracking-tight text-[#3D3D3D]">
             Gaslighting

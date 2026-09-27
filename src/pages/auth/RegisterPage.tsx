@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
 import { FormField } from "@/components/shared/FormField"
+import { AppLogo } from "@/components/shared/AppLogo"
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -35,12 +36,30 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="page-title text-foreground">Daftar</CardTitle>
-          <CardDescription className="section-subtitle">Buat akun baru di Gaslighting</CardDescription>
-        </CardHeader>
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-[#FBE8CE] p-4 sm:p-6 text-[#3D3D3D] select-none">
+      <div className="w-full max-w-sm flex flex-col gap-6">
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center gap-2.5">
+          <AppLogo size={60} className="drop-shadow-xs" />
+          <div>
+            <h1 className="text-2xl font-black tracking-tight text-[#2D2A26]">
+              Gaslighting
+            </h1>
+            <p className="text-xs text-[#6F6B58] mt-0.5">
+              Manajemen keuangan transparan bersama pasangan
+            </p>
+          </div>
+        </div>
+
+        <Card className="border border-[#D5CF9E] bg-[#E4DFB5]/90 shadow-sm rounded-2xl overflow-hidden">
+          <CardHeader className="text-center pb-2 pt-6">
+            <CardTitle className="text-lg font-bold text-[#2D2A26]">
+              Buat Akun Baru
+            </CardTitle>
+            <CardDescription className="text-xs text-[#6F6B58]">
+              Daftar untuk mengelola anggaran dan rekening bersama
+            </CardDescription>
+          </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="flex flex-col gap-4">
             {error && (
@@ -95,7 +114,8 @@ export default function RegisterPage() {
             </p>
           </CardFooter>
         </form>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }

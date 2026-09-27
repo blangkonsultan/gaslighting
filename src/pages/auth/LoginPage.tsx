@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
 import { FormField } from "@/components/shared/FormField"
-import { Mail, Lock, Eye, EyeOff, Wallet, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react"
+import { AppLogo } from "@/components/shared/AppLogo"
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react"
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -45,9 +46,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm flex flex-col gap-6">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center gap-2.5">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#9AB17A]/25 border border-[#9AB17A]/40 text-[#4D6B37] shadow-xs">
-            <Wallet size={28} />
-          </div>
+          <AppLogo size={60} className="drop-shadow-xs" />
           <div>
             <h1 className="text-2xl font-black tracking-tight text-[#2D2A26]">
               Gaslighting

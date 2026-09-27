@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/stores/auth-store"
 import { supabase } from "@/services/supabase"
 import { LogOut, User, Settings } from "lucide-react"
+import { AppLogo } from "@/components/shared/AppLogo"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +24,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:px-6">
-      <h1 className="text-lg font-bold text-primary lg:hidden">Gaslighting</h1>
+      <AppLogo size="sm" showText className="lg:hidden" />
 
       <div className="ml-auto">
         <DropdownMenu>
