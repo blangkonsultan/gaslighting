@@ -188,6 +188,8 @@
 - [x] Added dedicated Template Management page (`/templates`, `src/pages/templates/TemplatesPage.tsx`) with search, template cards, "Gunakan" direct pre-fill routing, and deletion dialog.
 - [x] Added navigation links: `DesktopSidebar` (user main nav), `MobileBottomNav` (Lainnya sheet), and `TransactionCreatePage` `?template_id=` parameter pre-fill support.
 - [x] Replaced toast-attached template save sheet with inline progressive disclosure toggles in `TransactionForm.tsx` (using accessible `Switch` components for both template activation and amount inclusion; zero checkboxes).
+- [x] Auto-derived template name directly from the transaction description (eliminating redundant duplicate input) with live preview and validation.
+- [x] Added category icons (`CategoryIcon`) inside the Category `Select` trigger and dropdown items with category background accents for instant visual familiarity.
 - [x] Cleaned up obsolete `SaveTemplateSheet.tsx` and moved template creation directly into atomic form submit.
 - [x] Ran Impeccable UI detector across all new and modified components (0 issues found)
 - [x] Verified `npm run lint` (0 errors), `npm run test` (231/231 passing), `npm run build` (production build succeeds)

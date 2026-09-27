@@ -161,6 +161,8 @@
   - Built `src/components/transactions/SaveTemplateSheet.tsx` bottom sheet with auto-filled template name (capped at 30 chars), IDR amount inclusion toggle, name validation, and duplicate name (23505) error handling.
   - Built `src/components/transactions/TemplateManageSheet.tsx` bottom sheet with template list, type/account/amount subtitles, delete confirmation dialog, and empty state.
   - Replaced toast-attached template save sheet with inline progressive disclosure toggles in `TransactionForm.tsx` (using accessible `Switch` components for both template activation and amount inclusion; zero checkboxes).
+  - Auto-derived template name directly from the transaction description (eliminating duplicate input) with real-time preview and validation.
+  - Enhanced Category dropdown (`SelectTrigger` and `SelectItem`) in `TransactionForm.tsx` to render category icons (`CategoryIcon`) and color accents for immediate visual recognition.
   - Cleaned up obsolete `SaveTemplateSheet.tsx` and moved template creation directly into atomic form submit.
   - Added 6 new/updated unit test suites:
     - `src/services/transaction-templates.service.test.ts` (8 tests)
