@@ -150,9 +150,9 @@ export default defineConfig({
         scope: "/",
         start_url: "/",
         icons: [
-          { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
-          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
-          { src: "pwa-512x512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          { src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" },
+          { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png" },
+          { src: "/pwa-512x512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
         shortcuts: [
           {
@@ -160,21 +160,21 @@ export default defineConfig({
             short_name: "Pengeluaran",
             description: "Catat transaksi pengeluaran baru",
             url: "/transactions/new?type=expense",
-            icons: [{ src: "pwa-192x192.png", sizes: "192x192", type: "image/png" }],
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" }],
           },
           {
             name: "Catat Pemasukan",
             short_name: "Pemasukan",
             description: "Catat transaksi pemasukan baru",
             url: "/transactions/new?type=income",
-            icons: [{ src: "pwa-192x192.png", sizes: "192x192", type: "image/png" }],
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" }],
           },
           {
             name: "Scan Struk Belanja",
             short_name: "Scan Struk",
             description: "Pindai struk belanja dengan kamera atau OCR",
             url: "/transactions/new?scan=true",
-            icons: [{ src: "pwa-192x192.png", sizes: "192x192", type: "image/png" }],
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" }],
           },
         ],
         share_target: {
