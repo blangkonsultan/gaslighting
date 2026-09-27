@@ -181,11 +181,11 @@
   - `src/components/transactions/TemplatePicker.test.tsx` (4 tests)
   - `src/components/transactions/TemplateManageSheet.test.tsx` (6 tests)
   - `src/components/transactions/TemplateEditDialog.test.tsx` (6 tests)
-  - `src/pages/transactions/TransactionCreatePage.test.tsx` (7 tests)
+  - `src/pages/transactions/TransactionCreatePage.test.tsx` (8 tests)
   - `src/components/transactions/TransactionForm.test.tsx` (4 tests)
   - `src/components/shared/CategoryIcon.test.tsx` (5 tests)
-  - `src/pages/templates/TemplatesPage.test.tsx` (6 tests)
-  - Total test suite: 43 files, 251 tests passing (100%)
+  - `src/pages/templates/TemplatesPage.test.tsx` (8 tests)
+  - Total test suite: 43 files, 255 tests passing (100%)
 - [x] Added dedicated Template Management page (`/templates`, `src/pages/templates/TemplatesPage.tsx`) with search, template cards, "Gunakan" direct pre-fill routing, and deletion dialog.
 - [x] Added navigation links: `DesktopSidebar` (user main nav), `MobileBottomNav` (Lainnya sheet), and `TransactionCreatePage` `?template_id=` parameter pre-fill support.
 - [x] Streamlined template save preview inside `TransactionForm.tsx`: removed redundant secondary amount toggle, unified saving with transaction amount, and aligned visual hierarchy: Kategori (with icon), Nama template (from description, on top), and Nominal (formatted amount, below name).
@@ -194,8 +194,10 @@
 - [x] Implemented template editing (`updateTemplate` service & `useUpdateTemplate` hook) with dedicated `TemplateEditDialog.tsx` modal:
   - Edit template name, type, account, category (with icons), amount, description, and tags.
   - Accessible via "Edit" (Pencil icon) on both `/templates` cards and `TemplateManageSheet.tsx` rows.
+- [x] Routed "Kelola" button in `TemplatePicker.tsx` directly to `/templates` management page, eliminating redundant bottom sheet.
+- [x] Added back button (`ArrowLeft`) and "Tambah Template" button on `TemplatesPage.tsx` using `TemplateEditDialog.tsx` in create mode.
 - [x] Ran Impeccable UI detector across all new and modified components (0 issues found)
-- [x] Verified `npm run lint` (0 errors), `npm run test` (251/251 passing), `npm run build` (production build succeeds)
+- [x] Verified `npm run lint` (0 errors), `npm run test` (255/255 passing), `npm run build` (production build succeeds)
 ### What's In Progress
 
 - None (all tasks completed and verified)
