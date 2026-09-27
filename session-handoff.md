@@ -1,7 +1,7 @@
 # Session Handoff
 
 - Goal: Implement PWA Mobile Ergonomics: Quick Shortcuts, Web Share Target & App Lock (feat-012)
-- Current status: Done. All plan steps implemented, verified with tests (196/196 pass across 34 suites), lint (0 errors), build, and browser screenshot evaluation.
+- Current status: Done. All plan steps implemented, verified with tests (197/197 pass across 34 suites), lint (0 errors), build, and browser screenshot evaluation.
 - Branch / commit: main / clean working directory
 ## Completed This Session
 
@@ -135,6 +135,13 @@
   - Replaced plain text with `AppLogo` in mobile `Header.tsx` and desktop `DesktopSidebar.tsx`
   - Replaced generic wallet/shield icons in `LoginPage.tsx`, `RegisterPage.tsx`, and `AppLockScreen.tsx` with the official botanical "G" crest
   - Added `src/components/shared/AppLogo.test.tsx` (4 tests passing)
+  - Deployed to Vercel production: https://gaslighting-nine.vercel.app
+- [x] Step 32: Update Notification Click & Email Verification Redirects:
+  - Aligned auto-debit Edge Function push payload URL to `/transactions` and deployed to Supabase
+  - Updated Service Worker `notificationclick` handler in `src/sw.ts` and dev proxy to focus/open `/transactions`
+  - Configured Supabase Auth `site_url` to `https://gaslighting-nine.vercel.app/auth/login` and allowed origins in `uri_allow_list`
+  - Passed `emailRedirectTo: <origin>/auth/login?verified=true` in `registerUser` (`auth.service.ts`)
+  - Designed and verified green confirmation banner in `LoginPage.tsx` with unit test `LoginPage.test.tsx` (197 tests passing)
   - Deployed to Vercel production: https://gaslighting-nine.vercel.app
 ## Verification Evidence
 

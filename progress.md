@@ -155,6 +155,12 @@
   - Integrated `AppLogo` into `AppLockScreen.tsx` lock screen header
   - Added test suite `src/components/shared/AppLogo.test.tsx` (4 tests passing)
   - Total test suite: 34 files, 196 passed (100% passing)
+- [x] Update Notification Click & Email Verification Redirect Routing:
+  - Updated auto-debit Edge Function `supabase/functions/auto-debit/index.ts` to dispatch push notifications with `url: '/transactions'`
+  - Updated service worker push listener and `notificationclick` handler in `src/sw.ts` and `vite.config.ts` to navigate to `/transactions`
+  - Configured Supabase Auth `site_url` to `https://gaslighting-nine.vercel.app/auth/login` and added production/tunnel wildcards to `uri_allow_list` via Management API
+  - Updated `registerUser` in `src/services/auth.service.ts` to specify `emailRedirectTo: <origin>/auth/login?verified=true`
+  - Added verification success alert banner to `src/pages/auth/LoginPage.tsx` with unit test in `LoginPage.test.tsx` (197 tests passing)
 ### What's In Progress
 
 - None (all tasks completed and verified)
