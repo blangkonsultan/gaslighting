@@ -179,11 +179,11 @@ export function PrintableReport({
               {transactions.map((tx) => {
                 const isIncome = tx.type === "income"
                 return (
-                  <tr key={tx.id} className="hover:bg-slate-50/50">
-                    <td className="py-2 px-3 text-slate-600 whitespace-nowrap">
+                  <tr key={tx.id} className="hover:bg-slate-50/50 align-top page-break-avoid">
+                    <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap tabular-nums">
                       {tx.transaction_date}
                     </td>
-                    <td className="py-2 px-3 whitespace-nowrap">
+                    <td className="py-2.5 px-3 whitespace-nowrap">
                       <span
                         className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${
                           isIncome
@@ -196,17 +196,17 @@ export function PrintableReport({
                         {formatTransactionType(tx.type)}
                       </span>
                     </td>
-                    <td className="py-2 px-3 text-slate-700 whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-slate-700 whitespace-normal break-words max-w-[120px]">
                       {tx.accounts?.name || "-"}
                     </td>
-                    <td className="py-2 px-3 text-slate-700 whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-slate-700 whitespace-normal break-words max-w-[120px]">
                       {tx.categories?.name || "-"}
                     </td>
-                    <td className="py-2 px-3 text-slate-800 max-w-xs truncate">
+                    <td className="py-2.5 px-3 text-slate-800 whitespace-normal break-words leading-relaxed min-w-[160px]">
                       {tx.description || "-"}
                     </td>
                     <td
-                      className={`py-2 px-3 text-right font-medium whitespace-nowrap ${
+                      className={`py-2.5 px-3 text-right font-medium whitespace-nowrap tabular-nums ${
                         isIncome ? "text-emerald-700" : "text-slate-900"
                       }`}
                     >

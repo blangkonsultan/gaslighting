@@ -220,9 +220,18 @@
   .print-only {
     display: block !important;
   }
-  .page-break-avoid {
+  .page-break-avoid,
+  tr {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  td, th {
+    word-break: normal;
+    overflow-wrap: break-word;
   }
 }
 
