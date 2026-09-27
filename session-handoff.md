@@ -1,7 +1,7 @@
 # Session Handoff
 
 - Goal: Implement PWA Mobile Ergonomics: Quick Shortcuts, Web Share Target & App Lock (feat-012)
-- Current status: Done. All plan steps implemented, verified with tests (187/187 pass across 32 suites), lint (0 errors), build, and browser screenshot evaluation.
+- Current status: Done. All plan steps implemented, verified with tests (192/192 pass across 33 suites), lint (0 errors), build, and browser screenshot evaluation.
 - Branch / commit: main / clean working directory
 ## Completed This Session
 
@@ -120,6 +120,16 @@
   - Built `AppLockSettingsCard.tsx` and integrated into `SettingsPage.tsx`
   - Mounted `AppLockScreen` at top level in `src/App.tsx`
   - Verified via browser test with screenshots: settings toggle, setup dialog, instant locking, keypad entry, and shortcut navigation
+- [x] Step 30: Polish LoginPage UI/UX (Impeccable craft pass):
+  - Resolved critical UX bug: `AppLockScreen` now guards against unauthenticated users (`!sessionUserId`), preventing lock screen from covering `/auth/login`
+  - Transformed flat card into warm vintage-earthy container with brand squircle emblem (`Wallet` icon) and tagline
+  - Added show/hide password visibility toggle with `Eye` / `EyeOff` icons (min 44px touch target)
+  - Added prefix icons (`Mail` and `Lock`) to form inputs with brand sage focus rings
+  - Fixed WCAG AA contrast failure on "Daftar sekarang" link (`#446330` on `#E4DFB5`)
+  - Seamless card layout removing awkward hairlines in `CardFooter`
+  - Added `src/pages/auth/LoginPage.test.tsx` (4 tests passing)
+  - Passed mechanical defect detector (`impeccable detect`) with 0 defects
+  - Deployed to Vercel production: https://gaslighting-nine.vercel.app
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
