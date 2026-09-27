@@ -178,7 +178,7 @@
     - `src/pages/templates/TemplatesPage.test.tsx` (8 tests)
     - Total test suite: 43 files, 255 tests passing (100% passing).
   - Routed "Kelola" button in `TemplatePicker.tsx` directly to `/templates` management page, eliminating redundant bottom sheet.
-  - Added back button (`ArrowLeft`) and "Tambah Template" button on `TemplatesPage.tsx` using `TemplateEditDialog.tsx` in create mode.
+  - Added back button (`ArrowLeft`) and unified "Tambah Template" action on `TemplatesPage.tsx` (both in the header and in the empty state), opening `TemplateEditDialog.tsx` directly in create mode.
   - Added dedicated Template Management page (`/templates`, `src/pages/templates/TemplatesPage.tsx`) with search, template cards, "Gunakan" direct pre-fill routing, and deletion dialog.
   - Added navigation links: `DesktopSidebar` (user main nav), `MobileBottomNav` (Lainnya sheet), and `TransactionCreatePage` `?template_id=` parameter pre-fill support.
   - Passed mechanical defect detector (`impeccable detect`) with 0 defects.
