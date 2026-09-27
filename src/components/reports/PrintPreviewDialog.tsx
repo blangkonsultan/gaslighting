@@ -32,7 +32,7 @@ export function PrintPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-2xl md:max-w-3xl top-[calc(env(safe-area-inset-top,0px)+0.5rem)] translate-y-0 sm:top-1/2 sm:-translate-y-1/2 max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-1rem)] sm:max-h-[88dvh] flex flex-col p-0 overflow-hidden bg-background shadow-xl">
+      <DialogContent className="no-print w-[95vw] sm:max-w-2xl md:max-w-3xl top-[calc(env(safe-area-inset-top,0px)+0.5rem)] translate-y-0 sm:top-1/2 sm:-translate-y-1/2 max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-1rem)] sm:max-h-[88dvh] flex flex-col p-0 overflow-hidden bg-background shadow-xl">
         <DialogHeader className="px-4 py-3 sm:px-5 sm:py-3.5 border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10 flex flex-row items-center justify-between no-print gap-2">
           <div className="min-w-0 flex-1">
             <DialogTitle className="text-sm font-semibold tracking-tight text-foreground truncate">
