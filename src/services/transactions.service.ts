@@ -3,7 +3,7 @@ import type { Transaction, TransactionFilters } from "@/types/financial"
 
 export type TransactionListRow = Pick<
   Transaction,
-  "id" | "amount" | "type" | "description" | "transaction_date" | "created_at" | "transfer_id"
+  "id" | "amount" | "type" | "description" | "transaction_date" | "created_at" | "transfer_id" | "tags"
 > & {
   accounts?: { name: string } | null
   categories?: { name: string } | null
@@ -14,7 +14,7 @@ export const TRANSACTIONS_PAGE_SIZE_DEFAULT = 10
 function buildTransactionsListQuery(userId: string, filters: TransactionFilters = {}) {
   let q = supabase
     .from("transactions")
-    .select("id,amount,type,description,transaction_date,created_at,transfer_id,accounts(name),categories(name)")
+    .select("id,amount,type,description,transaction_date,created_at,transfer_id,tags,accounts(name),categories(name)")
     .eq("user_id", userId)
 
   if (filters.type) q = q.eq("type", filters.type)
@@ -22,8 +22,12 @@ function buildTransactionsListQuery(userId: string, filters: TransactionFilters 
   if (filters.categoryId) q = q.eq("category_id", filters.categoryId)
   if (filters.dateFrom) q = q.gte("transaction_date", filters.dateFrom)
   if (filters.dateTo) q = q.lte("transaction_date", filters.dateTo)
+  if (filters.amountMin !== undefined) q = q.gte("amount", filters.amountMin)
+  if (filters.amountMax !== undefined) q = q.lte("amount", filters.amountMax)
+  if (filters.tags && filters.tags.length > 0) {
+    q = q.contains("tags", filters.tags)
+  }
   if (filters.search?.trim()) q = q.ilike("description", `%${filters.search.trim()}%`)
-
   return q
     .order("transaction_date", { ascending: false })
     .order("created_at", { ascending: false })
@@ -64,12 +68,13 @@ export type TransactionDetail = Pick<
   | "transaction_date"
   | "created_at"
   | "transfer_id"
+  | "tags"
 >
 
 export async function getTransactionById(userId: string, transactionId: string): Promise<TransactionDetail | null> {
   const { data, error } = await supabase
     .from("transactions")
-    .select("id,user_id,account_id,category_id,type,amount,description,transaction_date,created_at,transfer_id")
+    .select("id,user_id,account_id,category_id,type,amount,description,transaction_date,created_at,transfer_id,tags")
     .eq("user_id", userId)
     .eq("id", transactionId)
     .maybeSingle()
@@ -80,7 +85,7 @@ export async function getTransactionById(userId: string, transactionId: string):
 
 export type TransactionUpdateInput = Pick<
   Transaction,
-  "account_id" | "category_id" | "type" | "amount" | "description" | "transaction_date"
+  "account_id" | "category_id" | "type" | "amount" | "description" | "transaction_date" | "tags"
 >
 
 export async function updateTransaction(
@@ -118,5 +123,24 @@ export async function getEarliestTransactionDate(userId: string): Promise<string
 
   if (error) throw error
   return data?.transaction_date ?? null
+}
+
+export async function getUserTags(userId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("tags")
+    .eq("user_id", userId)
+
+  if (error) throw error
+  const tagSet = new Set<string>()
+  for (const row of data ?? []) {
+    const rowTags = (row as { tags?: string[] }).tags
+    if (Array.isArray(rowTags)) {
+      for (const t of rowTags) {
+        if (typeof t === "string" && t.trim()) tagSet.add(t.trim())
+      }
+    }
+  }
+  return Array.from(tagSet).sort()
 }
 

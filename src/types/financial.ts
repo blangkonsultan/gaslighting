@@ -36,6 +36,9 @@ export interface TransactionFilters {
   accountId?: string
   type?: string
   search?: string
+  tags?: string[]
+  amountMin?: number
+  amountMax?: number
 }
 
 export interface BalanceRecalcPreview {

@@ -88,6 +88,20 @@ describe("transactionSchema", () => {
     const res = transactionSchema.safeParse({ ...valid, account_id: "not-a-uuid" })
     expect(res.success).toBe(false)
   })
+
+  it("defaults tags to empty array if omitted and preserves tags if provided", () => {
+    const res = transactionSchema.safeParse(valid)
+    expect(res.success).toBe(true)
+    if (res.success) {
+      expect(res.data.tags).toEqual([])
+    }
+
+    const resWithTags = transactionSchema.safeParse({ ...valid, tags: ["#makan", "#liburan"] })
+    expect(resWithTags.success).toBe(true)
+    if (resWithTags.success) {
+      expect(resWithTags.data.tags).toEqual(["#makan", "#liburan"])
+    }
+  })
 })
 
 describe("billSchema", () => {

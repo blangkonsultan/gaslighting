@@ -59,6 +59,7 @@ export const transactionSchema = z.object({
     .string()
     .min(1, t.val_date_required)
     .refine((v) => v <= todayYmd(), t.val_date_max_today),
+  tags: z.array(z.string()).default([]),
 })
 
 export type TransactionInput = z.infer<typeof transactionSchema>

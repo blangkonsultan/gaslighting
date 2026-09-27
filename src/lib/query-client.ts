@@ -9,6 +9,7 @@ export const queryKeys = {
     all: ["transactions"] as const,
     filtered: (filters: Record<string, unknown>) => ["transactions", filters] as const,
     recent: (limit: number) => ["transactions", "recent", limit] as const,
+    tags: (userId: string) => ["transactions", "tags", userId] as const,
   },
   categories: {
     all: ["categories"] as const,
