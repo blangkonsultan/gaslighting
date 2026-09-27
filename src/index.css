@@ -201,10 +201,12 @@
 
 @media print {
   @page {
-    margin: 1cm;
-    size: auto;
+    size: A4 portrait;
+    margin: 10mm;
   }
-  body {
+  html, body {
+    width: 210mm !important;
+    min-width: 210mm !important;
     background-color: #ffffff !important;
     color: #0f172a !important;
     -webkit-print-color-adjust: exact !important;
@@ -221,6 +223,14 @@
   }
   .print-only {
     display: block !important;
+    width: 100% !important;
+  }
+  .print-document {
+    width: 190mm !important;
+    max-width: 190mm !important;
+    min-width: 190mm !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
   }
   .page-break-avoid,
   tr {
