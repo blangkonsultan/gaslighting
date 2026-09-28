@@ -198,6 +198,13 @@
 - [x] Streamlined `/templates` navigation (Option 1): removed awkward header back button, keeping clean standalone navigation via shell sidebar / bottom nav and direct "Gunakan →" transaction flow.
 - [x] Ran Impeccable UI detector across all new and modified components (0 issues found)
 - [x] Verified `npm run lint` (0 errors), `npm run test` (254/254 passing), `npm run build` (production build succeeds)
+- [x] Implement Deploy Refresh Prompt (PWA SW Update Notification):
+  - Updated `src/main.tsx` with immediate `controllerchange` event listener on `navigator.serviceWorker` guarded by `hadController` to suppress false alarms on initial visitor installation.
+  - Created `src/hooks/useUpdatePrompt.ts` listening to `sw-updated` custom event and invoking Sonner `toast.info` (`duration: Infinity`, `dismissible: false`, `id: "sw-update"`, Indonesian copy: "Versi baru tersedia", and "Muat Ulang" action button calling `window.location.reload()`).
+  - Mounted `useUpdatePrompt()` at top level in `src/App.tsx`.
+  - Added unit test suite `src/hooks/useUpdatePrompt.test.ts` (3 tests passing: event reception, reload action click, and unmount listener cleanup).
+  - Verified in headless browser smoke run with screenshot evidence: clean initial load, automatic persistent toast appearance upon background SW update, and page reload upon clicking "Muat Ulang".
+  - Full suite verification: 44 test suites pass (257/257 tests), 0 lint errors, build succeeds.
 ### What's In Progress
 
 - None (all tasks completed and verified)
