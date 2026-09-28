@@ -15,11 +15,27 @@ if (import.meta.env.DEV && "caches" in window) {
 }
 
 if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
+  let hadController = Boolean(navigator.serviceWorker.controller)
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hadController) {
+      window.dispatchEvent(new CustomEvent("sw-updated"))
+    } else {
+      hadController = true
+    }
+  })
+
+  const register = () => {
     navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((err) => {
       console.error("SW registration error:", err)
     })
-  })
+  }
+
+  if (document.readyState === "complete") {
+    register()
+  } else {
+    window.addEventListener("load", register)
+  }
 }
 
 createRoot(document.getElementById("root")!).render(

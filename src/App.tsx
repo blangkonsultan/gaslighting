@@ -9,6 +9,7 @@ import { UserRoute, AdminRoute, DashboardRoute, GuestRoute } from "@/components/
 import { PageLoading } from "@/components/shared/LoadingSpinner"
 import { AppLockScreen } from "@/components/security/AppLockScreen"
 import { setupAppLockAutoLockListeners } from "@/stores/app-lock-store"
+import { useUpdatePrompt } from "@/hooks/useUpdatePrompt"
 
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"))
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"))
@@ -38,6 +39,7 @@ export default function App() {
     const cleanup = setupAppLockAutoLockListeners()
     return cleanup
   }, [])
+  useUpdatePrompt()
 
   return (
     <QueryClientProvider client={queryClient}>
