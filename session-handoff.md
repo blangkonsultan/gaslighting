@@ -1,9 +1,15 @@
 # Session Handoff
 
-- Goal: Implement Deploy Refresh Prompt (PWA SW Update Notification)
-- Current status: Done. All plan steps implemented, verified with tests (257/257 pass across 44 suites), lint (0 errors), build succeeds, browser smoke test verified with screenshot.
-- Branch / commit: main / clean working directory
+- Goal: Full-Screen PWA Service Worker Update Blocker (sw-update-blocker-plan)
+- Current status: Done. All plan steps implemented, verified with tests (261/261 pass across 45 suites), lint (0 errors), build succeeds, browser smoke test verified with screenshot and native reload behavior.
+- Branch / commit: main
 ## Completed This Session
+- [x] Step 20: Full-Screen PWA Service Worker Update Blocker:
+  - Refactored `useUpdatePrompt.ts` from Sonner toast notification to reactive boolean state `{ showUpdate: boolean }`
+  - Implemented `UpdateBlocker.tsx` with full-screen `role="alertdialog"` modal overlay at `z-[100]` matching vintage earthy theme (`bg-[#FBE8CE]`, text `#3D3D3D`), centered `AppLogo`, descriptive update copy, and `touch-target` "Muat Ulang" button
+  - Mounted `UpdateBlocker` in `App.tsx` directly after `AppLockScreen` inside `<BrowserRouter>`
+  - Created test suite `UpdateBlocker.test.tsx` verifying dialog rendering, accessibility roles/labels, hidden state, and `window.location.reload()` execution; updated `useUpdatePrompt.test.ts`
+  - Verified with 45 passing test suites (261 tests), 0 ESLint errors, clean production build, and headless browser smoke test confirming overlay paint, background click blocking, and page reload
 
 - [x] Step 1: Configured MCP Vercel (`.mcp.json` and `~/.claude/settings.json`)
 - [x] Step 2: Consolidated 18 migration files into 6 canonical sequentially-timestamped files in `supabase/migrations/` and cleaned up empty directories

@@ -2,7 +2,7 @@
 
 ## Current State
 
-**Last Updated:** 2026-09-27
+**Last Updated:** 2026-09-29
 **Branch:** main
 **Active Feature:** feat-013 (Completed)
 
@@ -10,6 +10,12 @@
 
 ### What's Done
 
+- [x] Full-Screen PWA Service Worker Update Blocker:
+  - Converted `useUpdatePrompt` hook from Sonner persistent toast to React state `{ showUpdate: boolean }`
+  - Created `UpdateBlocker` full-screen modal component (`role="alertdialog"`, `z-[100]`, earthy theme `#FBE8CE`, `touch-target` "Muat Ulang" button calling `window.location.reload()`)
+  - Mounted `UpdateBlocker` in `App.tsx` directly after `AppLockScreen`
+  - Created comprehensive test suite `UpdateBlocker.test.tsx` and refactored `useUpdatePrompt.test.ts` (all 7 tests passing)
+  - Verified with full test suite (45 test files, 261 passed), ESLint (0 errors), production build (`tsc -b && vite build`), and browser smoke test with screenshot
 - [x] Consolidate migrations into 6 sequentially-timestamped files (core schema, indexes/constraints, RPCs, presets, balance recalc, auto-debit cron)
 - [x] Fix 4 critical security vulnerabilities:
   - Role privilege escalation prevented via `prevent_role_change()` trigger on `profiles`

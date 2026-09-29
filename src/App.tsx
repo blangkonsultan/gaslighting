@@ -10,6 +10,7 @@ import { PageLoading } from "@/components/shared/LoadingSpinner"
 import { AppLockScreen } from "@/components/security/AppLockScreen"
 import { setupAppLockAutoLockListeners } from "@/stores/app-lock-store"
 import { useUpdatePrompt } from "@/hooks/useUpdatePrompt"
+import { UpdateBlocker } from "@/components/shared/UpdateBlocker"
 
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"))
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"))
@@ -39,7 +40,7 @@ export default function App() {
     const cleanup = setupAppLockAutoLockListeners()
     return cleanup
   }, [])
-  useUpdatePrompt()
+  const { showUpdate } = useUpdatePrompt()
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -91,6 +92,7 @@ export default function App() {
         </AuthInitializer>
         <Toaster position="top-center" richColors />
         <AppLockScreen />
+        <UpdateBlocker show={showUpdate} />
       </BrowserRouter>
     </QueryClientProvider>
   )

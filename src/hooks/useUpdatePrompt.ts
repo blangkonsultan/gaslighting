@@ -1,21 +1,11 @@
-import { useEffect } from "react"
-import { toast } from "sonner"
+import { useEffect, useState } from "react"
 
-export function useUpdatePrompt(): void {
+export function useUpdatePrompt(): { showUpdate: boolean } {
+  const [showUpdate, setShowUpdate] = useState(false)
+
   useEffect(() => {
     const handleSwUpdated = () => {
-      toast.info("Versi baru tersedia", {
-        id: "sw-update",
-        description: "Aplikasi telah diperbarui. Muat ulang untuk mendapatkan versi terbaru.",
-        duration: Infinity,
-        dismissible: false,
-        action: {
-          label: "Muat Ulang",
-          onClick: () => {
-            window.location.reload()
-          },
-        },
-      })
+      setShowUpdate(true)
     }
 
     window.addEventListener("sw-updated", handleSwUpdated)
@@ -24,4 +14,6 @@ export function useUpdatePrompt(): void {
       window.removeEventListener("sw-updated", handleSwUpdated)
     }
   }, [])
+
+  return { showUpdate }
 }
